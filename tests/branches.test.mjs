@@ -67,7 +67,7 @@ test('every branch has four distinct massings for all foundations and both LODs,
  }
 });
 test('architectural shapes are normalized finite true arches, rings, domes and sails; palettes remain stable and diverse',()=>{
- const shapes=architecturalShapes();assert.equal(Object.keys(shapes).length,7);for(const g of Object.values(shapes)){g.computeBoundingBox();const {min,max}=g.boundingBox;for(const axis of ['x','y','z']){assert.ok(Math.abs(min[axis]+.5)<1e-5);assert.ok(Math.abs(max[axis]-.5)<1e-5);}assert.ok(Array.from(g.attributes.position.array).every(Number.isFinite));g.dispose();}
+ const shapes=architecturalShapes();assert.equal(Object.keys(shapes).length,14);for(const g of Object.values(shapes)){g.computeBoundingBox();const {min,max}=g.boundingBox;for(const axis of ['x','y','z']){assert.ok(Math.abs(min[axis]+.5)<1e-5);assert.ok(Math.abs(max[axis]-.5)<1e-5);}assert.ok(Array.from(g.attributes.position.array).every(Number.isFinite));g.dispose();}
  const palettes=new Set();for(const [type,defs] of Object.entries(BRANCHES))for(const branch of Object.keys(defs)){const c={type,branch,level:8},p=architecturePalette(c,100,20);assert.deepEqual(p,architecturePalette(c,100,20));palettes.add(JSON.stringify(p));}assert.equal(palettes.size,9);assert.notDeepEqual(facilityPalette('power'),facilityPalette('water'));
 });
 test('the branch city remains serializable and financially playable through five years of real simulation',()=>{

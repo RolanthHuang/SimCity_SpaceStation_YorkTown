@@ -1,6 +1,6 @@
-# Yorktown Continuum Dawn v11.0
+# Yorktown Clear Dawn v11.1
 
-Authoritative code lives in `SimCity/`. `build-simcity.mjs` bundles it and Three.js into five identical offline HTML entries. Edit sources, not generated HTML. This isolated output preserves v8/v9 in their own directories. It embeds no music, media tracks or external dependency URLs.
+Authoritative code lives in `SimCity/`. `build-simcity.mjs` generates four web entries with bundled Three.js and deferred local MP3 playback, plus one standalone offline HTML containing the approved MP3. Edit sources, not generated HTML. This isolated output preserves the prior v11 source directory. Earlier sections describe inherited systems; the v11.1 section below supersedes older render limits.
 
 ## Branch state and progression
 
@@ -36,7 +36,7 @@ Deterministic common/branch palettes give ivory bodies distinct glass, structura
 
 ## Evidence and limits
 
-`npm test` includes all inherited active tests plus branch selection, waiting periods, rebranching/decline, resident transition capacity, fusion, migration, real economy coefficients, 576 geometry combinations and five years of actual monthly simulation. Browser evidence covers branch comparisons, selected live-building progression, mode switching, a 360px layout, console and absence of music. Counts/hashes are in `CHROMATIC-CITY-VERIFICATION.json`.
+`npm test` includes inherited active tests plus branch selection, waiting periods, rebranching/decline, resident transition capacity, fusion, migration, real economy coefficients, 576 geometry combinations and five years of actual monthly simulation. Earlier v10 browser evidence covered branch comparisons, selected live-building progression, mode switching, a 360px layout, console and absence of music. Later v11 evidence separately covers the accepted soundtrack and continuum features. These are inherited visual observations unless explicitly repeated in the current release evidence.
 
 These checks do not establish a calibrated game economy, full-station performance, film-render equivalence or native mobile release. StarFleet visit/drone/crash systems and detailed damage/ruin families remain proposals. No rejected music source was copied into this version; archived drafts remain in v9.
 
@@ -90,3 +90,19 @@ A Blob-backed bundled worker performs one month at a time. `simulation-runner.mj
 `render-budget.mjs` stops static paused drawing and hidden drawing, bounds normal running construction views at 12fps and movement at 30fps, and caps canvas pixels at 1,152,000. `render-plan.mjs` limits complete detail to 80 nearby buildings and medium detail to 320; all remaining buildings retain visible branch-coloured silhouettes. Stable 32x16 chunks reuse instanced meshes across ordinary population updates. Shadows are cached at 1024px and invalidated on geometry changes; LINE shares a 640px backdrop, updates during camera movement at a bounded rate and otherwise reuses it. Close views retain the established detailed forms. These caps are rendering policy, not an assertion of measured battery power.
 
 The complete 109-test suite, CPU parity/timing report, synthetic capacity fixture, 12-month supply result and bounded browser/music observations are under `checks`. The 20% capacity fixture is deliberately populated and supplied but is not a new startup template or an all-policy economic calibration. A later excess-commerce vacancy was observed under unchanged rules. Full-station/endurance/thermal certification remains open.
+
+## v11.1 clear dawn: detail without repeated work
+
+`simulation-speed.mjs` limits speeds to 0/1/2/4, maps legacy 12 to 4 and legacy 3 to 2, and defines an 8,000ms base month. Work completes one month at a time with at least 250ms rest, or the duration of the previous month if greater. Bounded accumulation prevents an unbounded catch-up queue. These clock changes do not alter per-month game rules.
+
+`ViewQuality` distinguishes actual camera movement from a running simulation. Position/quaternion changes trigger a 650ms motion interval and one settled-quality frame. Settled pixel ratio is at least 1.5 and at most 2, bounded by 8,388,608 pixels; motion is bounded by 2,500,000 pixels and ratio 1.4. Antialiasing remains on. Hidden or blocked views draw no frames; static paused construction draws none after settlement. Running construction uses 8fps, growth uses 20fps, movement 30fps, and idle walk/fly/interior uses 12fps. No periodic static-quality timer keeps an inactive view alive.
+
+`render-plan.mjs` selects 96 full-detail and 320 medium-detail buildings using camera projection, true building height, frustum visibility and hysteresis. All other buildings remain visible with branch-specific low-detail forms. Stable 32×16 chunks are reused when their visual state does not change. Camera movement invalidates the selection, with a 1,300ms planning interval and a settled refresh. Canvas data attributes expose drawing statistics for read-only browser evidence.
+
+`AtelierScene.updateLandmarks` emits a mature adopted model only for its fusion anchor. The previous loop emitted a model for every member of an adopted plot: 4×4 produced 16 overlapping instances, 3×3 produced nine. This is per-foundation duplication, not proof of global quadratic simulation complexity. A regression test deliberately marks every member full-detail and verifies one model per plot, reuse and cleanup. The honest single residence model has wider stepped terraces, roof trees, winter garden glazing and fins; the commercial double blades and forecourt are wider. Industrial detail is retained.
+
+`static-batch.mjs` merges fixed same-material geometry after baking world transforms, positions, normals and UVs. Animated, independently hidden and instance-colored branches stay separate. Prototype clones reuse baked buffers. Atelier static subgroups and the complete sail/shell landmarks use this path; LINE keeps independently visible camouflage walls and moving mechanisms. Tests compare triangle counts and transformed vertex bounds before/after and verify that both real sail/shell generators submit fewer than half the mesh objects. No triangle decimation is involved.
+
+The fixed-direction morning shadow uses a cached 2048px map following the camera target in snapped four-unit steps. Glass atlases are 1024px with anisotropy up to 8, limited by device capability. LINE uses a cached 1280px settled backdrop and 640px motion backdrop; unchanged backgrounds are reused. These restore detail beyond the earlier budgeted settings without making static scenes redraw continuously.
+
+Current evidence: `checks/clear-dawn-tests.tap` (117 passed, zero failures), `checks/clear-dawn-browser.json` (20.08% populated close view at 4× with music; bounded pause observation), and `checks/clear-dawn-verification.json` (build/source hashes and final screenshot settings). The earlier 4.4× equal-month CPU speedup is inherited, not a new GPU, energy or thermal measurement. The 20% browser fixture contains no sail/shell landmarks, so its observation remains applicable after that isolated batching change; final starter screenshots were recaptured from the rebuilt source. Long-running thermal/battery stability, browser-specific crash coverage and full-station performance are still unverified.

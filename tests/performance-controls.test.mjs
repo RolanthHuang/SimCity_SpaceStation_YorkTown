@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {RenderBudget,renderPixelRatio} from '../SimCity/render-budget.mjs';
+import {RenderBudget,ViewQuality,renderPixelRatio} from '../SimCity/render-budget.mjs';
 import {buildingDetailPlan,distantBuilding} from '../SimCity/render-plan.mjs';
 import {MonthRunner} from '../SimCity/simulation-runner.mjs';
 import {createMonthTask,applyMonth,hydrateSimulation} from '../SimCity/simulation-protocol.mjs';
@@ -8,6 +8,7 @@ import {createCity,serialize,step,analyze} from '../SimCity/engine.mjs';
 import {prepareLiving} from '../SimCity/living-plan.mjs';
 import {prepareContinuum} from '../SimCity/continuum-plan.mjs';
 import {idx} from '../SimCity/catalog.mjs';
+import {simulationSpeed,SPEED_KEYS,MONTH_DURATION_MS,monthWorkRest} from '../SimCity/simulation-speed.mjs';
 import {CityView} from '../SimCity/view.mjs';
 import {surface} from '../SimCity/habitat.mjs';
 import * as T from '../YorktownPreview/three.module.js';
@@ -26,10 +27,36 @@ test('paused static city draws once then stops; hidden and disabled views schedu
 test('120 Hz input cannot exceed the movement frame budget',()=>{
  const c=clock();let frames=0;const r=new RenderBudget({doc:c.doc,win:c.win,draw:()=>frames++,activity:()=>30});for(let i=0;i<120;i++){r.invalidate();c.advance(1000/120);}assert.ok(frames<=30,frames);assert.ok(frames>=20,frames);r.dispose();
 });
-test('Retina rendering has a bounded pixel workload',()=>{for(const [w,h]of [[2668,1114],[3456,2234],[1280,720]]){const ratio=renderPixelRatio(w,h,2);assert.ok(w*h*ratio**2<=1152001);assert.ok(ratio<=1);}});
+test('settled Retina views exceed the old 1.7 ratio at laptop and 4K CSS sizes while motion remains bounded',()=>{
+ for(const [w,h]of [[1334,557],[1728,1117],[1920,1080],[3456,2234]]){
+  const still=renderPixelRatio(w,h,2),moving=renderPixelRatio(w,h,2,'moving');
+  assert.ok(w*h*still**2<=8388609);assert.ok(w*h*moving**2<=2500001);assert.ok(still>=moving);assert.ok(moving<=1.4);
+  if(w<=1920)assert.ok(still>=1.7);
+ }
+ assert.equal(renderPixelRatio(1280,720,1),1.5);
+});
+test('camera settles to a sharp final frame, without a permanent redraw timer',()=>{
+ const c=clock(),tiers=[];let frames=0;const r=new RenderBudget({doc:c.doc,win:c.win,draw:()=>frames++,activity:()=>0});
+ const q=new ViewQuality({doc:c.doc,win:c.win,change:t=>{tiers.push(t);r.invalidate();}});
+ q.motion();c.advance(300);q.motion();c.advance(300);assert.equal(q.tier,'moving');c.advance(500);assert.equal(q.tier,'still');assert.deepEqual(tiers,['moving','still']);assert.equal(frames,2);assert.equal(c.tasks.size,0);q.dispose();r.dispose();
+});
+test('quality timers do not redraw a hidden or disabled view',()=>{
+ const c=clock();let changes=0,settles=0;const q=new ViewQuality({doc:c.doc,win:c.win,change:()=>changes++,settle:()=>settles++});
+ q.motion();c.hide(true);c.advance(1000);assert.equal(settles,0);assert.equal(c.tasks.size,0);c.hide(false);c.advance(1000);assert.equal(settles,1);
+ q.motion();q.setEnabled(false);c.advance(1000);assert.equal(settles,1);assert.equal(c.tasks.size,0);assert.equal(changes,3);q.dispose();
+});
+test('legacy 12x speeds are capped; yearly time stays meaningful at the new maximum',()=>{
+ assert.deepEqual(Object.values(SPEED_KEYS),[1,2,4]);assert.equal(simulationSpeed(12),4);assert.equal(simulationSpeed(3),2);assert.equal(simulationSpeed(Infinity),0);assert.equal(simulationSpeed(-1),0);assert.equal(MONTH_DURATION_MS*12/4,24000);
+ for(const work of [0,600,3200])assert.ok(monthWorkRest(work)>=work);assert.equal(monthWorkRest(600),600);
+});
+test('visible large buildings get detail regardless of ground distance, and offscreen buildings do not consume it',()=>{
+ const p=buildingDetailPlan([{i:1,distance:95,pixels:170,visible:true},{i:2,distance:2,pixels:900,visible:false},{i:3,distance:8,pixels:8,visible:true}],'overview');
+ assert.equal(p.get(1),2);assert.equal(p.get(2),0);assert.equal(p.get(3),0);
+ assert.equal(buildingDetailPlan([{i:1,distance:95,pixels:62}], 'build',p).get(1),2);
+});
 test('large city detail count is bounded and every distant building keeps a visible model',()=>{
- const items=Array.from({length:6000},(_,i)=>({i,distance:20+i/1000})),p=buildingDetailPlan(items);assert.equal([...p.values()].filter(n=>n===2).length,80);assert.equal([...p.values()].filter(n=>n===1).length,320);assert.equal(p.size,6000);
- for(const type of ['R','C','I'])for(const branch of ['garden','finance','precision']){const parts=[];distantBuilding({x:3,y:4,c:{type,level:8,span:4,branch},add:(...p)=>parts.push(p)});assert.ok(parts.length>=7&&parts.length<=14);assert.ok(parts.flat().filter(v=>typeof v==='number').every(Number.isFinite));}
+ const items=Array.from({length:6000},(_,i)=>({i,distance:20+i/1000})),p=buildingDetailPlan(items);assert.equal([...p.values()].filter(n=>n===2).length,96);assert.equal([...p.values()].filter(n=>n===1).length,320);assert.equal(p.size,6000);
+ for(const type of ['R','C','I'])for(const branch of ['garden','finance','precision']){const parts=[];distantBuilding({x:3,y:4,c:{type,level:8,span:4,branch},add:(...p)=>parts.push(p)});assert.ok(parts.length>=7&&parts.length<=16);assert.ok(parts.flat().filter(v=>typeof v==='number').every(Number.isFinite));}
 });
 test('background months produce the same state and indicators as direct simulation',()=>{
  let city=prepareContinuum(prepareLiving(createCity()));const direct=hydrateSimulation(serialize(city)),month=createMonthTask();

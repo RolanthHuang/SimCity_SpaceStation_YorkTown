@@ -1,0 +1,5 @@
+
+> yorktown-continuum-city@11.1.0 build
+> node build-simcity.mjs
+
+Built web entries (1034 KiB) with deferred audio streaming and a fully offline single file (5825 KiB).

@@ -9,6 +9,7 @@ import {xy} from './catalog.mjs';
 import {foliageGeometry} from './evolution-materials.mjs';
 import {zoneBuilding} from './architecture.mjs';
 import {stageHeight} from './evolution.mjs';
+import {batchStaticArchitecture} from './static-batch.mjs';
 
 const V=p=>new T.Vector3(...p);
 function roundedShape(w,d,r){r=Math.min(r,w/2-.001,d/2-.001);const s=new T.Shape(),x=-w/2,y=-d/2;s.moveTo(x+r,y);s.lineTo(x+w-r,y);s.quadraticCurveTo(x+w,y,x+w,y+r);s.lineTo(x+w,y+d-r);s.quadraticCurveTo(x+w,y+d,x+w-r,y+d);s.lineTo(x+r,y+d);s.quadraticCurveTo(x,y+d,x,y+d-r);s.lineTo(x,y+r);s.quadraticCurveTo(x,y,x+r,y);return s;}
@@ -44,7 +45,7 @@ export class AtelierScene{
   this.view=view;this.clock=0;const assets=makeAtelierMaterials(view.renderer,view.scene);this.assets=assets;
   for(const name of ['ivory','titanium','gold','dark','glass']){const target=view.dawn.m[name],source=assets.m[name==='glass'?'window':name];target.color.copy(source.color);target.roughness=source.roughness;target.metalness=source.metalness;target.map=source.map;target.roughnessMap=source.roughnessMap;target.normalMap=source.normalMap;target.normalScale=source.normalScale;target.envMapIntensity=.65;target.needsUpdate=true;}
   this.p=new Parts(assets.m);this.root=new T.Group();view.scene.add(this.root);this.models=new Map();this.landmarks=new Map();this.pickables=[];this.dynamic=[];
-  for(const def of ATELIER_LOTS){const group=new T.Group();group.userData.tile=def.anchor;placeOnDeck(group,def.x-27.5,def.y-27.5,.065);this.root.add(group);const body=new T.Group();body.name='mature';group.add(body);this[def.key](body);this.addEvolution(group,def);this.p.batch(group);group.traverse(m=>{if(m.isMesh){m.userData.tile=def.anchor;this.pickables.push(m);}});this.models.set(def.key,group);}
+  for(const def of ATELIER_LOTS){const group=new T.Group();group.userData.tile=def.anchor;placeOnDeck(group,def.x-27.5,def.y-27.5,.065);this.root.add(group);const body=new T.Group();body.name='mature';group.add(body);this[def.key](body);this.addEvolution(group,def);this.p.batch(group);for(const sub of group.children)if(sub.isGroup)batchStaticArchitecture(sub);group.traverse(m=>{if(m.isMesh){m.userData.tile=def.anchor;this.pickables.push(m);}});this.models.set(def.key,group);}
   this.streets();this.makeGate();this.p.batch(this.landscape);this.setupLight();this.addSky();this.addCloudPlanetDetail();
  }
  addEvolution(g,def){
@@ -72,20 +73,25 @@ export class AtelierScene{
  }
  setupLight(){const v=this.view;v.scene.background.set(0x738991);v.scene.fog.color.set(0xc5cfca);v.scene.fog.density=.00035;v.renderer.toneMappingExposure=.91;v.renderer.shadowMap.enabled=true;v.renderer.shadowMap.type=T.PCFSoftShadowMap;v.renderer.shadowMap.autoUpdate=false;v.renderer.shadowMap.needsUpdate=true;
   v.scene.children.filter(x=>x.isAmbientLight).forEach(l=>l.intensity=.16);v.scene.children.filter(x=>x.isHemisphereLight).forEach(l=>{l.intensity=.95;l.color.set(0xc0e0ef);l.groundColor.set(0x939b80);});
-  const lights=v.scene.children.filter(x=>x.isDirectionalLight),sun=lights[0];sun.intensity=2.65;sun.color.set(0xffe0ad);sun.position.set(-30,48,30);sun.target.position.set(0,1,1);v.scene.add(sun.target);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-32,right:32,top:30,bottom:-26,near:1,far:140});sun.shadow.camera.updateProjectionMatrix();sun.shadow.bias=-.00015;sun.shadow.normalBias=.018;sun.shadow.radius=2;lights[1].intensity=.72;v.floor.receiveShadow=true;v.mat.envMapIntensity=.55;
+  const lights=v.scene.children.filter(x=>x.isDirectionalLight),sun=lights[0];sun.intensity=2.65;sun.color.set(0xffe0ad);sun.position.set(-30,48,30);sun.target.position.set(0,1,1);v.scene.add(sun.target);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-32,right:32,top:30,bottom:-26,near:1,far:140});sun.shadow.camera.updateProjectionMatrix();sun.shadow.bias=-.00015;sun.shadow.normalBias=.018;sun.shadow.radius=2;lights[1].intensity=.72;v.floor.receiveShadow=true;v.mat.envMapIntensity=.55;
  }
  residence(g){const p=this.p;
   p.round(g,[0,.06,0],4.75,4.55,.12,.5,'stone');p.round(g,[0,.38,0],3.85,3.75,.6,.45,'window');
   p.round(g,[0,.78,0],4.6,4.4,.17,.6);p.round(g,[0,.91,0],4.35,4.1,.08,.6,'gold');
   for(let x=-1.55;x<=1.6;x+=.52){p.b(g,[x,.42,1.87],[.045,.64,.08]);p.b(g,[x,.45,1.91],[.36,.48,.012],'clear');p.b(g,[x,.22,1.73],[.24,.13,.10],'wood');}
   p.round(g,[0,.70,2.03],1.5,.85,.07,.25);p.label(g,'AURELIA · RESIDENCES',[0,.60,2.02],1.50);
-  for(let j=0;j<18;j++){const y=1.02+j*.40,step=j<6?0:j<12?1:2,w=4.2-step*.56,d=3.72-step*.45,shift=step*.16;
+  for(let j=0;j<18;j++){const y=1.02+j*.40,step=j<6?0:j<12?1:2,w=4.35-step*.16,d=3.93-step*.12,shift=step*.045;
    const floor=new T.Group();floor.position.set(-shift,y,-shift*.6);g.add(floor);
    p.round(floor,[0,.16,0],w-.72,d-.65,.32,.22,'glass');p.round(floor,[0,.035,0],w-.68,d-.61,.035,.22,'dark');p.round(floor,[0,0,0],w,d,.055,.38,'porcelain');p.round(floor,[0,-.052,0],w-.13,d-.13,.012,.34,'gold');
    for(const z of [-(d-.78)/2,(d-.78)/2])for(let x=-(w-.85)/2+.15;x<(w-.85)/2;x+=.4){p.b(floor,[x,.16,z],[.022,.32,.025],'titanium');if((j+Math.round(x*10))%3===0)p.b(floor,[x+.1,.18,z*.99],[.06,.19,.012],'warm');}
    if(j%2===0){p.rail(floor,.065,w-.08,d-.08,.56);p.planter(floor,-w*.27,.075,d*.38,.72,.24);p.planter(floor,w*.27,.075,-d*.37,.62,.25);}
    if(j===5||j===11){p.tree(floor,w*.32,.1,d*.27,.62,j);p.tree(floor,-w*.32,.1,-d*.27,.53,j+2);}
   }
+  p.round(g,[0,8.32,0],4.05,3.67,.07,.38);p.rail(g,8.35,3.98,3.59,.36);
+  // A single fused campus: roof courts, planted aisles and glass winter gardens.
+  for(const x of [-1.28,-.42,.44,1.30])for(const z of [-1.05,.90]){p.planter(g,x,8.37,z,.65,.43);p.tree(g,x,8.44,z,.58,(x+z)*4);}
+  p.round(g,[0,8.54,-.18],1.15,.97,.35,.19,'glass');p.round(g,[0,8.75,-.18],1.35,1.12,.045,.22,'porcelain');
+  for(const x of [-1.83,1.83]){p.b(g,[x,4.44,-1.25],[.035,6.4,.055],'titanium');p.b(g,[x,4.44,-1.215],[.016,6.25,.012],'gold');}
   p.round(g,[-.32,8.32,-.2],3.0,2.65,.07,.3);p.b(g,[.8,8.42,-.85],[.44,.15,.4],'titanium');p.round(g,[-.32,8.54,-.2],1.82,1.55,.33,.42,'glass');p.round(g,[-.32,8.77,-.2],2.35,2.1,.11,.53,'porcelain');p.planter(g,.72,8.4,.7,.85,.35);
   for(let j=0;j<7;j++){p.b(g,[-1.1+j*.25,8.98,-.4],[.055,.045,1.6],'gold');}p.tree(g,-1.0,8.38,.6,.6,4);
   for(const x of [-1.94,1.94]){p.planter(g,x,.13,1.85,.44,.65);p.tree(g,x,.2,1.85,.7,3+x);}
@@ -95,13 +101,14 @@ export class AtelierScene{
   for(let x=-1.8;x<1.9;x+=.36){p.b(g,[x,.48,1.97],[.026,.7,.04],'gold');p.b(g,[x,.85,1.96],[.24,.026,.024],'warm');}
   p.round(g,[0,1.45,-.5],3.8,2.8,.78,.45,'glass');p.round(g,[0,1.9,-.5],4.12,3.13,.13,.5);p.rail(g,1.05,4.5,4.05,.5);
   // Two offset blades create a recognisable commercial skyline rather than a single box.
-  const towers=[{x:-.70,z:-.25,w:1.45,d:1.8,h:10.7},{x:.85,z:-.65,w:1.10,d:1.5,h:8.2}];
+  const towers=[{x:-.98,z:-.14,w:2.20,d:2.55,h:10.7},{x:1.06,z:-.34,w:1.62,d:2.23,h:8.2}];
   for(const t of towers){p.round(g,[t.x,1.98+t.h/2,t.z],t.w,t.d,t.h,.23,'window');
    for(let j=0;j<t.h/.25;j++){const y=2.05+j*.25;p.round(g,[t.x,y,t.z],t.w+.045,t.d+.045,.021,.24,'titanium');if(j%4===0)p.b(g,[t.x,y+.13,t.z+t.d/2+.005],[t.w*.76,.024,.009],'warm');}
    for(let k=0;k<=6;k++){const x=t.x-t.w/2+k*t.w/6;for(const z of [t.z-t.d/2,t.z+t.d/2])p.b(g,[x,2+t.h/2,z],[.016,t.h,.028],'titanium');}
    for(const side of [-1,1]){p.tube(g,[[t.x+side*(t.w/2+.18),.7,1.55],[t.x+side*(t.w/2+.12),2.1,t.z+.8],[t.x+side*(t.w/2+.06),t.h+1.6,t.z+.55],[t.x+side*.12,t.h+2.3,t.z-.3]],.07,'porcelain');}
    p.round(g,[t.x,t.h+2.02,t.z],t.w+.2,t.d+.2,.12,.25);p.b(g,[t.x,t.h+2.35,t.z],[.027,.65,.027],'gold');
   }
+  for(const x of [-1.68,1.68]){p.planter(g,x,1.10,1.38,.56,.44);p.tree(g,x,1.17,1.38,.60,x*3);}
   p.round(g,[.08,6.0,-.25],3.5,2.75,.17,.45);p.round(g,[.08,6.2,-.25],3.05,2.35,.35,.42,'glass');p.round(g,[.08,6.47,-.25],3.52,2.78,.1,.48);p.planter(g,-1.4,6.10,.48,.46,.8);p.planter(g,1.48,6.12,.40,.38,.7);
   p.round(g,[0,1.01,2.03],2.7,.95,.08,.35);p.label(g,'MERIDIAN · EXCHANGE',[0,.77,2.05],1.65);
   for(const x of [-1.65,1.65]){p.tree(g,x,1.12,1.30,.8,5+x);p.planter(g,x,1.10,1.3,.72,.7);}
@@ -171,9 +178,15 @@ export class AtelierScene{
   const mat=new T.ShaderMaterial({transparent:true,depthWrite:false,uniforms:{sun:{value:new T.Vector3(-.7,.6,.5).normalize()}},vertexShader:'varying vec3 n;varying vec3 p;void main(){p=position;n=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:`varying vec3 p;varying vec3 n;uniform vec3 sun;float h(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}float noise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1)),f.x),f.y),f.z);}void main(){vec3 q=p*.07;float f=noise(q)*.52+noise(q*2.1)*.26+noise(q*4.3)*.14+noise(q*8.7)*.08;float a=smoothstep(.42,.69,f)*.80;float l=.65+.35*max(0.,dot(normalize(n),sun));gl_FragColor=vec4(mix(vec3(.75,.82,.85),vec3(1.,.90,.74),max(0.,dot(normalize(n),sun)))*l,a);}`});
   const mesh=new T.Mesh(new T.SphereGeometry(191,80,48),mat);mesh.position.set(80,-230,-330);this.view.dawn.root.add(mesh);
  }
+ updateShadowFocus(point){
+  if(!this.sun)this.sun=this.view.scene.children.find(x=>x.isDirectionalLight&&x.castShadow);
+  if(!this.sun||!point)return;const p=new T.Vector3(Math.round(point.x/4)*4,Math.round(point.y/4)*4,Math.round(point.z/4)*4);
+  if(this.shadowFocus?.distanceToSquared(p)<16)return;this.shadowFocus=p;
+  this.sun.position.copy(p).add(new T.Vector3(-30,48,30));this.sun.target.position.copy(p).add(new T.Vector3(0,1,1));this.sun.target.updateMatrixWorld();this.view.renderer.shadowMap.needsUpdate=true;
+ }
  updateLandmarks(s,a){
   const types={aurelia:'residence',meridian:'commerce',aurora:'industry'},wanted=new Set();
-  s.cells.forEach((c,i)=>{const form=adoptedForm(c),key=types[c.type]||form;if(!key||c.subplot||!c.level)return;wanted.add(i);let group=this.landmarks.get(i);if(form&&this.view.detailPlan?.get(i)!==2){if(group)group.visible=false;return;}
+  s.cells.forEach((c,i)=>{const form=adoptedForm(c),key=types[c.type]||form;if(!key||c.subplot||c.plot!=null&&c.plot!==i||!c.level)return;wanted.add(i);let group=this.landmarks.get(i);if(form&&this.view.detailPlan?.get(i)!==2){if(group)group.visible=false;return;}
    if(!group||group.userData.type!==c.type||group.userData.signature!==`${c.type}:${c.branch}:${c.level}:${c.span}`){if(group){this.view.scene.remove(group);group.traverse(m=>{if(m.isInstancedMesh)m.dispose();});}
     group=new T.Group();const model=this.models.get(key).getObjectByName('mature').clone(true);model.visible=true;group.add(model);if(form){for(let stage=6;stage<=Math.min(8,c.level);stage++){const addon=this.models.get(key).getObjectByName('addition'+stage);if(addon){const clone=addon.clone(true);clone.visible=true;group.add(clone);}}group.scale.setScalar((c.span||1)/5);}group.userData.signature=`${c.type}:${c.branch}:${c.level}:${c.span}`;group.userData.type=c.type;group.userData.tile=i;const [x,y]=xy(i);placeOnDeck(group,x+((c.span||5)-1)/2-27.5,y+((c.span||5)-1)/2-27.5,.065);group.traverse(m=>{if(m.isMesh){m.userData.tile=i;this.pickables.push(m);}});this.view.scene.add(group);this.landmarks.set(i,group);
    }

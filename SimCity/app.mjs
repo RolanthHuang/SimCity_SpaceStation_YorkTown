@@ -25,6 +25,7 @@ const $=id=>document.getElementById(id),fmt=n=>Math.round(n).toLocaleString('en-
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=m=>`${2263+Math.floor(m/12)} / ${String(m%12+1).padStart(2,'0')}`;
 const AUTO='yorktown-continuum-city-autosave-v1',MANUAL='yorktown-continuum-city-manual-v1';
+import {simulationSpeed,MONTH_DURATION_MS,SPEED_KEYS,monthWorkRest} from './simulation-speed.mjs';
 let previewCity=false,returnCity=null,galleryDispose=null,monthRunner,cityRevision=0,simulationEpoch=0,nextMonthAt=0;
 let city=prepareContinuum(prepareLiving(createCity())),a,speed=0,category='inspect',tool='inspect',selected=-1,overlay='normal',receipts=[],view,modalType='',lastTime=performance.now(),accumulator=0,toastTimer,loaded=false,storageWarning=false,wasRunning=0,continuumUI;
 try{const text=localStorage.getItem(AUTO);if(text){city=deserialize(text);loaded=true;}}catch(e){storageWarning=true;}
@@ -46,7 +47,7 @@ function citizenDialogue(person){
 function toast(text,bad=false){$('toast').textContent=text;$('toast').classList.add('visible');$('toast').style.borderColor=bad?'#cf918280':'#7fafad80';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),5200);}
 function invalidateSimulation(){cityRevision++;monthRunner?.invalidate();}
 function persist(key=AUTO,monthly=false){if(!monthly)invalidateSimulation();if(previewCity)return true;try{localStorage.setItem(key,serialize(city,{compact:true}));return true;}catch(e){if(!storageWarning){toast('瀏覽器無法寫入儲存空間；請用「匯出存檔」保存進度。',true);storageWarning=true;}return false;}}
-function setSpeed(n){const next=city.insolvent?0:n;if(next!==speed){simulationEpoch++;monthRunner?.invalidate();}speed=next;if(view){view.simulationSpeed=speed;view.budget?.invalidate();}accumulator=0;lastTime=performance.now();document.querySelectorAll('[data-speed]').forEach(b=>{b.classList.toggle('active',Number(b.dataset.speed)===speed);b.setAttribute('aria-pressed',String(Number(b.dataset.speed)===speed));});$('resume-game').hidden=speed!==0;$('resume-game').textContent=city.insolvent?'財政接管 · 開啟財政面板':'已暫停 · 繼續經營 ▶';}
+function setSpeed(n){const next=city.insolvent?0:simulationSpeed(n);if(next!==speed){simulationEpoch++;monthRunner?.invalidate();}speed=next;if(view){view.simulationSpeed=speed;view.budget?.invalidate();}accumulator=0;lastTime=performance.now();document.querySelectorAll('[data-speed]').forEach(b=>{b.classList.toggle('active',Number(b.dataset.speed)===speed);b.setAttribute('aria-pressed',String(Number(b.dataset.speed)===speed));});$('resume-game').hidden=speed!==0;$('resume-game').textContent=city.insolvent?'財政接管 · 開啟財政面板':'已暫停 · 繼續經營 ▶';}
 function chooseTool(t){tool=t;view?.setTool(t);if(t!=='inspect')setSpeed(0);if(t==='wire'||t==='eraseWire')setOverlay('power');if(t==='pipe'||t==='erasePipe')setOverlay('water');renderTools();}
 const descriptions={assist:'框選 6 × 6 至 32 × 24 格，選擇投資級距並預覽道路、供應與分區，再確認施工。',line:'寬 4 格，拖曳 8～16 格長度。先預覽 160～320 公尺長廊，之後可逐段延長至 640 公尺；長側面呈透明背景迷彩，兩端可見內部。',sail:'5 × 5 星帆巡航塔提供 650 個居住名額及 80 個職位。可進入六層航跡秘庫，探索樓梯、連橋與解謎。',shell:'5 × 5 潮汐殼館提供文化活動、60 個職位與周邊公共空間效益，需水電、維生與持續維護。',fabricator:'已就業人員把 3 合金製成 1 零件；需道路、船塢、水電與維生。從「船塢與巨構」查看生產。',life:'提供 2,400 單位氧氣；需供電供水，沿水管供應。設備升級增加容量。',radiator:'提供 7,000 單位散熱；需供電供水，服務相連的電網。設備升級增加容量。',inspect:'點選建築查看運作原因。左拖平移、右拖旋轉、滾輪縮放。遮擋時可開「專注本臂」。',road:'道路兩側三格內，沿連續分區可開發。道路施工包含電線與水管；拖曳可連續鋪設。',avenue:'提高道路容量至 180，可直接升級現有道路。',rail:'磁浮軌道容量 500。車站四周的道路與軌道會互相連通；只鋪軌道不會產生通勤。',station:'可放在道路上，原道路繼續通行。車站會自動連接 140 格內的其他車站，優先沿路高架，必要時跨空間；軌道費用納入預覽。連線承接實際通勤，減少沿途道路流量。',dock:'工業必須沿交通網抵達運作中的船塢，才能正常出口。',power:'提供 6,000 單位電力。生產依維護預算與電網連接；工作職位另需道路。50 年壽命；可設定自動更新，未更新將變成殘骸。',solar:'提供 1,800 單位電力，維護較低。生產依預算與電網連接；50 年壽命；可設定自動更新，未更新將變成殘骸。',water:'水循環廠必須供電。生產依維護預算與電力，供水需求及輸送量獨立計算。',wire:'連接電廠與使用端。道路、建築自帶管線；可另外鋪線跨越空地。',pipe:'連接水循環廠與使用端。可獨立鋪設，與電網分開運作。',bulldoze:'拖曳拆除建築與管線，每格 5。無拆除退款；當月可撤銷最後一次施工。',eraseWire:'僅移除電力管線，保留地面建築，每格 1。',erasePipe:'僅移除供水管線，保留地面建築，每格 1。'};
 function renderTools(){
@@ -236,7 +237,7 @@ try{
  $('close-inspector').onclick=()=>$('inspector').hidden=true;
  $('modal-close').onclick=closeModal;$('modal').addEventListener('cancel',e=>{e.preventDefault();closeModal();});
  $('import-file').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>12000000)throw new Error('存檔超過大小上限。');const next=deserialize(await file.text());confirmReplace('匯入城市存檔',()=>replaceCity(next));}catch(err){toast(`無法匯入：${err.message}`,true);}e.target.value='';};
- document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||$('modal').open)return;if((e.metaKey||e.ctrlKey)&&e.code==='KeyZ'){e.preventDefault();undoLast();return;}if(e.code==='Space'&&!['walk','fly','interior'].includes(view.mode)){e.preventDefault();if(!speed){category='inspect';chooseTool('inspect');}setSpeed(speed?0:1);}if(['Digit1','Digit2','Digit3'].includes(e.code)){category='inspect';chooseTool('inspect');setSpeed({Digit1:1,Digit2:3,Digit3:12}[e.code]);}if(e.code==='Escape'){category='inspect';chooseTool('inspect');}if(e.code==='KeyB')budget();if(e.code==='KeyP')setSpeed(speed?0:1);});
+ document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||$('modal').open)return;if((e.metaKey||e.ctrlKey)&&e.code==='KeyZ'){e.preventDefault();undoLast();return;}if(e.code==='Space'&&!['walk','fly','interior'].includes(view.mode)){e.preventDefault();if(!speed){category='inspect';chooseTool('inspect');}setSpeed(speed?0:1);}if(['Digit1','Digit2','Digit3'].includes(e.code)){category='inspect';chooseTool('inspect');setSpeed(SPEED_KEYS[e.code]);}if(e.code==='Escape'){category='inspect';chooseTool('inspect');}if(e.code==='KeyB')budget();if(e.code==='KeyP')setSpeed(speed?0:1);});
  document.addEventListener('visibilitychange',()=>{accumulator=0;lastTime=performance.now();if(document.hidden)persist();});
  addEventListener('pagehide',persist);
  const workerURL=URL.createObjectURL(new Blob([SIMULATION_WORKER_SOURCE],{type:'text/javascript'}));
@@ -245,16 +246,16 @@ try{
  setInterval(async()=>{
   const now=performance.now(),elapsed=Math.min(500,now-lastTime);lastTime=now;
   if(!speed||document.hidden||$('modal').open||monthRunner.failed)return;
-  accumulator=Math.min(6000,accumulator+elapsed*speed);
-  if(accumulator<3000||monthRunner.busy||now<nextMonthAt)return;
-  accumulator-=3000;const current=city,revision=cityRevision,epoch=simulationEpoch,previous=city.unlocks.length;
+  accumulator=Math.min(MONTH_DURATION_MS*2,accumulator+elapsed*speed);
+  if(accumulator<MONTH_DURATION_MS||monthRunner.busy||now<nextMonthAt)return;
+  accumulator-=MONTH_DURATION_MS;const current=city,revision=cityRevision,epoch=simulationEpoch,previous=city.unlocks.length;
   document.body.dataset.simulationBusy='true';
   try{
    const result=await monthRunner.run(revision,()=>serialize(current));
    if(city!==current||cityRevision!==revision||simulationEpoch!==epoch||!speed||document.hidden||$('modal').open){monthRunner.invalidate();return;}
    a=applyMonth(city,result);document.body.dataset.monthWorkMs=String(Math.round(result.workMs));
    // Leave idle CPU time between completed months; never queue an unlimited catch-up burst.
-   nextMonthAt=performance.now()+Math.max(120,result.workMs*.75);
+   nextMonthAt=performance.now()+monthWorkRest(result.workMs);
    receipts=[];refresh(false);persist(AUTO,true);if(city.unlocks.length!==previous)renderTools();
    if(city.spaceIncident===city.month){setSpeed(0);toast('維生容量不足，已暫停提醒。請開啟「維生」補足氧氣或散熱。',true);}
    if(city.powerIncident===city.month){setSpeed(0);toast('電廠到期停機，城市已暫停。請開啟上方「⚡ 電廠」處理。',true);}

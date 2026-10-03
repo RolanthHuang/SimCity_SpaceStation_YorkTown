@@ -1,0 +1,34 @@
+{
+  "canvas": {
+    "antialias": "true",
+    "drawCalls": "463",
+    "engine": "three.js r169",
+    "frames": "47",
+    "fullDetail": "14",
+    "geometries": "236",
+    "geometryBuilds": "87",
+    "pixelRatio": "2",
+    "quality": "still",
+    "renderPixels": "839952",
+    "textures": "29",
+    "triangles": "1164057"
+  },
+  "canvasSize": {
+    "height": 684,
+    "width": 1228
+  },
+  "heading": "25°",
+  "speedButtons": [
+    "Ⅱ",
+    "1×",
+    "2×",
+    "4×"
+  ],
+  "title": "Yorktown · 晨光立體城",
+  "viewport": {
+    "deviceRatio": 2,
+    "height": 520,
+    "width": 614
+  },
+  "logs": []
+}

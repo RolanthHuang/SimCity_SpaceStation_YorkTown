@@ -6,6 +6,7 @@ import {makeBuilder,v,tree} from './structure/geometry.mjs';
 import {xy,deckOf,zoneOf} from './catalog.mjs';
 import {placeOnDeck} from './dawn-scene.mjs';
 import {LINE} from './continuum.mjs';
+import {batchStaticArchitecture} from './static-batch.mjs';
 
 export function adoptedForm(c){if(c.level<5||(c.span||1)<3||c.fire||c.vacant)return null;const z=zoneOf(c.type);return z==='R'&&c.branch==='garden'?'residence':z==='C'&&c.branch==='finance'?'commerce':z==='I'&&c.branch==='precision'?'industry':null;}
 export function lineAppearance(camera,halfLength,width=40){
@@ -49,6 +50,7 @@ export class ContinuumScene{
   else if(c.type==='shell'){model={root:makeShellHall(this.m)};model.root.scale.setScalar(.103);outer.add(model.root);}
   else if(c.type==='line'){const l=s.continuum.lines.find(l=>l.anchor===i);model=makeLine(this.m,l,this.target);const dims=l.axis==='x'?[l.segments*2,4]:[4,l.segments*2];offsetX=(dims[0]-1)/2;offsetY=(dims[1]-1)/2;model.root.rotation.y=l.axis==='x'?Math.PI/2:0;outer.add(model.root);}
   else if(c.type==='park'){const g=s.continuum.gardens[i];model={root:makeGarden(this.m,g)};model.root.scale.setScalar(g.span/32.7);outer.add(model.root);}
+  if(c.type==='sail'||c.type==='shell')batchStaticArchitecture(model.root);
   placeOnDeck(outer,x+offsetX-27.5,y+offsetY-27.5,.065);outer.userData.tile=i;outer.traverse(o=>{if(o.isMesh){o.userData.tile=i;this.pickables.push(o);}});this.root.add(outer);return {...model,outer,signature:this.signature(s,i,c)};
  }
  signature(s,i,c){const garden=s.continuum?.gardens[i];return `${c.type}:${c.level}:${c.lineSegments}:${c.span}:${garden?.stage}:${Math.round((garden?.health||1)*5)}:${c.fire}`;}
@@ -72,7 +74,7 @@ export class ContinuumScene{
   const lines=[...this.models.values()].filter(m=>m.walls&&m.outer.visible);if(!lines.length)return;
   this.root.updateMatrixWorld(true);let active=false;for(const m of lines){const local=m.root.worldToLocal(this.view.camera.position.clone()),appearance=lineAppearance(local,m.length/2);m.walls.visible=appearance.side;m.body.visible=!appearance.side;active||=appearance.side;}
   if(!active)return;
-  const renderer=this.view.renderer,size=renderer.getSize(new T.Vector2()),w=Math.min(640,Math.round(size.x*renderer.getPixelRatio())),h=Math.max(1,Math.round(w*size.y/Math.max(1,size.x)));if(this.target.width!==w||this.target.height!==h){this.target.setSize(w,h);this.backdropDirty=true;}
+  const renderer=this.view.renderer,size=renderer.getSize(new T.Vector2()),w=Math.min(this.view.quality?.tier==='still'?1280:640,Math.round(size.x*renderer.getPixelRatio())),h=Math.max(1,Math.round(w*size.y/Math.max(1,size.x)));if(this.target.width!==w||this.target.height!==h){this.target.setSize(w,h);this.backdropDirty=true;}
   this.view.camera.updateMatrixWorld();const key=[...this.view.camera.matrixWorld.elements,...this.view.camera.projectionMatrix.elements].map(n=>n.toFixed(4)).join(',');
   const moved=key!==this.backdropKey;if(!this.backdropDirty&&!moved&&(!this.view.simulationSpeed||now-(this.backdropTime||0)<1000))return;
   if(!this.backdropDirty&&now-(this.backdropTime||0)<120)return;

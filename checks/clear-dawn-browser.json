@@ -1,0 +1,103 @@
+{
+  "date": "2026-10-03",
+  "version": "11.1.0",
+  "engine": "Codex in-app browser",
+  "viewport": {
+    "width": 1280,
+    "height": 720,
+    "deviceRatio": 1
+  },
+  "city": {
+    "file": "checks/capacity-20pct-city.json",
+    "occupiedCells": 4068,
+    "buildableCells": 20256,
+    "coveragePercent": 20.0829,
+    "kind": "Synthetic city; not the startup template or an all-policy economic calibration"
+  },
+  "camera": {
+    "test": "Actual populated close view",
+    "sector": 2,
+    "sectorX": 154,
+    "y": 25,
+    "distance": 12
+  },
+  "running": {
+    "speed": 4,
+    "wallMs": 8013,
+    "before": {
+      "audio": {
+        "error": null,
+        "paused": false,
+        "readyState": 4,
+        "time": 121.553199
+      },
+      "canvas": {
+        "antialias": "true",
+        "drawCalls": "134",
+        "engine": "three.js r169",
+        "frames": "12",
+        "fullDetail": "96",
+        "geometries": "265",
+        "geometryBuilds": "87",
+        "pixelRatio": "1.5",
+        "quality": "still",
+        "renderPixels": "1589760",
+        "textures": "27",
+        "triangles": "959348"
+      },
+      "game": {},
+      "month": "2263 / 01",
+      "population": "32,076"
+    },
+    "after": {
+      "audio": {
+        "error": null,
+        "paused": false,
+        "readyState": 4,
+        "time": 129.562995
+      },
+      "canvas": {
+        "antialias": "true",
+        "drawCalls": "135",
+        "engine": "three.js r169",
+        "frames": "135",
+        "fullDetail": "96",
+        "geometries": "265",
+        "geometryBuilds": "123",
+        "pixelRatio": "1.5",
+        "quality": "still",
+        "renderPixels": "1589760",
+        "textures": "27",
+        "triangles": "932972"
+      },
+      "game": {},
+      "month": "2263 / 04",
+      "population": "43,260"
+    }
+  },
+  "paused": {
+    "wallMs": 1600,
+    "before": {
+      "audioTime": 171.023403,
+      "body": {
+        "monthWorkMs": "426",
+        "simulationBusy": "false"
+      },
+      "frames": "146"
+    },
+    "after": {
+      "audioTime": 172.632097,
+      "body": {
+        "monthWorkMs": "426",
+        "simulationBusy": "false"
+      },
+      "frames": "146"
+    }
+  },
+  "consoleWarningsAndErrors": [],
+  "limits": [
+    "Bounded observations only; no long-running battery, thermal, browser-specific crash, or full-station certification.",
+    "An FPS policy is not an uncontrolled maximum-frame-rate benchmark.",
+    "CPU timing speedup in performance-cpu.json is inherited from the earlier same-day optimization."
+  ]
+}

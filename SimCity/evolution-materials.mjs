@@ -11,7 +11,7 @@ export function detailMaterials(m){
   const v=rnd(),g=c.createLinearGradient(x*w,y*h,(x+1)*w,(y+1)*h);g.addColorStop(0,v>.72?'#bac4bc':'#c5dad7');g.addColorStop(.30,'#e4ece4');g.addColorStop(.55,v>.72?'#afbbb3':'#adcbcf');g.addColorStop(1,v>.72?'#9aaea9':'#92b4c0');c.fillStyle=g;c.fillRect(x*w+1,y*h+1,w-2,h-2);
   if(v>.72){c.fillStyle=v>.90?'#e3c491':'#d8cec0';c.fillRect(x*w+3,y*h+3,w*.82,h*(.23+rnd()*.37));c.strokeStyle='rgba(89,99,99,.40)';c.lineWidth=.8;for(let k=0;k<5;k++){c.beginPath();c.moveTo(x*w+3,y*h+4+k*3);c.lineTo(x*w+w*.88,y*h+4+k*3);c.stroke();}}
   c.fillStyle='rgba(34,59,64,.38)';c.fillRect(x*w+1,(y+1)*h-3,w-2,2);c.fillStyle='rgba(236,249,245,.34)';c.fillRect(x*w+2,y*h+1,1,h-3);
- }},512,true);
+ }},1024,true);
  const foliage=tex((c,s)=>{c.clearRect(0,0,s,s);for(let k=0;k<380;k++){const a=rnd()*Math.PI*2,r=Math.sqrt(rnd()),x=s/2+Math.cos(a)*r*s*.47,y=s/2+Math.sin(a)*r*s*.43;c.save();c.translate(x,y);c.rotate(a);c.fillStyle=['#e7e2ba','#b5caa2','#8ca88d','#d2dba6'][k%4];c.beginPath();c.ellipse(0,0,3+rnd()*9,2+rnd()*4,0,0,Math.PI*2);c.fill();c.restore();}},256,true);
  for(const name of ['ivory','porcelain','stone','titanium','gold','dark','wood']){m[name].roughnessMap=rough;m[name].normalMap=normal;m[name].normalScale=new T.Vector2(.07,.07);}
  m.ivory.roughness=.61;m.ivory.metalness=.05;m.porcelain.roughness=.48;m.porcelain.metalness=.06;m.stone.map=stone;m.stone.roughness=.88;
