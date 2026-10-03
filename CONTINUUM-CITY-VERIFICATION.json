@@ -25,17 +25,20 @@
     "repeatedFullCitySuiteAfterMusicOnlyChange": false,
     "finalBuild": "PASS"
   },
-  "offlineEntries": {
+  "entries": {
     "sha256": {
-      "index.html": "9e7a371b4c36eb12933c5897f5e3903a9c443d0c07bb1df948a36b2e3a48020d",
-      "simcity.html": "9e7a371b4c36eb12933c5897f5e3903a9c443d0c07bb1df948a36b2e3a48020d",
-      "showcase.html": "9e7a371b4c36eb12933c5897f5e3903a9c443d0c07bb1df948a36b2e3a48020d",
-      "SimCity/template.html": "9e7a371b4c36eb12933c5897f5e3903a9c443d0c07bb1df948a36b2e3a48020d",
+      "index.html": "81adc2fafebdbc2d48d6ccfd9f8c4eb9ee6258ad844305184fc263f22c14a5cb",
+      "simcity.html": "81adc2fafebdbc2d48d6ccfd9f8c4eb9ee6258ad844305184fc263f22c14a5cb",
+      "showcase.html": "81adc2fafebdbc2d48d6ccfd9f8c4eb9ee6258ad844305184fc263f22c14a5cb",
+      "SimCity/template.html": "65bdec37d5561e9d4f23da5eb02f32a3014045e6c42352e9378fc2eae77c276f",
       "Yorktown-Continuum-City-v11.0.0.html": "9e7a371b4c36eb12933c5897f5e3903a9c443d0c07bb1df948a36b2e3a48020d"
     },
-    "identical": true,
-    "approvedAudioEmbeddedExactlyOnce": true,
-    "externalRuntimeRequestsRequired": false
+    "rootWebEntriesIdentical": true,
+    "webAudioDeferredAndStreamed": true,
+    "webBytes": 992799,
+    "nestedAudioPathVerified": true,
+    "standaloneOfflineAudioEmbeddedExactlyOnce": true,
+    "standaloneExternalRuntimeRequestsRequired": false
   },
   "soundtrack": {
     "title": "星海靜謐・大提琴暖光",
@@ -125,7 +128,7 @@
       {
         "feature": "Accepted music",
         "result": "PASS",
-        "evidence": "Media readyState 4 and advancing currentTime after gesture; toggle paused at 53.736s and resumed from 54.256s. Browser negative first-frame volume issue fixed with bounded fade progress."
+        "evidence": "Media readyState 4 and advancing currentTime after gesture; toggle paused at 53.736s and resumed from 54.256s. Browser negative first-frame volume issue fixed with bounded fade progress. Final web build streams the same accepted MP3; offline HTML contains its exact bytes."
       },
       {
         "feature": "Final console",

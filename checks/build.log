@@ -2,4 +2,4 @@
 > yorktown-continuum-city@11.0.0 build
 > node build-simcity.mjs
 
-Built index.html and simcity.html (5760 KiB each), fully offline.
+Built web entries (970 KiB) with deferred audio streaming and a fully offline single file (5760 KiB).
