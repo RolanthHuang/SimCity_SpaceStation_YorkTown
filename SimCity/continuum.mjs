@@ -71,14 +71,14 @@ export function applyContinuumAuras(s,operational,parks,around){
  for(const [id,g]of Object.entries(s.continuum?.gardens||{})){const i=Number(id);if(s.cells[i]?.type!=='park')continue;const [x,y]=xy(i),center=idx(wrapX(x+Math.floor(g.span/2)),y+Math.floor(g.span/2));around(center,g.stage===3?8:6,(j,d)=>parks[j]+=(g.stage===3?18:10)*g.health*(1-d/(g.stage===3?9:7))*(operational[i]||0));}
 }
 export function tickGardens(s,a,f,notify){
- if(!s.autoDevelopment)return;const meta=ensureContinuum(s);
+ if(!s.autoDevelopment)return;const meta=ensureContinuum(s);let changed=false;
  for(const [key,g]of Object.entries(meta.gardens)){
-  const i=Number(key);if(s.cells[i]?.type!=='park'){delete meta.gardens[key];continue;}
+  const i=Number(key);if(s.cells[i]?.type!=='park'){delete meta.gardens[key];changed=true;continue;}
   const good=g.cells.every(j=>a.power.coverage[j]>.95&&a.water.coverage[j]>.95&&a.pollution[j]<35);
-  g.health=Math.max(.20,Math.min(1,g.health+(good?.025:-.06)));g.stress=good?0:g.stress+1;g.stable=good?g.stable+1:0;
-  if(g.stress>=6&&g.stage===3){g.stage=2;g.stress=0;notify('環帶花園因供應不足縮減為水庭，保留既有步道。','warn');}
+  const health=g.health;g.health=Math.max(.20,Math.min(1,g.health+(good?.025:-.06)));changed||=g.health!==health;g.stress=good?0:g.stress+1;g.stable=good?g.stable+1:0;
+  if(g.stress>=6&&g.stage===3){g.stage=2;g.stress=0;changed=true;notify('環帶花園因供應不足縮減為水庭，保留既有步道。','warn');}
  }
- if(s.month%3!==0)return;
+ if(s.month%3!==0)return changed;
  for(const size of [3,2])for(let i=0;i<s.cells.length;i++){
   const c=s.cells[i];if(c.type!=='park'||c.plot!==null&&c.plot!==i||c.preserve)continue;
   const current=meta.gardens[i];if(current?.stage===3||size===2&&current)continue;
@@ -91,8 +91,9 @@ export function tickGardens(s,a,f,notify){
   const cost=size===3?9200:2600,monthly=size===3?160:70,extra=monthly-(current?70:cells.length*3);
   if(f.net<extra||s.cash<cost+Math.max(6000,(f.cost+extra)*6))continue;
   for(const [id,g]of Object.entries(meta.gardens))if(g.cells.every(j=>set.has(j)))delete meta.gardens[id];
-  for(const j of cells)Object.assign(s.cells[j],{plot:i,span:size,level:1});meta.gardens[i]={stage:size,span:size,cells,health:1,stable:0,stress:0};s.cash-=cost;notify(`${size} × ${size} ${size===3?'環帶樹冠花園':'晨光水庭'}完成，投資 ${cost}，月維護 ${monthly}。`,'good');return;
+  for(const j of cells)Object.assign(s.cells[j],{plot:i,span:size,level:1});meta.gardens[i]={stage:size,span:size,cells,health:1,stable:0,stress:0};s.cash-=cost;notify(`${size} × ${size} ${size===3?'環帶樹冠花園':'晨光水庭'}完成，投資 ${cost}，月維護 ${monthly}。`,'good');return true;
  }
+ return changed;
 }
 export function tickGardenMonths(s,a){const months=ensureContinuum(s).parkMonths??={};for(const key of Object.keys(months))if(s.cells[key]?.type!=='park')delete months[key];for(let i=0;i<s.cells.length;i++){const c=s.cells[i];if(c.type==='park')months[i]=a.power.coverage[i]>.95&&a.water.coverage[i]>.95&&a.pollution[i]<35&&a.landValue[i]>=45?(months[i]||0)+1:0;}}
 export function questFor(s,i){return ensureContinuum(s).quests[i]??=createQuest();}

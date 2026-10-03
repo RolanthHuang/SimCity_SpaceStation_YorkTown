@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-03",
+  "engine": "Codex in-app browser",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "city": {
+    "file": "checks/capacity-20pct-city.json",
+    "occupiedCells": 4068,
+    "buildableCells": 20256,
+    "coveragePercent": 20.0829,
+    "scenario": "Synthetic dense city; disasters off and automatic investment off. Not a starter or long-term economic calibration."
+  },
+  "runs": [
+    {
+      "test": "Large operating city, music disabled",
+      "wallSeconds": 15.793,
+      "gameMonthsAdvanced": 14,
+      "populationBefore": 32076,
+      "populationAfter": 53462,
+      "before": {
+        "frames": 182,
+        "drawCalls": 133,
+        "triangles": 337500,
+        "geometries": 45
+      },
+      "after": {
+        "frames": 358,
+        "drawCalls": 133,
+        "triangles": 337500,
+        "geometries": 46,
+        "lastMonthWorkMs": 419
+      },
+      "consoleWarningsAndErrors": []
+    },
+    {
+      "test": "Dense-city close view and streamed accepted music together",
+      "wallSeconds": 15.782,
+      "gameMonthsAdvanced": 14,
+      "audioSecondsBefore": 0.417167,
+      "audioSecondsAfter": 16.198205,
+      "audioPaused": false,
+      "audioReadyState": 4,
+      "before": {
+        "frames": 944,
+        "drawCalls": 113,
+        "triangles": 785114,
+        "geometries": 111
+      },
+      "after": {
+        "frames": 1188,
+        "drawCalls": 112,
+        "triangles": 824312,
+        "geometries": 111,
+        "lastMonthWorkMs": 207
+      },
+      "consoleWarningsAndErrors": [],
+      "economicObservation": "By month 28, excess commercial zoning went vacant under unchanged game rules. This is not a performance crash or an economically stable all-policy scenario."
+    },
+    {
+      "test": "Music mute and resume while city is paused",
+      "pausedAtSeconds": 52.963579,
+      "resumedAtSeconds": 53.419487,
+      "framesBeforeAndAfter": 1188,
+      "result": "Audio resumes while the paused static city does not keep drawing."
+    }
+  ],
+  "limits": [
+    "Bounded runs only, not an endurance test or direct power/thermal measurement.",
+    "Pure monthly calculation improved about 4.4x in the measured 20% fixture. No claim of 10x total energy reduction.",
+    "Camera detail and shadow refresh are now budgeted; new render frame counts should not be interpreted as an uncontrolled FPS benchmark.",
+    "User Chrome renderer error 5 was reported; its exact OS/GPU failure cause was not independently established."
+  ]
+}

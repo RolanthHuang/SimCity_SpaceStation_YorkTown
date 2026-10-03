@@ -50,17 +50,20 @@ function retreat(s,i,notify,reason){
 }
 // Legacy high-stage buildings acquire an identity once, without advancing a stage.
 export function initializeBranches(s,a){
+ let changed=false;
  for(let i=0;i<s.cells.length;i++){const c=s.cells[i];if(!branchZone(c)||c.level<5||plotAnchor(s,i)!==i||c.branch)continue;
-  const id=preferredBranch(s,a,i)?.id||Object.keys(BRANCHES[branchZone(c)])[0];assign(s,plotMembers(s,i),{branch:id});
+  const id=preferredBranch(s,a,i)?.id||Object.keys(BRANCHES[branchZone(c)])[0];assign(s,plotMembers(s,i),{branch:id});changed=true;
  }
+ return changed;
 }
 export function tickBranches(s,a,notify=()=>{}){
+ let changed=false;
  for(let i=0;i<s.cells.length;i++){
   const c=s.cells[i],z=branchZone(c);if(!z||!c.level||plotAnchor(s,i)!==i||c.fire)continue;const members=plotMembers(s,i),q=branchContext(s,a,i),options=branchCandidates(s,a,i),best=options.find(b=>b.eligible),current=options.find(b=>b.id===c.branch);
   const supplied=members.every(j=>(a.power?.coverage?.[j]??a.operational[j])>.95&&(a.water?.coverage?.[j]??a.operational[j])>.95&&(a.space?.oxygen?.[j]??1)>.95&&(a.space?.cooling?.[j]??1)>.95&&(a.roadDistance?.[j]??0)>=0);
   if(c.vacant){
    const recovery=supplied&&c.enabled!==false&&a.stats.demand[z]>-15&&q.value>=22,months=recovery?(c.branchMonths||0)+1:0;
-   assign(s,members,{branchMonths:months});if(months>=6){assign(s,members,{vacant:false,branchStress:0,branchMonths:0,growthMonths:0,branchCooldown:6,age:0});notify('閒置街區重新接通服務，恢復共同基礎建築；後續仍需穩定經營才能進階。','good');}continue;
+   assign(s,members,{branchMonths:months});if(months>=6){assign(s,members,{vacant:false,branchStress:0,branchMonths:0,growthMonths:0,branchCooldown:6,age:0});changed=true;notify('閒置街區重新接通服務，恢復共同基礎建築；後續仍需穩定經營才能進階。','good');}continue;
   }
   if(c.enabled===false){assign(s,members,{growthMonths:0,branchMonths:0,branchStress:0});continue;}
   const retentionLand=[0,0,0,0,0,30,36,43,50][c.level]*(z==='I'?.42:1);
@@ -70,9 +73,10 @@ export function tickBranches(s,a,notify=()=>{}){
   const candidate=shift?best.id:null,months=candidate?(candidate===c.branchCandidate?(c.branchMonths||0)+1:1):0;
   const stable=advanceConditions(s,a,i).every(v=>v.ok)&&!bad&&!(c.level>=5&&candidate),growth=stable?(c.growthMonths||0)+1:0;
   assign(s,members,{branchCandidate:candidate,branchMonths:months,branchStress:stress,growthMonths:growth,branchCooldown:cooldown});
-  if(c.level>=5&&(stress>=12||candidate&&months>=18)){retreat(s,i,notify,stress>=12?'地段持續不再支持原分支':'周邊形成新的發展方向');continue;}
-  if(c.level<5&&stress>=24&&(z!=='R'||members.every(j=>s.cells[j].pop===0))){assign(s,members,{vacant:true,branch:null,branchCandidate:null,branchMonths:0,growthMonths:0});notify('共同基礎街區長期失去供應或需求，進入閒置；恢復服務與需求後可重新使用。','warn');}
+  if(c.level>=5&&(stress>=12||candidate&&months>=18)){retreat(s,i,notify,stress>=12?'地段持續不再支持原分支':'周邊形成新的發展方向');changed=true;continue;}
+  if(c.level<5&&stress>=24&&(z!=='R'||members.every(j=>s.cells[j].pop===0))){assign(s,members,{vacant:true,branch:null,branchCandidate:null,branchMonths:0,growthMonths:0});changed=true;notify('共同基礎街區長期失去供應或需求，進入閒置；恢復服務與需求後可重新使用。','warn');}
  }
+ return changed;
 }
 export function branchProgress(s,a,i){
  const c=s.cells[plotAnchor(s,i)],d=branchDefinition(c),best=preferredBranch(s,a,i),next=Math.min(8,c.level+1);

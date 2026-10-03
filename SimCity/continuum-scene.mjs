@@ -41,8 +41,9 @@ function makeLine(m,l,target){
  return {root,body,rim,walls,panels,train,length:L,localScale:1/LINE.metresPerTile};
 }
 export class ContinuumScene{
- constructor(view){this.view=view;this.assets=createLabMaterials(view.renderer,view.scene);this.m=this.assets.m;this.models=new Map();this.pickables=[];this.clock=0;this.target=new T.WebGLRenderTarget(960,540,{depthBuffer:true});this.root=new T.Group();view.scene.add(this.root);}
+ constructor(view){this.view=view;this.assets=createLabMaterials(view.renderer,view.scene);this.m=this.assets.m;this.models=new Map();this.pickables=[];this.clock=0;this.backdropDirty=true;this.target=new T.WebGLRenderTarget(640,360,{depthBuffer:true});this.root=new T.Group();view.scene.add(this.root);}
  create(s,i,c){
+  this.backdropDirty=true;
   const outer=new T.Group(),[x,y]=xy(i);let model,offsetX=((c.span||1)-1)/2,offsetY=offsetX;
   if(c.type==='sail'){model=makeSailTower(this.m);model.root.scale.setScalar(.12);outer.add(model.root);}
   else if(c.type==='shell'){model={root:makeShellHall(this.m)};model.root.scale.setScalar(.103);outer.add(model.root);}
@@ -52,6 +53,7 @@ export class ContinuumScene{
  }
  signature(s,i,c){const garden=s.continuum?.gardens[i];return `${c.type}:${c.level}:${c.lineSegments}:${c.span}:${garden?.stage}:${Math.round((garden?.health||1)*5)}:${c.fire}`;}
  remove(model){
+  this.backdropDirty=true;
   this.root.remove(model.outer);const owned=new Set(Object.values(this.m)),sharedTextures=new Set(),geometries=new Set(),materials=new Set(),textures=new Set();
   for(const m of owned)for(const value of Object.values(m))if(value?.isTexture)sharedTextures.add(value);
   model.outer.traverse(o=>{if(o.isMesh){if(o.isInstancedMesh)o.dispose();geometries.add(o.geometry);for(const m of Array.isArray(o.material)?o.material:[o.material])if(!owned.has(m))materials.add(m);}});
@@ -66,12 +68,15 @@ export class ContinuumScene{
   this.pickables=[...this.models.values()].flatMap(m=>{const p=[];m.outer.traverse(o=>{if(o.isMesh)p.push(o);});return p;});
  }
  animate(dt){this.clock+=dt;for(const m of this.models.values())if(m.train&&m.online)m.train.position.z=Math.sin(this.clock*.15)*(m.length/2-12);}
- renderBackground(){
+ renderBackground(now=performance.now()){
   const lines=[...this.models.values()].filter(m=>m.walls&&m.outer.visible);if(!lines.length)return;
   this.root.updateMatrixWorld(true);let active=false;for(const m of lines){const local=m.root.worldToLocal(this.view.camera.position.clone()),appearance=lineAppearance(local,m.length/2);m.walls.visible=appearance.side;m.body.visible=!appearance.side;active||=appearance.side;}
   if(!active)return;
-  const renderer=this.view.renderer,size=renderer.getSize(new T.Vector2()),w=Math.min(1100,Math.round(size.x*renderer.getPixelRatio())),h=Math.round(w*size.y/size.x);if(this.target.width!==w||this.target.height!==h)this.target.setSize(w,h);
-  const visible=lines.map(m=>m.outer.visible),oldTarget=renderer.getRenderTarget(),oldAuto=renderer.shadowMap.autoUpdate;
-  try{lines.forEach(m=>m.outer.visible=false);renderer.shadowMap.autoUpdate=false;renderer.setRenderTarget(this.target);renderer.render(this.view.scene,this.view.camera);}finally{renderer.setRenderTarget(oldTarget);renderer.shadowMap.autoUpdate=oldAuto;lines.forEach((m,i)=>m.outer.visible=visible[i]);}
+  const renderer=this.view.renderer,size=renderer.getSize(new T.Vector2()),w=Math.min(640,Math.round(size.x*renderer.getPixelRatio())),h=Math.max(1,Math.round(w*size.y/Math.max(1,size.x)));if(this.target.width!==w||this.target.height!==h){this.target.setSize(w,h);this.backdropDirty=true;}
+  this.view.camera.updateMatrixWorld();const key=[...this.view.camera.matrixWorld.elements,...this.view.camera.projectionMatrix.elements].map(n=>n.toFixed(4)).join(',');
+  const moved=key!==this.backdropKey;if(!this.backdropDirty&&!moved&&(!this.view.simulationSpeed||now-(this.backdropTime||0)<1000))return;
+  if(!this.backdropDirty&&now-(this.backdropTime||0)<120)return;
+  const visible=lines.map(m=>m.outer.visible),oldTarget=renderer.getRenderTarget(),oldAuto=renderer.shadowMap.autoUpdate,oldNeeds=renderer.shadowMap.needsUpdate;
+  try{lines.forEach(m=>m.outer.visible=false);renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=false;renderer.setRenderTarget(this.target);renderer.render(this.view.scene,this.view.camera);this.backdropKey=key;this.backdropTime=now;this.backdropDirty=false;}finally{renderer.setRenderTarget(oldTarget);renderer.shadowMap.autoUpdate=oldAuto;renderer.shadowMap.needsUpdate=oldNeeds;lines.forEach((m,i)=>m.outer.visible=visible[i]);}
  }
 }

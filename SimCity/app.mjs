@@ -1,5 +1,8 @@
 import {ContinuumUI} from './continuum-ui.mjs';
 import {CityMusic} from './music.mjs';
+import {SIMULATION_WORKER_SOURCE} from 'yorktown-worker-source';
+import {MonthRunner} from './simulation-runner.mjs';
+import {applyMonth} from './simulation-protocol.mjs';
 import {prepareContinuum} from './continuum-plan.mjs';
 import {lineAt,lineMaintenance} from './continuum.mjs';
 import {PROFILES,citizenReport} from './surrogate.mjs';
@@ -22,7 +25,7 @@ const $=id=>document.getElementById(id),fmt=n=>Math.round(n).toLocaleString('en-
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=m=>`${2263+Math.floor(m/12)} / ${String(m%12+1).padStart(2,'0')}`;
 const AUTO='yorktown-continuum-city-autosave-v1',MANUAL='yorktown-continuum-city-manual-v1';
-let previewCity=false,returnCity=null,galleryDispose=null;
+let previewCity=false,returnCity=null,galleryDispose=null,monthRunner,cityRevision=0,simulationEpoch=0,nextMonthAt=0;
 let city=prepareContinuum(prepareLiving(createCity())),a,speed=0,category='inspect',tool='inspect',selected=-1,overlay='normal',receipts=[],view,modalType='',lastTime=performance.now(),accumulator=0,toastTimer,loaded=false,storageWarning=false,wasRunning=0,continuumUI;
 try{const text=localStorage.getItem(AUTO);if(text){city=deserialize(text);loaded=true;}}catch(e){storageWarning=true;}
 if(new URL(location.href).searchParams.get('demo')==='1'||location.hash==='#showcase'){
@@ -41,8 +44,9 @@ function citizenDialogue(person){
 }
 
 function toast(text,bad=false){$('toast').textContent=text;$('toast').classList.add('visible');$('toast').style.borderColor=bad?'#cf918280':'#7fafad80';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),5200);}
-function persist(key=AUTO){if(previewCity)return true;try{localStorage.setItem(key,serialize(city,{compact:true}));return true;}catch(e){if(!storageWarning){toast('瀏覽器無法寫入儲存空間；請用「匯出存檔」保存進度。',true);storageWarning=true;}return false;}}
-function setSpeed(n){speed=city.insolvent?0:n;if(view)view.simulationSpeed=speed;accumulator=0;lastTime=performance.now();document.querySelectorAll('[data-speed]').forEach(b=>{b.classList.toggle('active',Number(b.dataset.speed)===speed);b.setAttribute('aria-pressed',String(Number(b.dataset.speed)===speed));});$('resume-game').hidden=speed!==0;$('resume-game').textContent=city.insolvent?'財政接管 · 開啟財政面板':'已暫停 · 繼續經營 ▶';}
+function invalidateSimulation(){cityRevision++;monthRunner?.invalidate();}
+function persist(key=AUTO,monthly=false){if(!monthly)invalidateSimulation();if(previewCity)return true;try{localStorage.setItem(key,serialize(city,{compact:true}));return true;}catch(e){if(!storageWarning){toast('瀏覽器無法寫入儲存空間；請用「匯出存檔」保存進度。',true);storageWarning=true;}return false;}}
+function setSpeed(n){const next=city.insolvent?0:n;if(next!==speed){simulationEpoch++;monthRunner?.invalidate();}speed=next;if(view){view.simulationSpeed=speed;view.budget?.invalidate();}accumulator=0;lastTime=performance.now();document.querySelectorAll('[data-speed]').forEach(b=>{b.classList.toggle('active',Number(b.dataset.speed)===speed);b.setAttribute('aria-pressed',String(Number(b.dataset.speed)===speed));});$('resume-game').hidden=speed!==0;$('resume-game').textContent=city.insolvent?'財政接管 · 開啟財政面板':'已暫停 · 繼續經營 ▶';}
 function chooseTool(t){tool=t;view?.setTool(t);if(t!=='inspect')setSpeed(0);if(t==='wire'||t==='eraseWire')setOverlay('power');if(t==='pipe'||t==='erasePipe')setOverlay('water');renderTools();}
 const descriptions={assist:'框選 6 × 6 至 32 × 24 格，選擇投資級距並預覽道路、供應與分區，再確認施工。',line:'寬 4 格，拖曳 8～16 格長度。先預覽 160～320 公尺長廊，之後可逐段延長至 640 公尺；長側面呈透明背景迷彩，兩端可見內部。',sail:'5 × 5 星帆巡航塔提供 650 個居住名額及 80 個職位。可進入六層航跡秘庫，探索樓梯、連橋與解謎。',shell:'5 × 5 潮汐殼館提供文化活動、60 個職位與周邊公共空間效益，需水電、維生與持續維護。',fabricator:'已就業人員把 3 合金製成 1 零件；需道路、船塢、水電與維生。從「船塢與巨構」查看生產。',life:'提供 2,400 單位氧氣；需供電供水，沿水管供應。設備升級增加容量。',radiator:'提供 7,000 單位散熱；需供電供水，服務相連的電網。設備升級增加容量。',inspect:'點選建築查看運作原因。左拖平移、右拖旋轉、滾輪縮放。遮擋時可開「專注本臂」。',road:'道路兩側三格內，沿連續分區可開發。道路施工包含電線與水管；拖曳可連續鋪設。',avenue:'提高道路容量至 180，可直接升級現有道路。',rail:'磁浮軌道容量 500。車站四周的道路與軌道會互相連通；只鋪軌道不會產生通勤。',station:'可放在道路上，原道路繼續通行。車站會自動連接 140 格內的其他車站，優先沿路高架，必要時跨空間；軌道費用納入預覽。連線承接實際通勤，減少沿途道路流量。',dock:'工業必須沿交通網抵達運作中的船塢，才能正常出口。',power:'提供 6,000 單位電力。生產依維護預算與電網連接；工作職位另需道路。50 年壽命；可設定自動更新，未更新將變成殘骸。',solar:'提供 1,800 單位電力，維護較低。生產依預算與電網連接；50 年壽命；可設定自動更新，未更新將變成殘骸。',water:'水循環廠必須供電。生產依維護預算與電力，供水需求及輸送量獨立計算。',wire:'連接電廠與使用端。道路、建築自帶管線；可另外鋪線跨越空地。',pipe:'連接水循環廠與使用端。可獨立鋪設，與電網分開運作。',bulldoze:'拖曳拆除建築與管線，每格 5。無拆除退款；當月可撤銷最後一次施工。',eraseWire:'僅移除電力管線，保留地面建築，每格 1。',erasePipe:'僅移除供水管線，保留地面建築，每格 1。'};
 function renderTools(){
@@ -89,7 +93,7 @@ function milestones(){return [
  {done:city.history.some(h=>h.net>=0),title:'收支平衡',description:'讓每月收入覆蓋支出',detail:'稅收來自居民與實際就業。公共設施過多會壓低收支；預算面板可調整稅率與維護。'},
  {done:city.highPopulation>=800,title:'交通網成形',description:'人口達到 800，規劃跨區磁浮',detail:'在住宅與工作區設置車站，讓自動磁浮連線分擔通勤；保留起終點的道路與公共服務。'},
  {done:city.highPopulation>=2000,title:'軌道都會',description:'人口達到 2,000，開放垂直居住塔',detail:'幹道、接駁與磁浮可分擔交通；高密度分區需要更大的水電供應。'}];}
-function refresh(recompute=true,draw=true){if(recompute){a=analyze(city);if(city.cells.some(c=>evolvable(c)&&c.level>=5&&!c.branch)){initializeBranches(city,a);a=analyze(city);}}const f=forecast(city,a),st=a.stats;
+function refresh(recompute=true,draw=true){if(recompute){invalidateSimulation();a=analyze(city);if(city.cells.some(c=>evolvable(c)&&c.level>=5&&!c.branch)){initializeBranches(city,a);a=analyze(city);}}const f=forecast(city,a),st=a.stats;
  $('cash').textContent=fmt(city.cash);$('cash').className=city.cash<0?'negative':'';$('net').textContent=`${f.net>=0?'+':''}${fmt(f.net)} / 月`;$('net').className=f.net>=0?'positive':'negative';$('population').textContent=fmt(st.population);$('jobs').textContent=`${fmt(st.employed)} 人就業`;$('happiness').textContent=`${Math.round(st.happiness)}%`;$('employment').textContent=`失業 ${pct(st.unemployment)}`;$('date').textContent=date(city.month);
  const plantSummary=plantRows(),retired=plantSummary.filter(({c})=>c.retiredPlant).length,dueSoon=plantSummary.filter(({c})=>!c.retiredPlant&&c.age>=588).length;$('plant-button').textContent=retired?`⚡ 停機 ${retired}`:dueSoon?`⚡ 到期 ${dueSoon}`:'⚡ 電廠';$('plant-button').classList.toggle('plant-warning',retired>0||dueSoon>0);
  $('space-button').textContent=`維生 ${pct(Math.min(st.oxygen,st.cooling))}`;$('space-button').classList.toggle('plant-warning',Math.min(st.oxygen,st.cooling)<.95);
@@ -101,7 +105,7 @@ function refresh(recompute=true,draw=true){if(recompute){a=analyze(city);if(city
  if(modalType==='budget')updateLedger();
  if(city.insolvent)setSpeed(0);
 }
-function showModal(title,type,html){galleryDispose?.();galleryDispose=null;if(!$('modal').open){wasRunning=speed;setSpeed(0);}$('modal').dataset.kind=type;$('modal-title').textContent=title;$('modal-body').innerHTML=html;modalType=type;if(!$('modal').open)$('modal').showModal();}
+function showModal(title,type,html){galleryDispose?.();galleryDispose=null;if(!$('modal').open){wasRunning=speed;setSpeed(0);}$('modal').dataset.kind=type;$('modal-title').textContent=title;$('modal-body').innerHTML=html;modalType=type;if(!$('modal').open)$('modal').showModal();view?.budget?.invalidate();}
 function closeModal(){view?.showPlan(null);galleryDispose?.();galleryDispose=null;modalType='';$('modal').close();setSpeed(wasRunning);}
 function updateLedger(){const f=forecast(city,a);if(!$('budget-revenue'))return;$('budget-revenue').textContent=fmt(f.revenue);$('budget-expenses').textContent=fmt(f.cost);$('budget-net').textContent=(f.net>=0?'+':'')+fmt(f.net);$('budget-net').className=f.net>=0?'positive':'negative';$('ledger').innerHTML=[...Object.entries(f.income).map(([k,v])=>[`${{R:'住宅稅收',C:'商業稅收',I:'工業稅收',orbital:'訪客與科研租金',continuum:'長廊租金與文化活動'}[k]}`,v]),...Object.entries(f.expenses).map(([k,v])=>[FUNDING[k]||{policies:'法令與進階建築維護',debt:'債券本息',megastructures:'巨構維護',production:'市營材料支出',continuum:'長廊與環帶花園維護'}[k],-v])].map(([label,v])=>`<tr><td>${label}</td><td class="${v>=0?'positive':''}">${v>=0?'+':''}${fmt(v)}</td></tr>`).join('');}
 function plantRows(){return city.cells.flatMap((c,i)=>plotAnchor(city,i)===i&&(isPowerPlant(c)||c.type==='rubble'&&c.retiredPlant)?[{c,i,type:isPowerPlant(c)?c.type:c.retiredPlant}]:[]);}
@@ -213,7 +217,7 @@ function setupLiving(){
 
 
 try{
- view=new CityView($('viewport'),{notice:toast,save:()=>persist(),talk:citizenDialogue,characters,track:trackPanel,transit:()=>persist(),manage:buildingPanel,mode:mode=>{if(['walk','fly','interior'].includes(mode)){if(mode==='interior')setSpeed(0);$('inspector').hidden=true;document.body.classList.remove('tools-open');$('sample-ui').textContent='建造工具';category='inspect';tool='inspect';view?.setTool('inspect');renderTools();}},select:i=>{if(city.artSample&&ATELIER_LOTS.some(p=>p.anchor===i)){buildingPanel(i);return;}selected=i;$('inspector').hidden=false;view.showSelection(i);inspector();},build:buildSelection,hover:i=>{},preview:indices=>{const el=$('build-preview');el.hidden=!indices.length||tool==='inspect';if(!el.hidden){const cost=TYPES[tool]?.cost||(['eraseWire','erasePipe'].includes(tool)?1:5);if(tool==='assist'){el.textContent='延續街區 · '+indices.length+' 格 · 放開後選擇投資級距';return;}if(tool==='line'){el.textContent='天際長廊 · 拖曳起始長度 160～320m · 放開後確認費用';return;}if(tool==='station'){const p=previewStation(city,indices[0]);el.textContent=p.ok?`磁浮車站 · 自動連線 ${p.links.length} 條 · 合計 ${fmt(p.cost)}${p.warning?' · 暫未連線':''}`:p.error;return;}el.textContent=`${TYPES[tool]?.name||'拆除'} · ${indices.length} 格 · 費用上限 ${fmt((LANDMARK_TYPES.includes(tool)?1:indices.length)*cost)}`;}}});
+ view=new CityView($('viewport'),{notice:toast,recover:()=>{setSpeed(0);persist();},save:()=>persist(),talk:citizenDialogue,characters,track:trackPanel,transit:()=>persist(),manage:buildingPanel,mode:mode=>{if(['walk','fly','interior'].includes(mode)){if(mode==='interior')setSpeed(0);$('inspector').hidden=true;document.body.classList.remove('tools-open');$('sample-ui').textContent='建造工具';category='inspect';tool='inspect';view?.setTool('inspect');renderTools();}},select:i=>{if(city.artSample&&ATELIER_LOTS.some(p=>p.anchor===i)){buildingPanel(i);return;}selected=i;$('inspector').hidden=false;view.showSelection(i);inspector();},build:buildSelection,hover:i=>{},preview:indices=>{const el=$('build-preview');el.hidden=!indices.length||tool==='inspect';if(!el.hidden){const cost=TYPES[tool]?.cost||(['eraseWire','erasePipe'].includes(tool)?1:5);if(tool==='assist'){el.textContent='延續街區 · '+indices.length+' 格 · 放開後選擇投資級距';return;}if(tool==='line'){el.textContent='天際長廊 · 拖曳起始長度 160～320m · 放開後確認費用';return;}if(tool==='station'){const p=previewStation(city,indices[0]);el.textContent=p.ok?`磁浮車站 · 自動連線 ${p.links.length} 條 · 合計 ${fmt(p.cost)}${p.warning?' · 暫未連線':''}`:p.error;return;}el.textContent=`${TYPES[tool]?.name||'拆除'} · ${indices.length} 格 · 費用上限 ${fmt((LANDMARK_TYPES.includes(tool)?1:indices.length)*cost)}`;}}});
  continuumUI=new ContinuumUI({city:()=>city,analysis:()=>a,view,choose:chooseTool,show:showModal,close:closeModal,notice:toast,select:i=>{selected=i;view.showSelection(i);$('inspector').hidden=false;inspector();},done:r=>{receipts.push(r);persist();refresh();renderTools();}});
  $('loading').remove();a=analyze(city);refresh(false);renderTools();setSpeed(0);view.home();
  $('inspector').hidden=true;
@@ -222,7 +226,7 @@ try{
  $('overlay').onchange=e=>setOverlay(e.target.value);
  $('speeds').onclick=e=>{const b=e.target.closest('[data-speed]');if(b){if(Number(b.dataset.speed)>0&&tool!=='inspect'){category='inspect';chooseTool('inspect');}setSpeed(Number(b.dataset.speed));}};
  document.querySelectorAll('[data-view-mode]').forEach(b=>b.onclick=()=>{if(b.dataset.viewMode==='overview')view.overview();else view.setMode(b.dataset.viewMode);});
- document.querySelectorAll('[data-walk-key]').forEach(b=>{b.onpointerdown=e=>{e.preventDefault();b.setPointerCapture(e.pointerId);view.keys[b.dataset.walkKey]=true;if(b.dataset.walkKey==='Space'&&view.mode==='walk')view.explorer.beginAbility();};b.onpointerup=b.onpointercancel=()=>delete view.keys[b.dataset.walkKey];});
+ document.querySelectorAll('[data-walk-key]').forEach(b=>{b.onpointerdown=e=>{e.preventDefault();b.setPointerCapture(e.pointerId);view.keys[b.dataset.walkKey]=true;view.budget.invalidate();if(b.dataset.walkKey==='Space'&&view.mode==='walk')view.explorer.beginAbility();};b.onpointerup=b.onpointercancel=()=>delete view.keys[b.dataset.walkKey];});
  $('orbital-button').onclick=orbitalPanel;$('orbital-badge').onclick=orbitalPanel;$('district-a').onclick=()=>goDistrict(0);$('district-b').onclick=()=>goDistrict(1);$('isolate').onclick=()=>{const on=view.toggleIsolation();$('isolate').classList.toggle('active',on);$('isolate').textContent=on?'顯示全站':'專注本臂';};$('showcase-toggle').onclick=toggleShowcase;
  $('arm-button').onclick=armPanel;$('space-button').onclick=spacePanel;$('interior-exit').onclick=()=>view.setMode('walk');$('interior-manage').onclick=()=>buildingPanel(view.interiorTile);
  $('home').onclick=()=>view.home();$('overview').onclick=()=>view.overview();$('rotate').onclick=()=>view.rotate();$('rotate-left').onclick=()=>view.rotate(-1);$('rotate-right').onclick=()=>view.rotate(1);$('zoom-in').onclick=()=>view.zoom(.8);$('zoom-out').onclick=()=>view.zoom(1.25);
@@ -235,7 +239,28 @@ try{
  document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||$('modal').open)return;if((e.metaKey||e.ctrlKey)&&e.code==='KeyZ'){e.preventDefault();undoLast();return;}if(e.code==='Space'&&!['walk','fly','interior'].includes(view.mode)){e.preventDefault();if(!speed){category='inspect';chooseTool('inspect');}setSpeed(speed?0:1);}if(['Digit1','Digit2','Digit3'].includes(e.code)){category='inspect';chooseTool('inspect');setSpeed({Digit1:1,Digit2:3,Digit3:12}[e.code]);}if(e.code==='Escape'){category='inspect';chooseTool('inspect');}if(e.code==='KeyB')budget();if(e.code==='KeyP')setSpeed(speed?0:1);});
  document.addEventListener('visibilitychange',()=>{accumulator=0;lastTime=performance.now();if(document.hidden)persist();});
  addEventListener('pagehide',persist);
- setInterval(()=>{const now=performance.now(),elapsed=Math.min(500,now-lastTime);lastTime=now;if(!speed||document.hidden||$('modal').open)return;accumulator+=elapsed*speed;if(accumulator>=3000){accumulator-=3000;const previous=city.unlocks.length;a=step(city);receipts=[];refresh(false);persist();if(city.unlocks.length!==previous)renderTools();if(city.spaceIncident===city.month){setSpeed(0);toast('維生容量不足，已暫停提醒。請開啟「維生」補足氧氣或散熱。',true);}if(city.powerIncident===city.month){setSpeed(0);toast('電廠到期停機，城市已暫停。請開啟上方「⚡ 電廠」處理。',true);}}},100);
+ const workerURL=URL.createObjectURL(new Blob([SIMULATION_WORKER_SOURCE],{type:'text/javascript'}));
+ try{monthRunner=new MonthRunner(new Worker(workerURL));}finally{URL.revokeObjectURL(workerURL);}
+ document.addEventListener('visibilitychange',()=>{simulationEpoch++;monthRunner.invalidate();accumulator=0;lastTime=performance.now();});
+ setInterval(async()=>{
+  const now=performance.now(),elapsed=Math.min(500,now-lastTime);lastTime=now;
+  if(!speed||document.hidden||$('modal').open||monthRunner.failed)return;
+  accumulator=Math.min(6000,accumulator+elapsed*speed);
+  if(accumulator<3000||monthRunner.busy||now<nextMonthAt)return;
+  accumulator-=3000;const current=city,revision=cityRevision,epoch=simulationEpoch,previous=city.unlocks.length;
+  document.body.dataset.simulationBusy='true';
+  try{
+   const result=await monthRunner.run(revision,()=>serialize(current));
+   if(city!==current||cityRevision!==revision||simulationEpoch!==epoch||!speed||document.hidden||$('modal').open){monthRunner.invalidate();return;}
+   a=applyMonth(city,result);document.body.dataset.monthWorkMs=String(Math.round(result.workMs));
+   // Leave idle CPU time between completed months; never queue an unlimited catch-up burst.
+   nextMonthAt=performance.now()+Math.max(120,result.workMs*.75);
+   receipts=[];refresh(false);persist(AUTO,true);if(city.unlocks.length!==previous)renderTools();
+   if(city.spaceIncident===city.month){setSpeed(0);toast('維生容量不足，已暫停提醒。請開啟「維生」補足氧氣或散熱。',true);}
+   if(city.powerIncident===city.month){setSpeed(0);toast('電廠到期停機，城市已暫停。請開啟上方「⚡ 電廠」處理。',true);}
+  }catch(error){setSpeed(0);toast('背景計算已停止；保留最後完成的月份。請先匯出存檔，再重新開啟遊戲。',true);console.error('Yorktown simulation stopped',error);}
+  finally{document.body.dataset.simulationBusy='false';}
+ },100);
  setupLiving();$('showcase-toggle').textContent=previewCity?'回我的城':'示範城市';$('showcase-toggle').classList.toggle('active',previewCity);$('showcase-toggle').setAttribute('aria-pressed',String(previewCity));$('showcase-banner').hidden=!previewCity;
  new CityMusic({audio:$('city-music'),button:$('music-toggle')});
 }catch(e){console.error(e);const el=$('loading');if(el){el.textContent='3D 畫面無法啟動。請使用支援 WebGL 的 Safari 或 Chrome，並啟用硬體加速。';}else toast('程式發生錯誤，請匯出存檔後重新開啟。',true);}

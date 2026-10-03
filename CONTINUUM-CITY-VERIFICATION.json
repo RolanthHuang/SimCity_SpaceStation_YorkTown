@@ -5,37 +5,30 @@
   "publicationEvidence": "Remote ref and Pages are verified separately after push.",
   "checks": {
     "status": "PASS",
-    "totalDistinctTests": 100,
+    "totalDistinctTests": 109,
     "runs": [
       {
         "file": "checks/city-tests.tap",
-        "tests": 96,
-        "pass": 96,
+        "tests": 109,
+        "pass": 109,
         "fail": 0,
-        "scope": "City systems before the soundtrack-only change"
-      },
-      {
-        "file": "checks/music-controls.tap",
-        "tests": 4,
-        "pass": 4,
-        "fail": 0,
-        "scope": "Final music lifecycle, fade timing, visibility, preferences and play-promise races"
+        "scope": "Final complete city, music lifecycle, worker, rendering budget and mesh reuse suite"
       }
     ],
-    "repeatedFullCitySuiteAfterMusicOnlyChange": false,
+    "repeatedFullSuiteAfterPerformanceChanges": true,
     "finalBuild": "PASS"
   },
   "entries": {
     "sha256": {
-      "index.html": "81adc2fafebdbc2d48d6ccfd9f8c4eb9ee6258ad844305184fc263f22c14a5cb",
-      "simcity.html": "81adc2fafebdbc2d48d6ccfd9f8c4eb9ee6258ad844305184fc263f22c14a5cb",
-      "showcase.html": "81adc2fafebdbc2d48d6ccfd9f8c4eb9ee6258ad844305184fc263f22c14a5cb",
-      "SimCity/template.html": "65bdec37d5561e9d4f23da5eb02f32a3014045e6c42352e9378fc2eae77c276f",
-      "Yorktown-Continuum-City-v11.0.0.html": "9e7a371b4c36eb12933c5897f5e3903a9c443d0c07bb1df948a36b2e3a48020d"
+      "index.html": "04f2fbdf2afa2f93de39673f4d43ff153aa175f1e92c346266e22d05506b09ad",
+      "simcity.html": "04f2fbdf2afa2f93de39673f4d43ff153aa175f1e92c346266e22d05506b09ad",
+      "showcase.html": "04f2fbdf2afa2f93de39673f4d43ff153aa175f1e92c346266e22d05506b09ad",
+      "SimCity/template.html": "ef03ccf85c8498d4acd5231cbff475994a2d9445b6fab4d12500a09983c35d8f",
+      "Yorktown-Continuum-City-v11.0.0.html": "e344e0fd3ff8e7b4a3ddce8c5895d6a2ab73eca24adffa819bb42f57f489cee8"
     },
     "rootWebEntriesIdentical": true,
     "webAudioDeferredAndStreamed": true,
-    "webBytes": 992799,
+    "webBytes": 1050067,
     "nestedAudioPathVerified": true,
     "standaloneOfflineAudioEmbeddedExactlyOnce": true,
     "standaloneExternalRuntimeRequestsRequired": false
@@ -100,7 +93,9 @@
   },
   "browser": {
     "engine": "Codex in-app browser",
-    "viewport": "Normal desktop window, major city/interior captures at 1280 x 720 and soundtrack proof after window resize at 614 x 552",
+    "viewport": "Previous feature captures retained; new bounded performance/music checks at 1280 x 720",
+    "earlierFeatureCapturesInheritedFromPreviousRelease": true,
+    "performanceVerification": "checks/performance-browser.json",
     "observations": [
       {
         "feature": "Assisted expansion",
@@ -142,6 +137,14 @@
       }
     ]
   },
+  "performance": {
+    "cpu": "checks/performance-cpu.json",
+    "browser": "checks/performance-browser.json",
+    "capacityScenario": "checks/capacity-20pct-result.json",
+    "sameMonthCpuSpeedup20Percent": 4.44,
+    "totalEnergyReductionMeasured": false,
+    "exactStarterParityMonths": 60
+  },
   "limits": [
     "Not a film-render equivalence or full-station performance certification.",
     "Only stated initial policies and no-disaster conditions were used for the 60-month scenario.",
@@ -149,27 +152,27 @@
     "StarFleet visit/crash, combat and native mobile store release remain unimplemented."
   ],
   "sourceSha256": {
-    "SimCity/app.mjs": "f033355f63515b815571977bae02c6cd8d7e8f4429a8cf0057fb82827c86cc46",
+    "SimCity/app.mjs": "8c097975137c374a978dacda7750bbbbda839e9b49f2ac0dccd78de4ca8b9e04",
     "SimCity/architecture-shapes.mjs": "623fbe1c2fc232d24e35e709f590928781ef80f4555b7751b71f130755cefbc0",
     "SimCity/architecture.mjs": "99fe3348410e107705cc9b6dda9343845912c2758bb554fffcf7d0ce2d246703",
     "SimCity/assisted-planning.mjs": "0e6f3228826cd3ee8cda6ccce473190ca7c7eae2dad5a944d5afd7dec89f17c6",
     "SimCity/atelier-materials.mjs": "d2e3fb65032f3bfe61432a04d16475eee478fc49cc1d0203ae0f8332bb5ab4e0",
     "SimCity/atelier-plan.mjs": "ac96d840bc2da27638ce2d8b36157341e2fbdbdaf67a3891811eee754b52d19d",
-    "SimCity/atelier-scene.mjs": "68c51bb89c6eb603fcd0451240ddffa593028ad30003de4c21fa7aafb098f47c",
+    "SimCity/atelier-scene.mjs": "6394b10abd32b8c454580aea9ecf5202b9176648647220bed9181adabf6b4908",
     "SimCity/body-collision.mjs": "f58f662d64fc43c21c85a1bbccdf432ff364c49f5351c54513075005ffd6f045",
     "SimCity/branch-architecture.mjs": "8271f4c66e87c6c9a96925de17b585f86c313a9079103e1576b6a49298adc395",
-    "SimCity/branch-development.mjs": "5a92952ed725fbde8dc4791293394b055c3b2868b28fe6bc6b39fa21479988cf",
+    "SimCity/branch-development.mjs": "f5d28a0b1da6490df1b0512b152d12320b4df023e4bcbab6612613655391a4a1",
     "SimCity/branches.mjs": "d68beb577246eff989f6105809a254be065bf8e1e86eed5f0ebbb53375f2dd11",
     "SimCity/camera-controls.mjs": "60cba011f0fb6b7109d6e5fa7f845f3b7e4ecaa3da547b4bd0bab790191d8a38",
     "SimCity/camera-ground.mjs": "c40e4460f1795034c949b82a93dc3a99ed70a6f5f0428278950327c92ef77db4",
     "SimCity/catalog.mjs": "8ff9fede9a8c5167896636dfbfd6d20e185cfbc9fe11832afc9159435002b9a0",
     "SimCity/continuum-interior.mjs": "aee89dd3e483c32254b48da0332e2ad21704ded8f6133f7258ac8f98ed29cea2",
     "SimCity/continuum-plan.mjs": "537254545682cc52140fb1c10e674afba010ae78093411a5222efd690703b994",
-    "SimCity/continuum-scene.mjs": "1dff9625c5cc67c50a66d68bd94036e4853c04aec543abff3fd6dce16efedfe1",
+    "SimCity/continuum-scene.mjs": "3c984ade583e60c23733d780538a5e780eb6d846f589cc8f5c43afe5a85e1425",
     "SimCity/continuum-ui.mjs": "b42abb0984e7269fa9110a196c7be84960316c302ea0fc62f5d8c96ad60d2677",
-    "SimCity/continuum.mjs": "3d6283b60a9da4a802153627e612c77b65ad670c9323c31a539decc0dee9555c",
+    "SimCity/continuum.mjs": "ed33ac876aba19a515e98f8aa68ed4ed4e18ce15be9b3e4b1956f9d9ae5a2626",
     "SimCity/dawn-scene.mjs": "413a8a3a1e7437a2cfb0972ed3fa48cacbbafd3167049c0d4e1e60722ed53ccd",
-    "SimCity/engine.mjs": "d653432379c76897eaf5cf839af9d9398a600c2688d625e042dabb2b839ee8e5",
+    "SimCity/engine.mjs": "70b605124166ce55d0bd4acb8bf2ba477e657e8a0a1d340832dc728f14c44e9b",
     "SimCity/evolution-gallery.mjs": "a0d0db84faed529125c92f5bb4b32bdd3186b2039f690cc8970a44da9c32b2cc",
     "SimCity/evolution-materials.mjs": "1b6bdc8f0939bbf4bc574afbfdb9d828540032979caa5ed706d5e46394a5c7a6",
     "SimCity/evolution.mjs": "5709a224b5c097294edd5579f26c2574a2f9802dfa64871b079d85d0cd16b824",
@@ -186,7 +189,12 @@
     "SimCity/orbital-ui.mjs": "4b9f046257a136200b4e07c3b1790646cc3316798fddfdbb93874dcc6170692b",
     "SimCity/orbital.mjs": "81d78ed335e03ffe43673846c1295873344835e1983b765be5dfdc76f1b3f3f5",
     "SimCity/plots.mjs": "92219d418b3ebf2c3a7a7b44b79d7fdaafe339f86e65e631ba8777379fd71b35",
-    "SimCity/redevelopment.mjs": "21a10d02c347e402688d3459e653af40d214a8efd32a242a2208358e3068fc07",
+    "SimCity/redevelopment.mjs": "5a37084e8e9ace53afee842c7b69b56ed536b788258925010a49efa766992ab4",
+    "SimCity/render-budget.mjs": "eaad99034729553d1090a0b044e7b49099598626cbc153592e24da9ac2f99f9b",
+    "SimCity/render-plan.mjs": "ef7387f8b2f7054aa00826a789e260bc93f9f48e2b2a25e93f034eb047ac7388",
+    "SimCity/simulation-protocol.mjs": "c89f8db4a266dfe5fa5a4a91db4de2c8ba4b63bc5a50c8ea447b06cb40d83504",
+    "SimCity/simulation-runner.mjs": "8ee3117beb38e29ad454d26c9e252bea3527b15744d819f589f4b99fc41c2faa",
+    "SimCity/simulation-worker.mjs": "0da94bf12a0889742689ee48a818205b214bfeb37e890fa419aca8cb74528baa",
     "SimCity/space.mjs": "52ca99883c498db7486082764c02300e79b452c3a6d0b55cb59dddf2dffdcf3d",
     "SimCity/station.mjs": "a7fe3a215a2f62172ab54c04985111505498bf5eafbda62ddf1f878a372f685d",
     "SimCity/structure/explorer.mjs": "bd57992d74a958b2e9a52f4da2fdc2e97a053418525687322bf8192b5225df80",
@@ -200,6 +208,6 @@
     "SimCity/surrogate-scene.mjs": "b1dd2a36e294eafb4dcced8bb4d559194e5c28304df2ee786efbaab8a9fe2c57",
     "SimCity/surrogate.mjs": "9bdf27e0095053737881a7c0d6ec81d8050c5e8a23b4eb0bcbb8b3b11341a499",
     "SimCity/template.html.in": "f013b78183c0a9d38870dd0fe30957f48fe25c89eea1340d2242d9fe8973936c",
-    "SimCity/view.mjs": "43d180734a101414e336199b6aa2b13a1dee874a7e590f2dd2cad8f4e67c429d"
+    "SimCity/view.mjs": "9025fd17b9a5d42bfaf481105045ce36d2da390850117cbac59ff9c14be1b1e7"
   }
 }

@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-03",
+  "machine": "Local Apple Silicon Node; test browser paused during serial CPU measurements",
+  "buildableCells": 20256,
+  "measurement": "Same game state, rules and game months. Median of three runs; CPU timings exclude rendering and cannot certify battery power or browser GPU cost.",
+  "cases": [
+    {
+      "name": "starter",
+      "occupiedCells": 945,
+      "coveragePercent": 4.67,
+      "population": 6109,
+      "baselineMonthMs": 346.92,
+      "optimizedMonthMs": 94.16,
+      "speedup": 3.68,
+      "simulationParity": "Exact state and stats match"
+    },
+    {
+      "name": "10 percent",
+      "occupiedCells": 2052,
+      "coveragePercent": 10.13,
+      "population": 10810,
+      "baselineMonthMs": 1312.03,
+      "optimizedMonthMs": 318.94,
+      "speedup": 4.11,
+      "simulationParity": "Exact state and stats match"
+    },
+    {
+      "name": "20 percent",
+      "occupiedCells": 4068,
+      "coveragePercent": 20.08,
+      "population": 11592,
+      "baselineMonthMs": 2823.28,
+      "optimizedMonthMs": 636.07,
+      "speedup": 4.44,
+      "simulationParity": "Exact state and stats match"
+    }
+  ],
+  "monthsCompared": 60,
+  "demoParity": "Exact state and stats every month",
+  "baselineCommit": "f493d559059f14ae7aed91f983ea833c41607907",
+  "baselineEngineSHA256": "d653432379c76897eaf5cf839af9d9398a600c2688d625e042dabb2b839ee8e5",
+  "optimizedEngineSHA256": "70b605124166ce55d0bd4acb8bf2ba477e657e8a0a1d340832dc728f14c44e9b"
+}

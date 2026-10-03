@@ -1,6 +1,7 @@
 import {build} from 'esbuild';
 import {readFile,writeFile} from 'node:fs/promises';
-const result=await build({entryPoints:['SimCity/app.mjs'],bundle:true,minify:true,format:'iife',write:false,target:['safari16','chrome110']});
+const worker=await build({entryPoints:['SimCity/simulation-worker.mjs'],bundle:true,minify:true,format:'iife',write:false,target:['safari16','chrome110']});
+const result=await build({entryPoints:['SimCity/app.mjs'],bundle:true,minify:true,format:'iife',write:false,target:['safari16','chrome110'],plugins:[{name:'simulation-worker',setup(b){b.onResolve({filter:/^yorktown-worker-source$/},()=>({path:'worker',namespace:'worker-source'}));b.onLoad({filter:/.*/,namespace:'worker-source'},()=>({contents:`export const SIMULATION_WORKER_SOURCE=${JSON.stringify(worker.outputFiles[0].text)};`,loader:'js'}));}}]});
 let page=await readFile('SimCity/template.html.in','utf8');
 const css=await readFile('SimCity/style.css','utf8');
 page=page.replace('/*STYLE*/',()=>css).replace('/*BUNDLED_GAME*/',()=>result.outputFiles[0].text);

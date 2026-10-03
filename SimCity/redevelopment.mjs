@@ -19,7 +19,7 @@ export function redevelopment(s,a,f,notify){
     const level=(z?Math.min:Math.max)(...ids.map(j=>s.cells[j].level));
     const extra=Math.max(0,ids.reduce((n,j)=>n+monthlyCost(s,{...s.cells[j],span:size,level})-monthlyCost(s,s.cells[j]),0));
     if(!developmentReserve(s,f,cost,extra))continue;
-    if(fuse(s,i,size)){s.cash-=cost;notify(`${TYPES[c.type].name}已重建為 ${size} × ${size} ${facility?'公共設施園':'綜合建築'}，${z?'採整片地基的共同成熟度，住戶分階段安置。':'保留既有設備策略。'}${cost?'工程費 '+cost+'。':''}`,'good');return;}
+    if(fuse(s,i,size)){s.cash-=cost;notify(`${TYPES[c.type].name}已重建為 ${size} × ${size} ${facility?'公共設施園':'綜合建築'}，${z?'採整片地基的共同成熟度，住戶分階段安置。':'保留既有設備策略。'}${cost?'工程費 '+cost+'。':''}`,'good');return true;}
    }
   }
  }
@@ -32,7 +32,7 @@ export function redevelopment(s,a,f,notify){
   let use=1;if(['power','solar'].includes(c.type))use=a.power.demand/Math.max(1,a.power.supply);if(c.type==='water')use=a.water.demand/Math.max(1,a.water.supply);if(c.type==='life')use=a.space.air.demand/Math.max(1,a.space.air.supply);if(c.type==='radiator')use=a.space.heat.demand/Math.max(1,a.space.heat.supply);
   if(use<.35||!developmentReserve(s,f,cost,extra))continue;
   s.cash-=cost;for(const j of members)s.cells[j].level++;
-  notify(`${TYPES[c.type].name}進化至第 ${c.level} 階；工程費 ${cost}，產能修正 ×${facilityFactor(c).toFixed(2)}。`,'good');break;
+  notify(`${TYPES[c.type].name}進化至第 ${c.level} 階；工程費 ${cost}，產能修正 ×${facilityFactor(c).toFixed(2)}。`,'good');return true;
  }
 }
 export function autoInvest(s,a,f,notify){
@@ -42,6 +42,6 @@ export function autoInvest(s,a,f,notify){
   const e=evolutionStatus(s,a,i,{automatic:true}),members=plotMembers(s,i),extra=members.reduce((n,j)=>n+monthlyCost(s,{...s.cells[j],level:s.cells[j].level+1,branch:e?.branch||null})-monthlyCost(s,s.cells[j]),0);if(!e?.ready||!developmentReserve(s,f,e.cost,extra))continue;
   const stock=s.orbital.stock[deckOf(i)];s.cash-=e.cost;stock.alloy-=e.alloy;stock.parts-=e.parts;
   advancePlot(s,i,e.branch);
-  notify(`${e.name}已自動進階；投資 ${e.cost}，保留六個月營運準備金。`,'good');break;
+  notify(`${e.name}已自動進階；投資 ${e.cost}，保留六個月營運準備金。`,'good');return true;
  }
 }

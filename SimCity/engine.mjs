@@ -73,12 +73,20 @@ class Heap{
  push(item){const a=this.a;let i=a.length;a.push(item);while(i>0){const p=(i-1)>>1;if(a[p][0]<=item[0])break;a[i]=a[p];i=p;}a[i]=item;}
  pop(){const a=this.a,first=a[0],last=a.pop();if(a.length){let i=0;while(i*2+1<a.length){let c=i*2+1;if(c+1<a.length&&a[c+1][0]<a[c][0])c++;if(a[c][0]>=last[0])break;a[i]=a[c];i=c;}a[i]=last;}return first;}
 }
-function routes(graph,starts,traffic,roadCapacity,cells){
- const dist=new Float32Array(N).fill(Infinity),previous=new Int32Array(N).fill(-1),heap=new Heap();
- for(const n of starts){dist[n]=0;heap.push([0,n]);}
- while(heap.a.length){const [d,i]=heap.pop();if(d>dist[i]+.0001||d>65)continue;for(const j of graph[i]){
-  const link=graph.railEdges?.get(`${i}:${j}`),weight=link?(graph.transfers.get(`${i}:${j}`))*(1+Math.min(3,link.riders/Math.max(1,link.capacity))*.6):(graph.transfers?.get(`${i}:${j}`)||0)+(cells[j].type==='rail'?.35:1)*(1+Math.min(3,(traffic[j]||0)/Math.max(1,roadCapacity[j]))*.55),next=d+weight;
-  if(next<dist[j]){dist[j]=next;previous[j]=i;heap.push([dist[j],j]);}
+function routeWorkspace(){return {dist:new Float32Array(N).fill(Infinity),previous:new Int32Array(N).fill(-1),touched:[]};}
+function compileRoutes(graph,cells,roadCapacity){
+ // Reuse edge metadata for every origin; riders and road traffic remain live.
+ const edges=new Array(N);
+ for(let i=0;i<N;i++)if(graph[i].length)edges[i]=graph[i].map(j=>({j,link:graph.railEdges?.get(`${i}:${j}`),transfer:graph.transfers?.get(`${i}:${j}`)||0,base:cells[j].type==='rail'?.35:1,capacity:Math.max(1,roadCapacity[j])}));
+ graph.routeEdges=edges;
+}
+function routes(graph,starts,traffic,roadCapacity,cells,workspace=routeWorkspace(),maxCost=65){
+ const {dist,previous,touched}=workspace,heap=new Heap();
+ for(const n of touched){dist[n]=Infinity;previous[n]=-1;}touched.length=0;
+ for(const n of starts){if(dist[n]===Infinity)touched.push(n);dist[n]=0;heap.push([0,n]);}
+ while(heap.a.length){const [d,i]=heap.pop();if(d>dist[i]+.0001||d>maxCost)continue;for(const edge of graph.routeEdges?.[i]||graph[i]){
+  const compiled=typeof edge!=='number',j=compiled?edge.j:edge,link=compiled?edge.link:graph.railEdges?.get(`${i}:${j}`),transfer=compiled?edge.transfer:(graph.transfers?.get(`${i}:${j}`)||0),base=compiled?edge.base:(cells[j].type==='rail'?.35:1),capacity=compiled?edge.capacity:Math.max(1,roadCapacity[j]),weight=link?transfer*(1+Math.min(3,link.riders/Math.max(1,link.capacity))*.6):transfer+base*(1+Math.min(3,(traffic[j]||0)/capacity)*.55),next=d+weight;
+  if(next<dist[j]){if(dist[j]===Infinity)touched.push(j);dist[j]=next;previous[j]=i;heap.push([dist[j],j]);}
  }}return {dist,previous};
 }
 
@@ -128,6 +136,7 @@ export function analyze(s){
  const freight=new Uint8Array(N),passengers=new Uint8Array(N);
  for(const i of active){freight[i]=access[i].some(n=>portDist[n]<60)?1:0;passengers[i]=access[i].some(n=>passengerDist[n]<60)?1:0;}
  const maglev=attachMaglev(s,operational,graph,roadCapacity),lineTransit=attachLineTransit(s,operational,graph);
+ compileRoutes(graph,cells,roadCapacity);
  const pollution=new Float32Array(N),parks=new Float32Array(N),services=Object.fromEntries(['fire','police','school','hospital'].map(k=>[k,new Float32Array(N)]));
  for(const i of active){const c=cells[i],t=c.type;
   if(zoneOf(t)==='I'&&c.level>0&&isEnabled(c))around(i,7,(j,d)=>pollution[j]+=(t==='I'?28:16)*developmentFactor(c)*(1-d/8)*(s.policies.green?.6:1)*(s.education>70?.7:1)*(districtCore(c)?.pollution||1)*branchEffects(c).pollution);
@@ -146,10 +155,11 @@ export function analyze(s){
  for(const i of active){const c=cells[i];let factor=1;if(zoneOf(c.type)==='I')factor=freight[i]?1:.2;if(zoneOf(c.type)==='C')factor=clamp(population/Math.max(100,nominal*.7),.15,1)+(passengers[i]?.2:0);jobs[i]=Math.floor(nominalJobs(c)*Math.min(1,factor)*operational[i]*(c.level?1:0));}
  // Assign finite job seats along actual paths. Rotating origin priority prevents permanent residential bias.
  const homes=active.filter(i=>residential(cells[i].type)&&cells[i].pop>0),jobSites=active.filter(i=>jobs[i]>0),offset=s.month%Math.max(1,homes.length);
- let totalWorkers=0,totalEmployed=0,commuteTotal=0;
+ let totalWorkers=0,totalEmployed=0,commuteTotal=0;const commuteWorkspace=routeWorkspace();
  for(let h=0;h<homes.length;h++){
-  const i=homes[(h+offset)%homes.length],workers=Math.floor(cells[i].pop*.48);totalWorkers+=workers;if(!access[i].length)continue;
-  const path=routes(graph,access[i],traffic,roadCapacity,cells),candidates=[];
+  const i=homes[(h+offset)%homes.length],workers=Math.floor(cells[i].pop*.48);totalWorkers+=workers;if(!workers||!access[i].length)continue;
+  // Commutes above 42 were already rejected. Do not explore farther network nodes.
+  const path=routes(graph,access[i],traffic,roadCapacity,cells,commuteWorkspace,42),candidates=[];
   for(const j of jobSites)if(jobs[j]-filled[j]>=1){let best=-1,d=Infinity;for(const n of access[j])if(path.dist[n]<d){d=path.dist[n];best=n;}d+=Math.max(0,pedestrian.dist[i])+Math.max(0,pedestrian.dist[j]);if(d<=42)candidates.push({j,d,best});}
   candidates.sort((a,b)=>a.d-b.d);let needed=workers,travel=0;
   for(const {j,d,best} of candidates){const count=Math.min(needed,jobs[j]-filled[j]);if(!count)continue;filled[j]+=count;employed[i]+=count;needed-=count;travel+=count*d;
@@ -220,7 +230,7 @@ function powerLifecycle(s){
 
 export function step(s){
  if(s.insolvent)return analyze(s);
- s.month++;const renewalCost=powerLifecycle(s);let a=analyze(s);initializeBranches(s,a);a=analyze(s);tickBranches(s,a,(text,tone)=>message(s,text,tone));a=analyze(s);
+ s.month++;const renewalCost=powerLifecycle(s);let a=analyze(s);if(initializeBranches(s,a))a=analyze(s);if(tickBranches(s,a,(text,tone)=>message(s,text,tone)))a=analyze(s);
  s.education=clamp(s.education+(clamp(25+a.stats.school*.85,15,95)-s.education)*.025,10,95);
  s.health=clamp(s.health+(clamp(42+a.stats.hospital*.7-a.stats.pollution*.2,15,98)-s.health)*.035,10,98);
  const growth=[];
@@ -246,7 +256,7 @@ export function step(s){
  for(const [i,change] of growth){const c=s.cells[i];const delta=change>0?Math.min(change,immigration):change;if(delta>0)immigration-=delta;c.pop=clamp(c.pop+delta,0,capacity(c));if(c.pop<=baseBuildingCapacity(c))c.residentReserve=0;}
  if(s.disasters&&s.month%12===0&&random(s)<.28){const vulnerable=s.cells.map((c,i)=>({c,i})).filter(({c,i})=>building(c.type)&&c.level&&a.services.fire[i]<45);if(vulnerable.length){const {i}=vulnerable[Math.floor(random(s)*vulnerable.length)];s.cells[i].fire=5;message(s,'站內發生火災。消防覆蓋不足時，火勢會延燒；可派遣應變隊。','bad');}}
  if(s.emergency>0){s.emergency--;for(const c of s.cells)if(c.fire)c.fire=Math.max(0,c.fire-2);}
- cleanTransit(s);a=analyze(s);const notify=(text,tone)=>message(s,text,tone);tickGardenMonths(s,a);tickGardens(s,a,forecast(s,a),notify);a=analyze(s);redevelopment(s,a,forecast(s,a),notify);a=analyze(s);autoInvest(s,a,forecast(s,a),notify);a=analyze(s);if(Math.min(a.stats.oxygen,a.stats.cooling)<.9&&s.spaceIncident===null){s.spaceIncident=s.month;message(s,'生命維持或散熱不足。請從「太空維生」檢查容量與管網。','bad');}else if(Math.min(a.stats.oxygen,a.stats.cooling)>=.95)s.spaceIncident=null;const f=forecast(s,a),contractNet=tickOrbital(s,a,(text,tone)=>message(s,text,tone));s.cash=Math.round((s.cash+f.net+contractNet)*100)/100;
+ cleanTransit(s);a=analyze(s);const notify=(text,tone)=>message(s,text,tone);tickGardenMonths(s,a);if(tickGardens(s,a,forecast(s,a),notify))a=analyze(s);if(redevelopment(s,a,forecast(s,a),notify))a=analyze(s);if(autoInvest(s,a,forecast(s,a),notify))a=analyze(s);if(Math.min(a.stats.oxygen,a.stats.cooling)<.9&&s.spaceIncident===null){s.spaceIncident=s.month;message(s,'生命維持或散熱不足。請從「太空維生」檢查容量與管網。','bad');}else if(Math.min(a.stats.oxygen,a.stats.cooling)>=.95)s.spaceIncident=null;const f=forecast(s,a),contractNet=tickOrbital(s,a,(text,tone)=>message(s,text,tone));s.cash=Math.round((s.cash+f.net+contractNet)*100)/100;
  for(const l of s.loans){l.balance=Math.max(0,l.balance-l.principal);l.months--;}
  s.loans=s.loans.filter(l=>l.balance>.01&&l.months>0);
  s.highPopulation=Math.max(s.highPopulation,a.stats.population);

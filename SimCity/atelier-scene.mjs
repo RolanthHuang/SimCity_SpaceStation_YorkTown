@@ -70,9 +70,9 @@ export class AtelierScene{
    }
   }
  }
- setupLight(){const v=this.view;v.scene.background.set(0x738991);v.scene.fog.color.set(0xc5cfca);v.scene.fog.density=.00035;v.renderer.toneMappingExposure=.91;v.renderer.shadowMap.enabled=true;v.renderer.shadowMap.type=T.PCFSoftShadowMap;
+ setupLight(){const v=this.view;v.scene.background.set(0x738991);v.scene.fog.color.set(0xc5cfca);v.scene.fog.density=.00035;v.renderer.toneMappingExposure=.91;v.renderer.shadowMap.enabled=true;v.renderer.shadowMap.type=T.PCFSoftShadowMap;v.renderer.shadowMap.autoUpdate=false;v.renderer.shadowMap.needsUpdate=true;
   v.scene.children.filter(x=>x.isAmbientLight).forEach(l=>l.intensity=.16);v.scene.children.filter(x=>x.isHemisphereLight).forEach(l=>{l.intensity=.95;l.color.set(0xc0e0ef);l.groundColor.set(0x939b80);});
-  const lights=v.scene.children.filter(x=>x.isDirectionalLight),sun=lights[0];sun.intensity=2.65;sun.color.set(0xffe0ad);sun.position.set(-30,48,30);sun.target.position.set(0,1,1);v.scene.add(sun.target);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-32,right:32,top:30,bottom:-26,near:1,far:140});sun.shadow.camera.updateProjectionMatrix();sun.shadow.bias=-.00015;sun.shadow.normalBias=.018;sun.shadow.radius=2;lights[1].intensity=.72;v.floor.receiveShadow=true;v.mat.envMapIntensity=.55;
+  const lights=v.scene.children.filter(x=>x.isDirectionalLight),sun=lights[0];sun.intensity=2.65;sun.color.set(0xffe0ad);sun.position.set(-30,48,30);sun.target.position.set(0,1,1);v.scene.add(sun.target);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-32,right:32,top:30,bottom:-26,near:1,far:140});sun.shadow.camera.updateProjectionMatrix();sun.shadow.bias=-.00015;sun.shadow.normalBias=.018;sun.shadow.radius=2;lights[1].intensity=.72;v.floor.receiveShadow=true;v.mat.envMapIntensity=.55;
  }
  residence(g){const p=this.p;
   p.round(g,[0,.06,0],4.75,4.55,.12,.5,'stone');p.round(g,[0,.38,0],3.85,3.75,.6,.45,'window');
@@ -173,11 +173,11 @@ export class AtelierScene{
  }
  updateLandmarks(s,a){
   const types={aurelia:'residence',meridian:'commerce',aurora:'industry'},wanted=new Set();
-  s.cells.forEach((c,i)=>{const form=adoptedForm(c),key=types[c.type]||form;if(!key||c.subplot||!c.level)return;wanted.add(i);let group=this.landmarks.get(i);
+  s.cells.forEach((c,i)=>{const form=adoptedForm(c),key=types[c.type]||form;if(!key||c.subplot||!c.level)return;wanted.add(i);let group=this.landmarks.get(i);if(form&&this.view.detailPlan?.get(i)!==2){if(group)group.visible=false;return;}
    if(!group||group.userData.type!==c.type||group.userData.signature!==`${c.type}:${c.branch}:${c.level}:${c.span}`){if(group){this.view.scene.remove(group);group.traverse(m=>{if(m.isInstancedMesh)m.dispose();});}
     group=new T.Group();const model=this.models.get(key).getObjectByName('mature').clone(true);model.visible=true;group.add(model);if(form){for(let stage=6;stage<=Math.min(8,c.level);stage++){const addon=this.models.get(key).getObjectByName('addition'+stage);if(addon){const clone=addon.clone(true);clone.visible=true;group.add(clone);}}group.scale.setScalar((c.span||1)/5);}group.userData.signature=`${c.type}:${c.branch}:${c.level}:${c.span}`;group.userData.type=c.type;group.userData.tile=i;const [x,y]=xy(i);placeOnDeck(group,x+((c.span||5)-1)/2-27.5,y+((c.span||5)-1)/2-27.5,.065);group.traverse(m=>{if(m.isMesh){m.userData.tile=i;this.pickables.push(m);}});this.view.scene.add(group);this.landmarks.set(i,group);
    }
-   group.visible=!(this.view.isolate&&this.view.mode==='build'&&this.view.deck!==(Math.floor(i/536)>=60?1:0));group.userData.online=a.operational[i]>.5&&c.enabled!==false;
+   group.visible=(!form||this.view.detailPlan?.get(i)===2)&&!(this.view.isolate&&this.view.mode==='build'&&this.view.deck!==(Math.floor(i/536)>=60?1:0));group.userData.online=a.operational[i]>.5&&c.enabled!==false;
   });
   for(const [i,g] of this.landmarks)if(!wanted.has(i)){this.view.scene.remove(g);g.visible=false;g.traverse(m=>{if(m.isInstancedMesh)m.dispose();});this.landmarks.delete(i);}
   this.pickables=this.pickables.filter(m=>{let p=m;while(p?.parent)p=p.parent;return p===this.view.scene;});

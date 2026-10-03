@@ -1,0 +1,70 @@
+{
+  "kind": "Synthetic capacity scenario, not a new starter or full-station certification",
+  "disasters": false,
+  "autoDevelopment": false,
+  "occupiedCells": 4068,
+  "buildableCells": 20256,
+  "snapshots": [
+    {
+      "month": 0,
+      "population": 32076,
+      "happiness": 96.71250008948056,
+      "unemployment": 0.053497942386831275,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1,
+      "cash": 5000000,
+      "net": 12477.149999999514
+    },
+    {
+      "month": 3,
+      "population": 43260,
+      "happiness": 98.22966239618803,
+      "unemployment": 0.01933372992266508,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1,
+      "cash": 5067477.02,
+      "net": 25399.320000000414
+    },
+    {
+      "month": 6,
+      "population": 47592,
+      "happiness": 98.80757276966584,
+      "unemployment": 0.0073100726522558074,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1,
+      "cash": 5154908.64,
+      "net": 30343.470631579225
+    },
+    {
+      "month": 9,
+      "population": 49995,
+      "happiness": 99.29268691410768,
+      "unemployment": 0.0014861364697889687,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1,
+      "cash": 5251924.22,
+      "net": 33237.585000000385
+    },
+    {
+      "month": 12,
+      "population": 52135,
+      "happiness": 99.23524202233571,
+      "unemployment": 0.0032096859383252754,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1,
+      "cash": 5356085.35,
+      "net": 35468.68150000047
+    }
+  ],
+  "coveragePercent": 20.082938388625593
+}
