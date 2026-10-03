@@ -1,0 +1,30 @@
+TAP version 13
+# Subtest: music waits for interaction, fades gently and suspends hidden-page playback without restarting the track
+ok 1 - music waits for interaction, fades gently and suspends hidden-page playback without restarting the track
+  ---
+  duration_ms: 2.505167
+  ...
+# Subtest: an explicitly muted preference survives reload and the single control enables or disables playback
+ok 2 - an explicitly muted preference survives reload and the single control enables or disables playback
+  ---
+  duration_ms: 0.562459
+  ...
+# Subtest: a browser playback rejection offers one retry control and does not break the city
+ok 3 - a browser playback rejection offers one retry control and does not break the city
+  ---
+  duration_ms: 0.339666
+  ...
+# Subtest: a delayed playback response cannot unmute a paused page or stop a newer successful start
+ok 4 - a delayed playback response cannot unmute a paused page or stop a newer successful start
+  ---
+  duration_ms: 0.386791
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 54.408083

@@ -1,0 +1,202 @@
+{
+  "version": "11.0.0",
+  "release": "Yorktown Continuum Dawn",
+  "preparedDate": "2026-10-03",
+  "publicationEvidence": "Remote ref and Pages are verified separately after push.",
+  "checks": {
+    "status": "PASS",
+    "totalDistinctTests": 100,
+    "runs": [
+      {
+        "file": "checks/city-tests.tap",
+        "tests": 96,
+        "pass": 96,
+        "fail": 0,
+        "scope": "City systems before the soundtrack-only change"
+      },
+      {
+        "file": "checks/music-controls.tap",
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "scope": "Final music lifecycle, fade timing, visibility, preferences and play-promise races"
+      }
+    ],
+    "repeatedFullCitySuiteAfterMusicOnlyChange": false,
+    "finalBuild": "PASS"
+  },
+  "offlineEntries": {
+    "sha256": {
+      "index.html": "9e7a371b4c36eb12933c5897f5e3903a9c443d0c07bb1df948a36b2e3a48020d",
+      "simcity.html": "9e7a371b4c36eb12933c5897f5e3903a9c443d0c07bb1df948a36b2e3a48020d",
+      "showcase.html": "9e7a371b4c36eb12933c5897f5e3903a9c443d0c07bb1df948a36b2e3a48020d",
+      "SimCity/template.html": "9e7a371b4c36eb12933c5897f5e3903a9c443d0c07bb1df948a36b2e3a48020d",
+      "Yorktown-Continuum-City-v11.0.0.html": "9e7a371b4c36eb12933c5897f5e3903a9c443d0c07bb1df948a36b2e3a48020d"
+    },
+    "identical": true,
+    "approvedAudioEmbeddedExactlyOnce": true,
+    "externalRuntimeRequestsRequired": false
+  },
+  "soundtrack": {
+    "title": "星海靜謐・大提琴暖光",
+    "file": "Audio/Yorktown-Starlit-Resolve-Warm-Cello.mp3",
+    "sha256": "002a80477e7887b57fd2e04656f8f3d79d0ae4832b0b41ecb27dfe519e8fa511",
+    "userAcceptedAndAuthorizedIntegration": true,
+    "seconds": 173.397642,
+    "sampleRate": 44100,
+    "channels": 2,
+    "integratedLUFS": -18.0,
+    "truePeakDbTP": -2.8,
+    "gamePlaybackLevel": 0.55,
+    "firstGestureStarts": true,
+    "singleToggleRemembersMute": true,
+    "hiddenPagePauses": true,
+    "gameplaySimulationIndependent": true
+  },
+  "starter": {
+    "name": "晨光中軸街區",
+    "file": "Yorktown-Morning-Axis-Demo-v11.json",
+    "population": 5845,
+    "cash": 160000,
+    "monthlyNetForecast": 422.454112817386,
+    "lineLengthMeters": 200,
+    "ordinaryRepresentativePlots": {
+      "residential": {
+        "level": 6,
+        "branch": "garden",
+        "vacant": false,
+        "operational": 1,
+        "preserve": false
+      },
+      "commercial": {
+        "level": 6,
+        "branch": "finance",
+        "vacant": false,
+        "operational": 1,
+        "preserve": false
+      },
+      "industrial": {
+        "level": 6,
+        "branch": "precision",
+        "vacant": false,
+        "operational": 1,
+        "preserve": false
+      }
+    },
+    "stableRun": {
+      "file": "DEMO-STABILITY-v11.json",
+      "months": 60,
+      "finalPopulation": 9235,
+      "finalCash": 187967.14,
+      "finalMonthlyNetForecast": 3403.787400486817,
+      "minPopulation": 5845,
+      "minCash": 160000,
+      "conditions": "Unmodified morning-axis starter, automatic development and production enabled, disasters disabled, no external construction or budget changes",
+      "localRoadBottlenecksRemain": true
+    }
+  },
+  "browser": {
+    "engine": "Codex in-app browser",
+    "viewport": "Normal desktop window, major city/interior captures at 1280 x 720 and soundtrack proof after window resize at 614 x 552",
+    "observations": [
+      {
+        "feature": "Assisted expansion",
+        "result": "PASS",
+        "evidence": "Actual quote for 11,704 credits, commit, supply, full same-month undo/refund",
+        "capture": "previews/assisted-plan.png"
+      },
+      {
+        "feature": "Sail quest",
+        "result": "PASS",
+        "evidence": "Actual six-floor traversal, ordered interactions, final jump, completed quest persists",
+        "capture": "sail-interior.png"
+      },
+      {
+        "feature": "LINE",
+        "result": "PASS",
+        "evidence": "Actual 200m corridor entry, lift from 1F to 6F, guided platform approach, end-to-end train travel and street exit",
+        "capture": "line-interior.png"
+      },
+      {
+        "feature": "Preview save isolation",
+        "result": "PASS",
+        "evidence": "Own city 3,705 residents and 160,000 credits survives entering/returning from independent 5,845-resident preview. Fresh-document scene construction replaces resource-heavy in-document swap."
+      },
+      {
+        "feature": "Accepted music",
+        "result": "PASS",
+        "evidence": "Media readyState 4 and advancing currentTime after gesture; toggle paused at 53.736s and resumed from 54.256s. Browser negative first-frame volume issue fixed with bounded fade progress."
+      },
+      {
+        "feature": "Final console",
+        "result": "PASS",
+        "evidence": "No new warning/error after bounded fade correction; earlier negative-volume errors are resolved, not omitted from history."
+      },
+      {
+        "feature": "Actual starter screenshot",
+        "result": "PASS",
+        "capture": "continuum-dawn.png"
+      }
+    ]
+  },
+  "limits": [
+    "Not a film-render equivalence or full-station performance certification.",
+    "Only stated initial policies and no-disaster conditions were used for the 60-month scenario.",
+    "LINE public streets are explorable; all residence/office rooms are not individually simulated.",
+    "StarFleet visit/crash, combat and native mobile store release remain unimplemented."
+  ],
+  "sourceSha256": {
+    "SimCity/app.mjs": "f033355f63515b815571977bae02c6cd8d7e8f4429a8cf0057fb82827c86cc46",
+    "SimCity/architecture-shapes.mjs": "623fbe1c2fc232d24e35e709f590928781ef80f4555b7751b71f130755cefbc0",
+    "SimCity/architecture.mjs": "99fe3348410e107705cc9b6dda9343845912c2758bb554fffcf7d0ce2d246703",
+    "SimCity/assisted-planning.mjs": "0e6f3228826cd3ee8cda6ccce473190ca7c7eae2dad5a944d5afd7dec89f17c6",
+    "SimCity/atelier-materials.mjs": "d2e3fb65032f3bfe61432a04d16475eee478fc49cc1d0203ae0f8332bb5ab4e0",
+    "SimCity/atelier-plan.mjs": "ac96d840bc2da27638ce2d8b36157341e2fbdbdaf67a3891811eee754b52d19d",
+    "SimCity/atelier-scene.mjs": "68c51bb89c6eb603fcd0451240ddffa593028ad30003de4c21fa7aafb098f47c",
+    "SimCity/body-collision.mjs": "f58f662d64fc43c21c85a1bbccdf432ff364c49f5351c54513075005ffd6f045",
+    "SimCity/branch-architecture.mjs": "8271f4c66e87c6c9a96925de17b585f86c313a9079103e1576b6a49298adc395",
+    "SimCity/branch-development.mjs": "5a92952ed725fbde8dc4791293394b055c3b2868b28fe6bc6b39fa21479988cf",
+    "SimCity/branches.mjs": "d68beb577246eff989f6105809a254be065bf8e1e86eed5f0ebbb53375f2dd11",
+    "SimCity/camera-controls.mjs": "60cba011f0fb6b7109d6e5fa7f845f3b7e4ecaa3da547b4bd0bab790191d8a38",
+    "SimCity/camera-ground.mjs": "c40e4460f1795034c949b82a93dc3a99ed70a6f5f0428278950327c92ef77db4",
+    "SimCity/catalog.mjs": "8ff9fede9a8c5167896636dfbfd6d20e185cfbc9fe11832afc9159435002b9a0",
+    "SimCity/continuum-interior.mjs": "aee89dd3e483c32254b48da0332e2ad21704ded8f6133f7258ac8f98ed29cea2",
+    "SimCity/continuum-plan.mjs": "537254545682cc52140fb1c10e674afba010ae78093411a5222efd690703b994",
+    "SimCity/continuum-scene.mjs": "1dff9625c5cc67c50a66d68bd94036e4853c04aec543abff3fd6dce16efedfe1",
+    "SimCity/continuum-ui.mjs": "b42abb0984e7269fa9110a196c7be84960316c302ea0fc62f5d8c96ad60d2677",
+    "SimCity/continuum.mjs": "3d6283b60a9da4a802153627e612c77b65ad670c9323c31a539decc0dee9555c",
+    "SimCity/dawn-scene.mjs": "413a8a3a1e7437a2cfb0972ed3fa48cacbbafd3167049c0d4e1e60722ed53ccd",
+    "SimCity/engine.mjs": "d653432379c76897eaf5cf839af9d9398a600c2688d625e042dabb2b839ee8e5",
+    "SimCity/evolution-gallery.mjs": "a0d0db84faed529125c92f5bb4b32bdd3186b2039f690cc8970a44da9c32b2cc",
+    "SimCity/evolution-materials.mjs": "1b6bdc8f0939bbf4bc574afbfdb9d828540032979caa5ed706d5e46394a5c7a6",
+    "SimCity/evolution.mjs": "5709a224b5c097294edd5579f26c2574a2f9802dfa64871b079d85d0cd16b824",
+    "SimCity/explorer-controller.mjs": "5a6e9deb9ee12dad184f88450867be76187e3f23ed9ed3792d05a23404d70d25",
+    "SimCity/facade-details.mjs": "52488056d456d8787573391bd10e81a45e09806d9f841ccc214381535014e69d",
+    "SimCity/habitat.mjs": "cea76315120525f9153667a9f75bb033d24a0e76618fd5e060323a917acd4789",
+    "SimCity/interior-layout.mjs": "3d241712d2fa66100213c293b6fcaf320f4381a7fd33e63b0fcc396525232660",
+    "SimCity/interior.mjs": "c67ea86075fe9b3339088a312c368a25e40d4b1697c20f90c7478899e7d2f3a7",
+    "SimCity/line-walking.mjs": "f6dab24acd3e64c7e8c2228689fc15b1cbc117a362d8d935633fa613e0cabe7c",
+    "SimCity/living-plan.mjs": "ebaaa002208e8a9063d18de3d6d4c2efb0850af8bbc390cf6c4962e5087d30d0",
+    "SimCity/maglev-scene.mjs": "860e61c380cf515f2bf675e97c3712054510e5dfc4a05d211848d47cbd414e67",
+    "SimCity/maglev.mjs": "d65a241d04b807ded3268ca3f10b7c386af2c37c775274fd4a126e0a81e81c01",
+    "SimCity/music.mjs": "b38982c89710d885f4735ef0a83d6649acefa36dd5548b17b46e564e79b3ce25",
+    "SimCity/orbital-ui.mjs": "4b9f046257a136200b4e07c3b1790646cc3316798fddfdbb93874dcc6170692b",
+    "SimCity/orbital.mjs": "81d78ed335e03ffe43673846c1295873344835e1983b765be5dfdc76f1b3f3f5",
+    "SimCity/plots.mjs": "92219d418b3ebf2c3a7a7b44b79d7fdaafe339f86e65e631ba8777379fd71b35",
+    "SimCity/redevelopment.mjs": "21a10d02c347e402688d3459e653af40d214a8efd32a242a2208358e3068fc07",
+    "SimCity/space.mjs": "52ca99883c498db7486082764c02300e79b452c3a6d0b55cb59dddf2dffdcf3d",
+    "SimCity/station.mjs": "a7fe3a215a2f62172ab54c04985111505498bf5eafbda62ddf1f878a372f685d",
+    "SimCity/structure/explorer.mjs": "bd57992d74a958b2e9a52f4da2fdc2e97a053418525687322bf8192b5225df80",
+    "SimCity/structure/geometry.mjs": "cb91ad5d81f32d8fcb7b5c28563ed7340870064faf1f2b2aa6e97061f0147e06",
+    "SimCity/structure/interior-plan.mjs": "a670f3c966945b7df177a7f1a2aea65f7c9808982c1662029c81e83c4894aa9c",
+    "SimCity/structure/interior-scene.mjs": "3868b4c0bb434e9ed3373833a1367acb45df3c65a772feb20bd4c1c139c4e87b",
+    "SimCity/structure/landmarks.mjs": "a0efce59fa1e5a5d9bf698dfa1160cd853bfb5eb865e2618cce04b8bc18c9701",
+    "SimCity/structure/materials.mjs": "3faf567a6cd9609e953d84c13bf8bdd67938d6540dbac07be9b960a72545cce7",
+    "SimCity/structure/ring-scene.mjs": "8b8abb38dc93e6ef9dff591b1e6739cce8ebb39ef6e26deef2072bb781271eed",
+    "SimCity/style.css": "c0d2df77b4abdb3c419f71ce1002d7291f524bfc34309383a45c3c50a3774461",
+    "SimCity/surrogate-scene.mjs": "b1dd2a36e294eafb4dcced8bb4d559194e5c28304df2ee786efbaab8a9fe2c57",
+    "SimCity/surrogate.mjs": "9bdf27e0095053737881a7c0d6ec81d8050c5e8a23b4eb0bcbb8b3b11341a499",
+    "SimCity/template.html.in": "f013b78183c0a9d38870dd0fe30957f48fe25c89eea1340d2242d9fe8973936c",
+    "SimCity/view.mjs": "43d180734a101414e336199b6aa2b13a1dee874a7e590f2dd2cad8f4e67c429d"
+  }
+}

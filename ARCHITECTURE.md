@@ -1,4 +1,4 @@
-# Yorktown Architectural Dawn v10.1
+# Yorktown Continuum Dawn v11.0
 
 Authoritative code lives in `SimCity/`. `build-simcity.mjs` bundles it and Three.js into five identical offline HTML entries. Edit sources, not generated HTML. This isolated output preserves v8/v9 in their own directories. It embeds no music, media tracks or external dependency URLs.
 
@@ -10,7 +10,7 @@ Common stages 1–4 use the existing development path. 4→5 needs 18 stable mon
 
 A different candidate must beat the existing branch by a score margin of at least .14 for 18 months. Sustained unsuitability adds stress, with good months reducing it by two; stress 12 retreats a high building to common stage 4. Both paths add a 12-month reconstruction cooldown. New branch development begins at stage 5. Common buildings only enter vacancy after sustained stress 24; residential buildings must first become empty. Vacancy recovery requires six consecutive supplied, accessible months with demand and land value restored. Reconstruction and decline notifications explain the transition.
 
-Residential retreat/fusion stores the old population as `residentReserve`. Capacity permits those existing occupants, but new immigration is bounded by the new base capacity; surplus residents adjust gradually. Clearing a plot or changing its use resets all branch state. Save version 8/`tiles-v5` persists the eight branch fields and validates branch/type combinations, integer timers and complete plot lineage. Older high-stage buildings receive a one-time identity without losing stage or population.
+Residential retreat/fusion stores the old population as `residentReserve`. Capacity permits those existing occupants, but new immigration is bounded by the new base capacity; surplus residents adjust gradually. Clearing a plot or changing its use resets all branch state. Branch state originated in save version 8/`tiles-v5`; version 9 adds continuum metadata. `tiles-v5` persists the eight branch fields and validates branch/type combinations, integer timers and complete plot lineage. Older high-stage buildings receive a one-time identity without losing stage or population.
 
 ## Real economic effects
 
@@ -47,3 +47,35 @@ These checks do not establish a calibrated game economy, full-station performanc
 Glass textures use neutral reflection colors so instance palettes remain visible. A shared fixed morning environment, restrained glazing and selective warm occupied windows replace the dark uniform glass treatment. The gallery uses the same geometry/material pipeline and can export a 1600 × 1000 PNG through its visible output button. The topbar now has a stacking context above lower scene controls, fixing intercepted More-menu clicks.
 
 This output is isolated from the source v10.0.0 folder. It retains the branch save keys and schema. No new economic rules, StarFleet events, soundtrack or traversal areas are added in v10.1.
+
+## v11 main-game integration
+
+`continuum-plan.mjs` only prepares new starter cities. Imported saves retain their layout. `continuum-scene.mjs` adopts the shared structure-lab generators for large mature garden/finance/precision plots, sail/shell landmarks and staged gardens. Stages 5–8 keep distinct changes; every model is selected from actual simulation cells, not a separate display scene. Existing branch, capacity, maintenance and progression rules still apply.
+
+`continuum.mjs` owns validated LINE anchors, axis, segment counts, full footprints, garden clocks, health and landmark quest state. LINE children carry zero population and jobs; the anchor owns capacity and upkeep. Building, extension, full-plot demolition and undo carry metadata with the tile transaction. Save v9 persists this data in both full and compact formats; incomplete footprints or impossible quest prerequisites are rejected.
+
+`assisted-planning.mjs` generates an immutable candidate from a rectangular same-deck selection. Road components connect through free ground to existing road access; disconnected speculative stubs are removed. Existing occupied/preserved plots and portal footings cannot be overwritten. Demand capacity includes existing unbuilt zones, preventing speculative commercial flooding. Local utility reserves, service placement, transport/freight, stage-4 mature load and six-month reserves are checked before a quote is returned. Commit rejects stale tiles or insufficient reserves, orders infrastructure before zoning and rolls back the full transaction if construction fails. The three investment tiers have finite ceilings and keep unused funds.
+
+`continuum-ui.mjs` exposes one area tool and three investment tiers, quote dimensions, a drawn construction plan, explicit commit/reselection and contextual LINE controls. The committed quote shares the ordinary month's undo stack.
+
+LINE uses a real passenger graph shortcut between only its connected end roads. Supply above 95% and transport funding at least 50% activate the commuter edge; actual assignments count riders. Freight remains on its separate logistics network. Anchor solar/oxygen/cooling reserves and reduced water loads supplement existing networks, with monthly fees and occupied job income in `forecast`.
+
+Long-side camouflage renders the existing scene into an aspect-matched shared background target with LINE objects hidden, then projects it onto the side panels with a subtle tint and seams. End/inside/overhead views expose actual geometry. No video, static copied reference image or hidden background texture provides the effect.
+
+`continuum-interior.mjs` and `structure/` implement the six-floor sail quest, actual stair navigation, constrained guidance, ordered interactions, jump gap, recovery and persisted progress. `line-walking.mjs` supplies pure floor-opening geometry and planter collisions. LINE has six floors, true lift shaft openings, bounded walking, dynamic lift cabs, walk-to controls, end-to-end train travel and return to the corresponding street end. Public corridors are explorable; residential/office room layouts are not simulated. Generic interior prompts are suppressed when a dedicated room HUD is active.
+
+Automatic park investment uses 12 stable months for 2×2 and a further 18 for 3×3, funded fees and six-month reserves. Garden health responds to supply; six stressed months retreat stage 3 while retaining its footprint for traversal. No graph connectivity depends on visual plant geometry.
+
+The authoritative release evidence is `CONTINUUM-CITY-VERIFICATION.json`. Browser checks in this release cover construction quote/commit/refund, saved sail quest completion, LINE side/end distinction, lift and train, mode controls and captured console logs. Automated checks were rerun for this release; older evidence above describes inherited system coverage rather than newly repeated visual checks of every feature.
+
+## v11 morning-axis starter and preview isolation
+
+`DEMO_BLUEPRINT` defines an organized main-deck core, utility campus, collector avenues, four magnetically linked stations, freight-connected dock/fabrication pairs, three ordinary level-6 representative plots and expansion gates at both ends. `prepareContinuum` supplies these assets only to new cities. The high-stage plots are not preserved display props: real population, filled jobs, branch eligibility, supply, funded growth and decline remain active. The exact compact starter is shipped as `Yorktown-Morning-Axis-Demo-v11.json`; `DEMO-STABILITY-v11.json` records the same unmodified starter through 60 monthly steps, with disasters off and automatic investment/plant renewal on. Local road bottlenecks remain part of management.
+
+The preview is loaded through `?demo=1` in a fresh document before the renderer constructs city geometry. Entering first persists the user's city. Preview persistence is guarded, and return removes the preview URL state and reloads the original city. This avoids building both cities during a scene swap and protects the user's save. A memory fallback remains when browser storage is unavailable.
+
+`ContinuumScene.remove` treats shared foliage/material textures as owned by the scene cache, not by an individual retired building. Rebuilding a garden disposes unique geometry and private maps while retaining shared textures. Repeated same-mode selections skip redundant camera/scene updates.
+
+## Approved cello soundtrack
+
+`music.mjs` uses one HTML audio element and one More-menu toggle. It starts only after a user gesture, fades to a restrained level, preserves mute preference, suspends hidden-page playback and resumes at the current track position. Playback rejection offers a direct retry without affecting simulation. Generation checks prevent delayed play promises from defeating a later mute or interrupting a newer start. Four focused control tests cover these cases. The accepted mixed MP3 is embedded by `build-simcity.mjs` in every offline entry; the build validates that exactly one approved audio source is present. No older rejected draft is loaded.

@@ -1,0 +1,224 @@
+{
+  "scenario": "Unmodified morning-axis starter, automatic development and production enabled, disasters disabled, no external construction or budget changes",
+  "simulatedMonths": 60,
+  "minCash": 160000,
+  "minPopulation": 5845,
+  "snapshots": [
+    {
+      "month": 0,
+      "cash": 160000,
+      "forecastMonthlyNet": 422.454112817386,
+      "population": 5845,
+      "happiness": 97.55860857935009,
+      "unemployment": 0,
+      "peakRoadCapacityRatio": 1.3936507936507936,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1,
+      "representatives": {
+        "residential": {
+          "level": 6,
+          "branch": "garden",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        },
+        "commercial": {
+          "level": 6,
+          "branch": "finance",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        },
+        "industrial": {
+          "level": 6,
+          "branch": "precision",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        }
+      }
+    },
+    {
+      "month": 12,
+      "cash": 170543.37,
+      "forecastMonthlyNet": 2300.2651486222494,
+      "population": 7542,
+      "happiness": 96.8889217624548,
+      "unemployment": 0,
+      "peakRoadCapacityRatio": 1.853968253968254,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1,
+      "representatives": {
+        "residential": {
+          "level": 6,
+          "branch": "garden",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        },
+        "commercial": {
+          "level": 6,
+          "branch": "finance",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        },
+        "industrial": {
+          "level": 6,
+          "branch": "precision",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        }
+      }
+    },
+    {
+      "month": 24,
+      "cash": 187944.39,
+      "forecastMonthlyNet": 3323.741679820224,
+      "population": 8007,
+      "happiness": 97.14378684996606,
+      "unemployment": 0,
+      "peakRoadCapacityRatio": 1.5904761904761904,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1,
+      "representatives": {
+        "residential": {
+          "level": 6,
+          "branch": "garden",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        },
+        "commercial": {
+          "level": 6,
+          "branch": "finance",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        },
+        "industrial": {
+          "level": 6,
+          "branch": "precision",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        }
+      }
+    },
+    {
+      "month": 36,
+      "cash": 207562.37,
+      "forecastMonthlyNet": 3381.974271240638,
+      "population": 8224,
+      "happiness": 98.14040035774735,
+      "unemployment": 0,
+      "peakRoadCapacityRatio": 1.5015873015873016,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1,
+      "representatives": {
+        "residential": {
+          "level": 6,
+          "branch": "garden",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        },
+        "commercial": {
+          "level": 6,
+          "branch": "finance",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        },
+        "industrial": {
+          "level": 6,
+          "branch": "precision",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        }
+      }
+    },
+    {
+      "month": 48,
+      "cash": 193585.15,
+      "forecastMonthlyNet": 3393.5125952989483,
+      "population": 8612,
+      "happiness": 98.3663801378391,
+      "unemployment": 0,
+      "peakRoadCapacityRatio": 1.5714285714285714,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1,
+      "representatives": {
+        "residential": {
+          "level": 6,
+          "branch": "garden",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        },
+        "commercial": {
+          "level": 6,
+          "branch": "finance",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        },
+        "industrial": {
+          "level": 6,
+          "branch": "precision",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        }
+      }
+    },
+    {
+      "month": 60,
+      "cash": 187967.14,
+      "forecastMonthlyNet": 3403.787400486817,
+      "population": 9235,
+      "happiness": 98.53537224406607,
+      "unemployment": 0,
+      "peakRoadCapacityRatio": 1.7301587301587302,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1,
+      "representatives": {
+        "residential": {
+          "level": 6,
+          "branch": "garden",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        },
+        "commercial": {
+          "level": 7,
+          "branch": "finance",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        },
+        "industrial": {
+          "level": 6,
+          "branch": "precision",
+          "vacant": false,
+          "operational": 1,
+          "preserve": false
+        }
+      }
+    }
+  ]
+}

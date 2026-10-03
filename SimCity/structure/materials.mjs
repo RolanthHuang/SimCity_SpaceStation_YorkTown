@@ -1,0 +1,22 @@
+import * as T from '../../YorktownPreview/three.module.js';
+import {makeAtelierMaterials} from '../atelier-materials.mjs';
+function texture(draw,size=512,color=true){const c=document.createElement('canvas');c.width=c.height=size;draw(c.getContext('2d'),size);const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;if(color)t.colorSpace=T.SRGBColorSpace;t.anisotropy=8;return t;}
+export function createLabMaterials(renderer,scene){
+ const assets=makeAtelierMaterials(renderer,scene),m=assets.m;
+ const clone=(name,base,color,properties={})=>{m[name]=m[base].clone();m[name].color.set(color);Object.assign(m[name],properties);};
+ clone('ivoryCool','ivory',0xdce7e4);clone('ivoryWarm','ivory',0xe8dac1);clone('copper','gold',0xaa7560,{roughness:.43});clone('steel','titanium',0x536f7c,{roughness:.38});clone('violet','glass',0x7e8fb2);clone('teal','pane',0x6faaa9);clone('deepGlass','window',0x4a7082);clone('champagne','gold',0xb8a989,{roughness:.42});clone('terracotta','porcelain',0xbe947a,{roughness:.66});clone('black','dark',0x213841);clone('water','glass',0x4294a7,{roughness:.13,metalness:.18});clone('warmDim','warm',0xffd5a0,{emissiveIntensity:.18});clone('cyanDim','cyan',0xaad4df,{emissiveIntensity:.20});
+ const tiles=texture((c,s)=>{c.fillStyle='#e9e8dd';c.fillRect(0,0,s,s);for(let y=0;y<32;y++)for(let x=0;x<32;x++){const n=(x*137+y*67)%19;c.fillStyle=n%5===0?'#ddd9c8':`rgb(${225+n},${224+n},${213+n})`;c.fillRect(x*16+1,y*16+1,14,14);}c.strokeStyle='#abae9d';c.lineWidth=.45;for(let k=-32;k<64;k++){c.beginPath();c.moveTo(k*16,0);c.lineTo(k*16-s,s);c.stroke();}},512);
+ const tileBump=texture((c,s)=>{c.fillStyle='#d0d0d0';c.fillRect(0,0,s,s);c.fillStyle='#737373';for(let k=0;k<s;k+=16){c.fillRect(k,0,1,s);c.fillRect(0,k,s,1);}},512,false);
+ m.shell=new T.MeshPhysicalMaterial({color:0xeee9d8,map:tiles,bumpMap:tileBump,bumpScale:.028,roughness:.42,metalness:.04,clearcoat:.23,side:T.DoubleSide});m.shellInside=m.shell.clone();m.shellInside.color.set(0xcfb590);m.shellInside.roughness=.69;
+ const stoneLarge=m.stone.map.clone();stoneLarge.repeat.set(16,16);m.deck=m.stone.clone();m.deck.map=stoneLarge;m.deck.color.set(0xe9e3d4);
+ const panelLarge=m.ivory.map.clone();panelLarge.repeat.set(3,2);m.floor=m.ivoryCool.clone();m.floor.map=panelLarge;m.floor.roughness=.82;
+ m.foliage=m.leaf.clone();m.foliage.color.set(0x7fa681);m.foliagePale=m.leaf2.clone();m.foliagePale.color.set(0xb5b995);m.foliageBlue=m.leaf.clone();m.foliageBlue.color.set(0x799e9b);m.foliageAmber=m.leaf2.clone();m.foliageAmber.color.set(0xb2a679);
+ const turf=texture((c,s)=>{c.fillStyle='#49635a';c.fillRect(0,0,s,s);for(let k=0;k<9000;k++){const x=(k*73.171)%s,y=(k*151.331)%s;c.strokeStyle=['#567765','#6d896d','#8f9d78','#324e45'][k%4];c.lineWidth=.6+(k%3)*.3;c.beginPath();c.moveTo(x,y);c.lineTo(x+Math.sin(k)*2,y-2-k%5);c.stroke();}},512);turf.repeat.set(4,4);m.grass=new T.MeshStandardMaterial({color:0xc5d3b6,map:turf,roughness:.98});
+ m.flower=new T.MeshStandardMaterial({color:0xe8b9b2,roughness:.85});m.lavender=new T.MeshStandardMaterial({color:0xa49ab4,roughness:.85});m.screen=new T.MeshStandardMaterial({color:0x263e4f,emissive:0x3c8599,emissiveIntensity:.42,roughness:.28});
+ const ripples=texture((c,s)=>{c.fillStyle='#808080';c.fillRect(0,0,s,s);for(let i=0;i<80;i++){c.strokeStyle=`rgb(${110+i%40},${110+i%40},${110+i%40})`;c.lineWidth=1.3;c.beginPath();for(let x=0;x<=s;x+=4){const y=i*s/80+Math.sin(x*.022+i)*3;x?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();}},256,false);ripples.repeat.set(6,6);m.water.bumpMap=ripples;m.water.bumpScale=.035;
+ return {...assets,m,waterTexture:ripples};
+}
+export function placard(text,subtitle,w=2.4,h=1.2,color='#cae0dc'){
+ const c=document.createElement('canvas');c.width=768;c.height=384;const x=c.getContext('2d');x.fillStyle='#18303b';x.fillRect(0,0,768,384);x.strokeStyle='#ad996e';x.lineWidth=3;x.strokeRect(18,18,732,348);x.fillStyle='#e6dcc4';x.font='22px -apple-system, sans-serif';x.fillText(subtitle,42,73);x.fillStyle=color;x.font='52px -apple-system, sans-serif';x.fillText(text,42,168);x.strokeStyle='#78aaa9';x.lineWidth=1;for(let k=0;k<7;k++){x.beginPath();x.moveTo(44+k*80,257);x.lineTo(77+k*80,218+k%3*13);x.stroke();}x.fillStyle='#809d9d';x.font='16px -apple-system, sans-serif';x.fillText('YORKTOWN   •   ORBITAL ARCHIVE',42,320);
+ const tex=new T.CanvasTexture(c);tex.colorSpace=T.SRGBColorSpace;return new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshStandardMaterial({map:tex,emissive:0x7f9795,emissiveIntensity:.12,side:T.DoubleSide}));
+}
