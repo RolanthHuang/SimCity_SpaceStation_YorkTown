@@ -1,34 +1,49 @@
-# 方案 C：整體規劃，逐步完成共同城市
+# Yorktown Architectural Dawn v10.1
 
-## 單一真實狀態
+Authoritative code lives in `SimCity/`. `build-simcity.mjs` bundles it and Three.js into five identical offline HTML entries. Edit sources, not generated HTML. This isolated output preserves v8/v9 in their own directories. It embeds no music, media tracks or external dependency URLs.
 
-engine 的 city.cells 是唯一建築、人口、年齡、營運和升級來源。analyze 導出水電、交通、服務、就業、氧氣和散熱；UI、外部 3D 和室內讀取相同結果，沒有獨立的室內經濟。
+## Branch state and progression
 
-## 地圖與座標
+`branches.mjs` defines nine branch identities, four stages each, stable deterministic palettes, functional coefficients and progression waits. `branch-development.mjs` computes neighbourhood scores from real city analysis and updates one atomic foundation at a time. Foundation member state must agree on branch, candidate, observation months, stress, growth and cooldown. Residential transition capacity may differ per tile because existing residents differ.
 
-catalog：SIZE=536 為環向寬度、HEIGHT=56 為儲存列數、可用列 8..43。idx/xy 以環向寬度定址；neighbors 只沿 X 週期閉合，Y 有界。deltaX 處理接縫最短距離。
+Common stages 1–4 use the existing development path. 4→5 needs 18 stable months with the same selected candidate confirmed for at least 12; 5→6, 6→7 and 7→8 need 24/42/72 months. Conditions must remain continuously satisfied; instability resets growth. Manual investment uses these same gates. `evolution.mjs` calculates the resource bill and upkeep; `redevelopment.mjs` checks operating reserves before automatic investment. No free high-stage random growth remains.
 
-habitat：半徑 SIZE/(2π)，原點保留 x-27.5、y-27.5，使舊街區仍在相同位置。地板、建築、步行、選取、相機均使用 surface/localPoint。道路、水電與服務採內在格網，不以外觀相交判定連通。
+A different candidate must beat the existing branch by a score margin of at least .14 for 18 months. Sustained unsuitability adds stress, with good months reducing it by two; stress 12 retreats a high building to common stage 4. Both paths add a 12-month reconstruction cooldown. New branch development begins at stage 5. Common buildings only enter vacancy after sustained stress 24; residential buildings must first become empty. Vacancy recovery requires six consecutive supplied, accessible months with demand and land value restored. Reconstruction and decline notifications explain the transition.
 
-view：建造、walk、fly 使用局部法向；overview 使用全站座標。分區導航只改相機。遠處建築減少組件，走近後刷新細節；不改模擬。Fly 是與曲面綁定方向的觀察控制，無碰撞。
+Residential retreat/fusion stores the old population as `residentReserve`. Capacity permits those existing occupants, but new immigration is bounded by the new base capacity; surplus residents adjust gradually. Clearing a plot or changing its use resets all branch state. Save version 8/`tiles-v5` persists the eight branch fields and validates branch/type combinations, integer timers and complete plot lineage. Older high-stage buildings receive a one-time identity without losing stage or population.
 
-## 模擬與管理
+## Real economic effects
 
-每月先處理电廠壽命，再計算供應、交通、職位、居住、財政、災害。每座建築 enabled 控制運作；upgrade 0..2 控制容量與維護。公共預算與單座停用疊加。電廠更新保留設備升級、營運和更新偏好。
+Branch coefficients scale linearly from 25% at stage 5 to 100% at stage 8. Power, water and heat loads feed existing utility networks. Industrial pollution feeds the actual land-value/happiness calculation. Commercial bonuses use filled jobs for tax revenue; industrial bonuses apply to actual alloy production. Branch upkeep feeds monthly costs and investment reserve estimates.
 
-space 模組從 water/power 的實際連通群組計算產能與負載。容量只惠及連通群組。供應設施不依自身散熱／氧氣比例遞迴降產，避免計算迴圈；仍受真實水電、預算、停用與火災影響。住商工與服務的有效運作受維生比例影響。
+Each occupied operational plot emits neighbourhood effects once, weighted by occupancy, minimum member supply and distance on the same gravity deck. Income/production auras exclude their own plot and cap at .08 residential, .10 commercial and .20 production. Base park coverage is saved separately so a garden cannot select itself solely using its own generated amenity bonus. Mature-commerce scoring requires actual filled jobs rather than an empty tall building.
 
-## 室內
+## Geometry and materials
 
-catalog.INTERIORS 定義可參訪類型。InteriorRoom 只建立當前參訪場景，離開即釋放 GPU 資源。走動有牆壁和家具碰撞；回街道採最近安全落點。入口保存建築格號，室內螢幕按月份讀取該建築數據，管理調用同一 manageBuilding。火災、拆除、類型改變會退出房間。
+`branch-architecture.mjs` supplies nine families of forms, each changing podiums, wings, gardens, bridges, machinery or courtyards through levels 5–8. `architecture-shapes.mjs` provides normalized true arches, vertical/horizontal rings, half-sphere domes, curved hangar vaults and extruded sails. `architecture.mjs` uses these same generators for live buildings; `evolution-gallery.mjs` renders the same models for comparison. Both LODs support density and 1/2/3/4-square foundations. The gallery offers three branch comparisons or an eight-stage path.
 
-## 存檔契約
+Deterministic common/branch palettes give ivory bodies distinct glass, structural metal, accents and vegetation. Public facilities have independent palettes. The inherited fixed warm/cool morning lighting remains independent of camera rotation. Bridges and exterior roof platforms are architectural visuals, not new traversable interiors.
 
-產品 v5.0.0，城市存檔 version 3。舊 version 2 僅 56×56 懸臂地圖可遷移；拒絕平面 version 1。緊湊 encoding=tiles-v1 的每格陣列仍還原為完整 cell 物件，所有欄位通過同樣合法性檢查。新 v3 localStorage keys 不刪除 v2。
+## Inherited systems
 
-## 後續擴充邊界
+- `catalog.mjs`, `engine.mjs`, `space.mjs`, `orbital.mjs`: zoning, supply, employment, finances, heat/oxygen, stocks, orders, portals, lift and floating city.
+- `plots.mjs`, `redevelopment.mjs`: three-tile road access, complete foundation fusion, funded public tiers, whole-plot demolition/undo and renewal strategies. Zoned fusion carries minimum stage/progress and maximum stress/cooldown, retaining residents; public fusion retains the existing equipment policy and oldest plant age.
+- `maglev.mjs`, `maglev-scene.mjs`: automatically routed station links, real passenger edges, visible trains, explicit demolition suppression and restoration.
+- `habitat.mjs`, `camera-controls.mjs`, `camera-ground.mjs`, `explorer-controller.mjs`: intrinsic curved/folded surfaces, wrapped yaw, local gravity, third-person ground/floor constraints and contextual interactions.
+- `surrogate.mjs`, `surrogate-scene.mjs`, `body-collision.mjs`: three profiles, representative scooters/hounds, equivalent-mass separation, contact sliding and safe dismount.
+- `interior-layout.mjs`, `interior.mjs`: one three-floor maze building; no duplicated single-room interiors.
+- `living-plan.mjs`, `view.mjs`, `app.mjs`, `style.css`: initial demonstration city, actual model rebuilding, picking, compact inspection/progression panels, mode controls and responsive layout.
 
-- 橫空分支：先把 tile address 擴成 segment + local cell；每個 segment 定義局部曲面。路網、水電、行人明確通過接點，外觀交叉不自動連通。
-- 更多室內：保持建築格號作為狀態索引，可替換個別配置，不複製經濟。
-- 深化維生：儲備、物流庫存、太空事件需要新的持久狀態和遷移，不能只在顯示層新增數字。
-- 大城市效能：目前有遠景簡化和行人上限；若達到全臂高密度，應量測模擬瓶頸，再考慮分區增量分析／工作執行緒。
+## Evidence and limits
+
+`npm test` includes all inherited active tests plus branch selection, waiting periods, rebranching/decline, resident transition capacity, fusion, migration, real economy coefficients, 576 geometry combinations and five years of actual monthly simulation. Browser evidence covers branch comparisons, selected live-building progression, mode switching, a 360px layout, console and absence of music. Counts/hashes are in `CHROMATIC-CITY-VERIFICATION.json`.
+
+These checks do not establish a calibrated game economy, full-station performance, film-render equivalence or native mobile release. StarFleet visit/drone/crash systems and detailed damage/ruin families remain proposals. No rejected music source was copied into this version; archived drafts remain in v9.
+
+## v10.1 facade refinement
+
+`facade-details.mjs` supplies recessed panes, mullions, sills, loggia rails and roof service grilles to all four tower elevations. Details are clipped to the true lot bounds; sail floor plates and ribs follow the inverse cubic profile. `processDetails` adds utility manifolds, valves and maintenance platforms. `architecture-shapes.mjs` adds a shared instanced dome lattice; close-range cylinder/dome/sail tessellation is smoother. Distant buildings omit fine facade work.
+
+Glass textures use neutral reflection colors so instance palettes remain visible. A shared fixed morning environment, restrained glazing and selective warm occupied windows replace the dark uniform glass treatment. The gallery uses the same geometry/material pipeline and can export a 1600 × 1000 PNG through its visible output button. The topbar now has a stacking context above lower scene controls, fixing intercepted More-menu clicks.
+
+This output is isolated from the source v10.0.0 folder. It retains the branch save keys and schema. No new economic rules, StarFleet events, soundtrack or traversal areas are added in v10.1.

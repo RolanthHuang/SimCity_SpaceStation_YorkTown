@@ -1,0 +1,35 @@
+{
+  "version": "10.1.0",
+  "source_baseline_sha256": "4110d2d98116e7cc959a022324ee02fc253d5d6332b7de96cd973db7483c65be",
+  "release_html_sha256": "976b472e128264c4c87928df8d7feef3622844ee16df94360a13f13273d3c095",
+  "html_bytes": 888467,
+  "aliases_identical": [
+    "index.html",
+    "simcity.html",
+    "showcase.html",
+    "SimCity/template.html",
+    "Yorktown-Chromatic-City-v10.1.0.html"
+  ],
+  "regression": {
+    "passed": 70,
+    "failed": 0,
+    "log": "verification/tests.txt",
+    "run_directory": "yorktown-chromatic-dawn-sample",
+    "release_simulation_geometry_modules_and_tests_identical": true,
+    "release_difference": "Title, version, bundle filename and existing v10 storage keys only"
+  },
+  "visual_evidence": [
+    "residential-detail.png",
+    "commercial-detail.png",
+    "industrial-detail.png"
+  ],
+  "music_embedded": false,
+  "new_features": "Recessed glazing on four elevations, curved sail ribs, dome lattice, loggia rails, roof equipment, utility service details, neutral reflection textures and fixed dawn lighting",
+  "publication_target": "https://github.com/RolanthHuang/SimCity_SpaceStation_YorkTown",
+  "pages_target": "https://rolanthhuang.github.io/SimCity_SpaceStation_YorkTown/",
+  "limits": [
+    "Not film-equivalent rendering",
+    "Full-station GPU performance not benchmarked",
+    "Export PNG viewed from gallery; native download behavior depends on browser"
+  ]
+}
