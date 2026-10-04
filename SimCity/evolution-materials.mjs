@@ -19,6 +19,8 @@ export function detailMaterials(m){
  m.window.map=glass;m.window.color.set(0x67a8b8);m.window.roughness=.19;m.window.metalness=.16;m.window.envMapIntensity=.82;
  const singleRow=glass.clone();singleRow.repeat.set(1,1/12);textures.push(singleRow);m.glass.map=singleRow;m.glass.roughness=.17;m.glass.metalness=.10;m.glass.clearcoat=.75;m.glass.envMapIntensity=.95;m.glass.color.set(0x8cc5c7);
  const paneMap=glass.clone();paneMap.repeat.set(1/8,1/12);paneMap.offset.set(3/8,5/12);textures.push(paneMap);m.pane=m.glass.clone();m.pane.map=paneMap;m.pane.color.set(0xffffff);m.pane.roughness=.14;
+ const grain=tex((c,s)=>{c.fillStyle='#d8c9af';c.fillRect(0,0,s,s);for(let k=0;k<180;k++){c.strokeStyle=k%3?'rgba(106,80,50,.24)':'rgba(255,248,217,.3)';c.lineWidth=.5+(k%4)*.4;c.beginPath();for(let y=0;y<=s;y+=8){const x=k*s/180+Math.sin(y*.014+k*.23)*(1+k%4);y?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();}},512,true);
+ m.wood.map=grain;m.wood.metalness=0;m.wood.roughness=.71;m.bark.map=grain;m.bark.metalness=0;m.bark.roughness=.94;if(m.charcoal){m.charcoal.map=grain;m.charcoal.metalness=0;m.charcoal.roughness=.9;}
  m.warm.emissiveIntensity=.35;m.cyan.emissiveIntensity=.30;
  m.leaf.map=foliage;m.leaf.alphaTest=.42;m.leaf.side=T.DoubleSide;m.leaf.color.set(0x8fa586);m.leaf2.map=foliage;m.leaf2.alphaTest=.42;m.leaf2.side=T.DoubleSide;m.leaf2.color.set(0xb6be90);
  const contact=tex((c,s)=>{const g=c.createRadialGradient(s/2,s/2,2,s/2,s/2,s*.5);g.addColorStop(0,'rgba(0,0,0,.55)');g.addColorStop(.55,'rgba(0,0,0,.33)');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(0,0,s,s);},128);

@@ -1,0 +1,649 @@
+
+> yorktown-continuum-city@11.2.0 test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: inverse mass gives most contact displacement to the lighter body
+ok 1 - inverse mass gives most contact displacement to the lighter body
+  ---
+  duration_ms: 35.958875
+  ...
+# Subtest: head-on walking cannot penetrate the mechanical hound and slowly slides around it
+ok 2 - head-on walking cannot penetrate the mechanical hound and slowly slides around it
+  ---
+  duration_ms: 37.817083
+  ...
+# Subtest: oblique impact preserves faster tangent motion than head-on impact
+ok 3 - oblique impact preserves faster tangent motion than head-on impact
+  ---
+  duration_ms: 13.808
+  ...
+# Subtest: substeps prevent a fast rider tunnelling through a hound during a slow frame
+ok 4 - substeps prevent a fast rider tunnelling through a hound during a slow frame
+  ---
+  duration_ms: 16.618125
+  ...
+# Subtest: a chassis pinned against a building pushes the walker out, never into that building
+ok 5 - a chassis pinned against a building pushes the walker out, never into that building
+  ---
+  duration_ms: 17.901875
+  ...
+# Subtest: different gravity decks do not collide; airborne feet clear a lower chassis
+ok 6 - different gravity decks do not collide; airborne feet clear a lower chassis
+  ---
+  duration_ms: 0.124417
+  ...
+# Subtest: landing separates the character from a chassis in the same update
+ok 7 - landing separates the character from a chassis in the same update
+  ---
+  duration_ms: 14.310916
+  ...
+# Subtest: a rider and shared vehicles obey contacts, while dismount never places a person inside any chassis
+ok 8 - a rider and shared vehicles obey contacts, while dismount never places a person inside any chassis
+  ---
+  duration_ms: 41.306125
+  ...
+# Subtest: an inhabited fleet can be separated without changing city simulation data or clipping into buildings
+ok 9 - an inhabited fleet can be separated without changing city simulation data or clipping into buildings
+  ---
+  duration_ms: 308.194417
+  ...
+# Subtest: all nine authored branches remain inside every fused foundation and camera height bound
+ok 10 - all nine authored branches remain inside every fused foundation and camera height bound
+  ---
+  duration_ms: 142.104041
+  ...
+# Subtest: fine silhouettes have bounded geometry and distant models keep less than a tenth of fine triangles
+ok 11 - fine silhouettes have bounded geometry and distant models keep less than a tenth of fine triangles
+  ---
+  duration_ms: 1.556125
+  ...
+# Subtest: forest high tiers have one central ground trunk with crowns well above street level
+ok 12 - forest high tiers have one central ground trunk with crowns well above street level
+  ---
+  duration_ms: 0.151875
+  ...
+# Subtest: shipyard work varies by site and advances only at an eight-month work boundary
+ok 13 - shipyard work varies by site and advances only at an eight-month work boundary
+  ---
+  duration_ms: 0.456
+  ...
+# Subtest: passive timber homes save power progressively without bypassing branch availability
+ok 14 - passive timber homes save power progressively without bypassing branch availability
+  ---
+  duration_ms: 0.130291
+  ...
+# Subtest: organic trunk normals face outward so crowns have solid supports in WebGL
+ok 15 - organic trunk normals face outward so crowns have solid supports in WebGL
+  ---
+  duration_ms: 0.116083
+  ...
+# Subtest: all three completed shipyard objects have distinct geometry and remain within budget
+ok 16 - all three completed shipyard objects have distinct geometry and remain within budget
+  ---
+  duration_ms: 0.404625
+  ...
+# Subtest: market canopy upper surface faces the sky rather than disappearing from above
+ok 17 - market canopy upper surface faces the sky rather than disappearing from above
+  ---
+  duration_ms: 0.130041
+  ...
+# Subtest: high-tier near models expose inhabited trunks and industrial hardware while far geometry omits them
+ok 18 - high-tier near models expose inhabited trunks and industrial hardware while far geometry omits them
+  ---
+  duration_ms: 0.409416
+  ...
+# Subtest: each zone can select all three branches from different neighbourhood conditions
+ok 19 - each zone can select all three branches from different neighbourhood conditions
+  ---
+  duration_ms: 225.651291
+  ...
+# Subtest: initial branch selection needs eighteen continuous months; a manual investment cannot bypass it
+ok 20 - initial branch selection needs eighteen continuous months; a manual investment cannot bypass it
+  ---
+  duration_ms: 96.361375
+  ...
+# Subtest: tier 6->7 takes 42 stable months and tier 7->8 takes 72; disruption restarts growth
+ok 21 - tier 6->7 takes 42 stable months and tier 7->8 takes 72; disruption restarts growth
+  ---
+  duration_ms: 889.905208
+  ...
+# Subtest: a new better branch never swaps at the same high level and must redevelop from common tier 4
+ok 22 - a new better branch never swaps at the same high level and must redevelop from common tier 4
+  ---
+  duration_ms: 167.291291
+  ...
+# Subtest: sustained service failure retreats first, preserves residents, and only later can leave an empty vacant base
+ok 23 - sustained service failure retreats first, preserves residents, and only later can leave an empty vacant base
+  ---
+  duration_ms: 178.677875
+  ...
+# Subtest: fusion carries the slowest stage/progress, preserves population and refuses incompatible branch identities
+ok 24 - fusion carries the slowest stage/progress, preserves population and refuses incompatible branch identities
+  ---
+  duration_ms: 134.358875
+  ...
+# Subtest: common-stage fusion cannot borrow a mature neighbour and retains existing residents above the lower base capacity
+ok 25 - common-stage fusion cannot borrow a mature neighbour and retains existing residents above the lower base capacity
+  ---
+  duration_ms: 39.258541
+  ...
+# Subtest: both save formats retain every branch timer and reject invalid lineage; v7 migration keeps stages and people
+ok 26 - both save formats retain every branch timer and reject invalid lineage; v7 migration keeps stages and people
+  ---
+  duration_ms: 284.244
+  ...
+# Subtest: branch effects alter actual utility loads, pollution, commerce and local production and incur maintenance
+ok 27 - branch effects alter actual utility loads, pollution, commerce and local production and incur maintenance
+  ---
+  duration_ms: 301.168625
+  ...
+# Subtest: every branch has four distinct massings for all foundations and both LODs, with finite bounded geometry
+ok 28 - every branch has four distinct massings for all foundations and both LODs, with finite bounded geometry
+  ---
+  duration_ms: 66.101916
+  ...
+# Subtest: architectural shapes are normalized finite true arches, rings, domes and sails; palettes remain stable and diverse
+ok 29 - architectural shapes are normalized finite true arches, rings, domes and sails; palettes remain stable and diverse
+  ---
+  duration_ms: 20.125917
+  ...
+# Subtest: the branch city remains serializable and financially playable through five years of real simulation
+ok 30 - the branch city remains serializable and financially playable through five years of real simulation
+  ---
+  duration_ms: 5176.755417
+  ...
+# Subtest: camera floor uses signed curved-deck height, including folded gravity and the complete arm
+ok 31 - camera floor uses signed curved-deck height, including folded gravity and the complete arm
+  ---
+  duration_ms: 0.578334
+  ...
+# Subtest: all third-person yaw, pitch and zoom combinations keep the camera and focus ray above both decks
+ok 32 - all third-person yaw, pitch and zoom combinations keep the camera and focus ray above both decks
+  ---
+  duration_ms: 45.947833
+  ...
+# Subtest: safe cameras retain their exact position, while smoothed old positions below a new floor are retracted
+ok 33 - safe cameras retain their exact position, while smoothed old positions below a new floor are retracted
+  ---
+  duration_ms: 0.730083
+  ...
+# Subtest: room and staircase cameras never go below the current floor, including a smoothed previous-floor position
+ok 34 - room and staircase cameras never go below the current floor, including a smoothed previous-floor position
+  ---
+  duration_ms: 0.121917
+  ...
+# Subtest: upward looking retains a usable follow distance and frees the orbit again while airborne
+ok 35 - upward looking retains a usable follow distance and frees the orbit again while airborne
+  ---
+  duration_ms: 0.143
+  ...
+# Subtest: new district has operating architecture, real populations and positive initial finance
+ok 36 - new district has operating architecture, real populations and positive initial finance
+  ---
+  duration_ms: 318.249666
+  ...
+# Subtest: line initial drag, reverse drag and extension use consistent real dimensions
+ok 37 - line initial drag, reverse drag and extension use consistent real dimensions
+  ---
+  duration_ms: 33.278958
+  ...
+# Subtest: line protects occupied ground, unlocks and the maximum length without losing funds
+ok 38 - line protects occupied ground, unlocks and the maximum length without losing funds
+  ---
+  duration_ms: 22.577
+  ...
+# Subtest: line demolition removes its whole foundation, undo and both save formats restore it
+ok 39 - line demolition removes its whole foundation, undo and both save formats restore it
+  ---
+  duration_ms: 177.101625
+  ...
+# Subtest: the Line shortcut joins only end roads and requires operating supply and transport funding
+ok 40 - the Line shortcut joins only end roads and requires operating supply and transport funding
+  ---
+  duration_ms: 25.753417
+  ...
+# Subtest: assistant preserves sources, reserves supply, and does not add oversupplied commercial zoning
+ok 41 - assistant preserves sources, reserves supply, and does not add oversupplied commercial zoning
+  ---
+  duration_ms: 478.189875
+  ...
+# Subtest: all assistant roads connect to existing roads, no isolated grid remains in a new district
+ok 42 - all assistant roads connect to existing roads, no isolated grid remains in a new district
+  ---
+  duration_ms: 332.466709
+  ...
+# Subtest: assistant rejects insufficient funds and changed quotes atomically
+ok 43 - assistant rejects insufficient funds and changed quotes atomically
+  ---
+  duration_ms: 251.68125
+  ...
+# Subtest: assistant refuses distant unsupported industry and nonpositive city demand before spending
+ok 44 - assistant refuses distant unsupported industry and nonpositive city demand before spending
+  ---
+  duration_ms: 265.370667
+  ...
+# Subtest: automatic gardens pay for staged fusion and respond gradually to supply loss
+ok 45 - automatic gardens pay for staged fusion and respond gradually to supply loss
+  ---
+  duration_ms: 147.460292
+  ...
+# Subtest: a preserve flag or poor finances prevents automatic park fusion
+ok 46 - a preserve flag or poor finances prevents automatic park fusion
+  ---
+  duration_ms: 71.368291
+  ...
+# Subtest: star sail quest progress is saved with its actual landmark and impossible prerequisites are rejected
+ok 47 - star sail quest progress is saved with its actual landmark and impossible prerequisites are rejected
+  ---
+  duration_ms: 116.867334
+  ...
+# Subtest: camouflage is used on long side views; end, inside and overhead views expose structure
+ok 48 - camouflage is used on long side views; end, inside and overhead views expose structure
+  ---
+  duration_ms: 0.128458
+  ...
+# Subtest: adopted forms remain distinct district branches with valid stages and footprints
+ok 49 - adopted forms remain distinct district branches with valid stages and footprints
+  ---
+  duration_ms: 0.071833
+  ...
+# Subtest: Line floor area has real elevator openings while central train corridors retain floors
+ok 50 - Line floor area has real elevator openings while central train corridors retain floors
+  ---
+  duration_ms: 0.141833
+  ...
+# Subtest: Line planters block movement and oblique walking slides without leaving the corridor
+ok 51 - Line planters block movement and oblique walking slides without leaving the corridor
+  ---
+  duration_ms: 0.269208
+  ...
+# Subtest: morning-axis template supplies every constructed building and employs its residents
+ok 52 - morning-axis template supplies every constructed building and employs its residents
+  ---
+  duration_ms: 261.478083
+  ...
+# Subtest: representative architecture is ordinary supported zoning, not protected display props
+ok 53 - representative architecture is ordinary supported zoning, not protected display props
+  ---
+  duration_ms: 173.599208
+  ...
+# Subtest: demo stays solvent and keeps all three high-stage branches for sixty operating months
+ok 54 - demo stays solvent and keeps all three high-stage branches for sixty operating months
+  ---
+  duration_ms: 7784.839708
+  ...
+# Subtest: west and east extension sites are empty and their boulevard stubs join the entire main district
+ok 55 - west and east extension sites are empty and their boulevard stubs join the entire main district
+  ---
+  duration_ms: 316.422709
+  ...
+# Subtest: old save preserves RCI capacity and population through 1/2/3 -> 1/3/5 migration
+ok 56 - old save preserves RCI capacity and population through 1/2/3 -> 1/3/5 migration
+  ---
+  duration_ms: 617.830125
+  ...
+# Subtest: compact and ordinary saves preserve stage 8, preservation policy, exact funds and stocks
+ok 57 - compact and ordinary saves preserve stage 8, preservation policy, exact funds and stocks
+  ---
+  duration_ms: 152.925292
+  ...
+# Subtest: investment requires actual resources; denied upgrade changes nothing
+ok 58 - investment requires actual resources; denied upgrade changes nothing
+  ---
+  duration_ms: 450.4145
+  ...
+# Subtest: real commercial investment debits one district, raises jobs and upkeep, never invents residents
+ok 59 - real commercial investment debits one district, raises jobs and upkeep, never invents residents
+  ---
+  duration_ms: 224.015375
+  ...
+# Subtest: all three types have reachable requirements through eight tiers; automatic investment respects growth and preservation
+ok 60 - all three types have reachable requirements through eight tiers; automatic investment respects growth and preservation
+  ---
+  duration_ms: 303.494834
+  ...
+# Subtest: 8-stage geometry is finite, distinct, and bounded for all zones, densities and LODs
+ok 61 - 8-stage geometry is finite, distinct, and bounded for all zones, densities and LODs
+  ---
+  duration_ms: 20.524791
+  ...
+# Subtest: stopping a high-tier building retains only 15 percent of progression upkeep
+ok 62 - stopping a high-tier building retains only 15 percent of progression upkeep
+  ---
+  duration_ms: 0.221375
+  ...
+# Subtest: with automatic investment disabled, free natural growth never exceeds common stage 4
+ok 63 - with automatic investment disabled, free natural growth never exceeds common stage 4
+  ---
+  duration_ms: 1640.506166
+  ...
+# Subtest: real city permits each R/C/I building to reach tier 8 and pays the whole resource bill
+ok 64 - real city permits each R/C/I building to reach tier 8 and pays the whole resource bill
+  ---
+  duration_ms: 516.234958
+  ...
+# Subtest: both sides of a road grow through continuous zoning to distance three, never four or across vacant lots
+ok 65 - both sides of a road grow through continuous zoning to distance three, never four or across vacant lots
+  ---
+  duration_ms: 34.194833
+  ...
+# Subtest: 2/3/4 square foundations fuse, preserve residents, and support continued eight-stage evolution
+ok 66 - 2/3/4 square foundations fuse, preserve residents, and support continued eight-stage evolution
+  ---
+  duration_ms: 150.296667
+  ...
+# Subtest: fusion refuses partial old plots, mismatched equipment and explicit plant renewal policies
+ok 67 - fusion refuses partial old plots, mismatched equipment and explicit plant renewal policies
+  ---
+  duration_ms: 23.917792
+  ...
+# Subtest: automatic fusion chooses fitting 2/3/4 foundations and leaves reserved buildings untouched
+ok 68 - automatic fusion chooses fitting 2/3/4 foundations and leaves reserved buildings untouched
+  ---
+  duration_ms: 140.998417
+  ...
+# Subtest: fused utility capacity and upkeep grow nonlinearly without losing the underlying network
+ok 69 - fused utility capacity and upkeep grow nonlinearly without losing the underlying network
+  ---
+  duration_ms: 278.297542
+  ...
+# Subtest: facility automatic upgrades stop for low cash or demand and proceed with a funded mature city
+ok 70 - facility automatic upgrades stop for low cash or demand and proceed with a funded mature city
+  ---
+  duration_ms: 64.099459
+  ...
+# Subtest: paid automatic high-stage investment debits actual district stock and preserves the operating reserve
+ok 71 - paid automatic high-stage investment debits actual district stock and preserves the operating reserve
+  ---
+  duration_ms: 784.867291
+  ...
+# Subtest: whole-plot demolition and undo are atomic; equipment never exceeds two upgrades
+ok 72 - whole-plot demolition and undo are atomic; equipment never exceeds two upgrades
+  ---
+  duration_ms: 22.404
+  ...
+# Subtest: landmarks occupy the previewed foundation, charge once, simulate once and cannot duplicate through damage
+ok 73 - landmarks occupy the previewed foundation, charge once, simulate once and cannot duplicate through damage
+  ---
+  duration_ms: 134.439667
+  ...
+# Subtest: power campus renews together without resetting its evolution; disabled renewal produces real ruins
+ok 74 - power campus renews together without resetting its evolution; disabled renewal produces real ruins
+  ---
+  duration_ms: 319.007834
+  ...
+# Subtest: fused plots survive both saves; malformed partial foundations fail visibly
+ok 75 - fused plots survive both saves; malformed partial foundations fail visibly
+  ---
+  duration_ms: 307.647833
+  ...
+# Subtest: mature large districts form civic functions automatically, once per campus or economic unit
+ok 76 - mature large districts form civic functions automatically, once per campus or economic unit
+  ---
+  duration_ms: 102.7605
+  ...
+# Subtest: continuous arrow yaw crosses many complete turns in either direction; pitch alone is bounded
+ok 77 - continuous arrow yaw crosses many complete turns in either direction; pitch alone is bounded
+  ---
+  duration_ms: 0.823875
+  ...
+# Subtest: all three interior rooms are reachable and both staircases support actual ascent and descent
+ok 78 - all three interior rooms are reachable and both staircases support actual ascent and descent
+  ---
+  duration_ms: 12.021541
+  ...
+# Subtest: fused RCI campuses and evolved utility campuses render finite distinct forms within their foundations
+ok 79 - fused RCI campuses and evolved utility campuses render finite distinct forms within their foundations
+  ---
+  duration_ms: 123.462791
+  ...
+# Subtest: the new playable city keeps residents, pays expenses and round-trips after a year of evolution
+ok 80 - the new playable city keeps residents, pays expenses and round-trips after a year of evolution
+  ---
+  duration_ms: 1195.562209
+  ...
+# Subtest: music waits for interaction, fades gently and suspends hidden-page playback without restarting the track
+ok 81 - music waits for interaction, fades gently and suspends hidden-page playback without restarting the track
+  ---
+  duration_ms: 6.442542
+  ...
+# Subtest: an explicitly muted preference survives reload and the single control enables or disables playback
+ok 82 - an explicitly muted preference survives reload and the single control enables or disables playback
+  ---
+  duration_ms: 3.327125
+  ...
+# Subtest: a browser playback rejection offers one retry control and does not break the city
+ok 83 - a browser playback rejection offers one retry control and does not break the city
+  ---
+  duration_ms: 1.500084
+  ...
+# Subtest: a delayed playback response cannot unmute a paused page or stop a newer successful start
+ok 84 - a delayed playback response cannot unmute a paused page or stop a newer successful start
+  ---
+  duration_ms: 1.776875
+  ...
+# Subtest: paused static city draws once then stops; hidden and disabled views schedule no frames
+ok 85 - paused static city draws once then stops; hidden and disabled views schedule no frames
+  ---
+  duration_ms: 0.702333
+  ...
+# Subtest: 120 Hz input cannot exceed the movement frame budget
+ok 86 - 120 Hz input cannot exceed the movement frame budget
+  ---
+  duration_ms: 0.230041
+  ...
+# Subtest: settled Retina views exceed the old 1.7 ratio at laptop and 4K CSS sizes while motion remains bounded
+ok 87 - settled Retina views exceed the old 1.7 ratio at laptop and 4K CSS sizes while motion remains bounded
+  ---
+  duration_ms: 0.137833
+  ...
+# Subtest: camera settles to a sharp final frame, without a permanent redraw timer
+ok 88 - camera settles to a sharp final frame, without a permanent redraw timer
+  ---
+  duration_ms: 0.389875
+  ...
+# Subtest: quality timers do not redraw a hidden or disabled view
+ok 89 - quality timers do not redraw a hidden or disabled view
+  ---
+  duration_ms: 0.182833
+  ...
+# Subtest: legacy 12x speeds are capped; yearly time stays meaningful at the new maximum
+ok 90 - legacy 12x speeds are capped; yearly time stays meaningful at the new maximum
+  ---
+  duration_ms: 0.094292
+  ...
+# Subtest: visible large buildings get detail regardless of ground distance, and offscreen buildings do not consume it
+ok 91 - visible large buildings get detail regardless of ground distance, and offscreen buildings do not consume it
+  ---
+  duration_ms: 0.157833
+  ...
+# Subtest: large city detail count is bounded and every distant building keeps a visible model
+ok 92 - large city detail count is bounded and every distant building keeps a visible model
+  ---
+  duration_ms: 10.559
+  ...
+# Subtest: background months produce the same state and indicators as direct simulation
+ok 93 - background months produce the same state and indicators as direct simulation
+  ---
+  duration_ms: 1709.816041
+  ...
+# Subtest: background patches include a cell cleared during a month and preserve removed objects after resync
+ok 94 - background patches include a cell cleared during a month and preserve removed objects after resync
+  ---
+  duration_ms: 301.288583
+  ...
+# Subtest: worker runner allows only one month, caches snapshots, and resyncs after edits
+ok 95 - worker runner allows only one month, caches snapshots, and resyncs after edits
+  ---
+  duration_ms: 0.593375
+  ...
+# Subtest: worker errors stop calculation and reject the pending month
+ok 96 - worker errors stop calculation and reject the pending month
+  ---
+  duration_ms: 0.107833
+  ...
+# Subtest: display meshes are reused for population changes and only the affected chunk is rebuilt
+ok 97 - display meshes are reused for population changes and only the affected chunk is rebuilt
+  ---
+  duration_ms: 187.139459
+  ...
+# Subtest: dense detailed prototypes stay within triangle budgets and prioritize the closest visible plots
+ok 98 - dense detailed prototypes stay within triangle budgets and prioritize the closest visible plots
+  ---
+  duration_ms: 2.410042
+  ...
+# Subtest: puzzle rewards require correct order and alignment, cannot bypass prerequisites
+ok 99 - puzzle rewards require correct order and alignment, cannot bypass prerequisites
+  ---
+  duration_ms: 3.552875
+  ...
+# Subtest: the floor-aware walking guide reaches the archive, workshop and star room through actual stairs
+ok 100 - the floor-aware walking guide reaches the archive, workshop and star room through actual stairs
+  ---
+  duration_ms: 40.49975
+  ...
+# Subtest: walls and bookshelves block movement, oblique input still slides along the wall
+ok 101 - walls and bookshelves block movement, oblique input still slides along the wall
+  ---
+  duration_ms: 0.376083
+  ...
+# Subtest: the final gap requires a real jump and falls return to a safe place
+ok 102 - the final gap requires a real jump and falls return to a safe place
+  ---
+  duration_ms: 0.408833
+  ...
+# Subtest: the on-screen jump assist crosses the gap and stops within vault interaction range at multiple frame rates
+ok 103 - the on-screen jump assist crosses the gap and stops within vault interaction range at multiple frame rates
+  ---
+  duration_ms: 1.097833
+  ...
+# Subtest: static batching preserves all transformed triangles, bounds, normals and UVs
+ok 104 - static batching preserves all transformed triangles, bounds, normals and UVs
+  ---
+  duration_ms: 3.583959
+  ...
+# Subtest: moving mechanisms and individually coloured instances are kept live
+ok 105 - moving mechanisms and individually coloured instances are kept live
+  ---
+  duration_ms: 0.560083
+  ...
+# Subtest: all fused district branches bypass old showcase replacements
+ok 106 - all fused district branches bypass old showcase replacements
+  ---
+  duration_ms: 39.994291
+  ...
+# Subtest: real sail and shell landmarks retain their complete geometry with fewer static submissions
+ok 107 - real sail and shell landmarks retain their complete geometry with fewer static submissions
+  ---
+  duration_ms: 439.126334
+  ...
+# Subtest: surrogate choices are optional and have genuinely different abilities
+ok 108 - surrogate choices are optional and have genuinely different abilities
+  ---
+  duration_ms: 0.525542
+  ...
+# Subtest: courier jumps nearly three cells while running, then lands and can jump again
+ok 109 - courier jumps nearly three cells while running, then lands and can jump again
+  ---
+  duration_ms: 32.037583
+  ...
+# Subtest: pilot flight has a height limit, depletes, lands even with Space held, and recovers on the ground
+ok 110 - pilot flight has a height limit, depletes, lands even with Space held, and recovers on the ground
+  ---
+  duration_ms: 42.783042
+  ...
+# Subtest: walk, jump, flight and riding never tunnel through buildings or off the deck
+ok 111 - walk, jump, flight and riding never tunnel through buildings or off the deck
+  ---
+  duration_ms: 22.3245
+  ...
+# Subtest: mounting changes speed, footprint and animation position, and a safe dismount is on open terrain
+ok 112 - mounting changes speed, footprint and animation position, and a safe dismount is on open terrain
+  ---
+  duration_ms: 13.552125
+  ...
+# Subtest: vehicle upgrades require current population, wellbeing and completed orders
+ok 113 - vehicle upgrades require current population, wellbeing and completed orders
+  ---
+  duration_ms: 21.566625
+  ...
+# Subtest: nearby interaction respects deck, distance, disabled objects and altitude
+ok 114 - nearby interaction respects deck, distance, disabled objects and altitude
+  ---
+  duration_ms: 0.138708
+  ...
+# Subtest: visible traffic is generated from operating streets and real commute routes, without creating residents or tax income
+ok 115 - visible traffic is generated from operating streets and real commute routes, without creating residents or tax income
+  ---
+  duration_ms: 313.732333
+  ...
+# Subtest: route traffic moves along road geometry and reverses its heading rather than teleporting at the endpoints
+ok 116 - route traffic moves along road geometry and reverses its heading rather than teleporting at the endpoints
+  ---
+  duration_ms: 0.369375
+  ...
+# Subtest: citizens give measured city and local road information, and change when the city changes
+ok 117 - citizens give measured city and local road information, and change when the city changes
+  ---
+  duration_ms: 133.421833
+  ...
+# Subtest: articulated character meshes face travel direction on both gravity frames and stay finite
+ok 118 - articulated character meshes face travel direction on both gravity frames and stay finite
+  ---
+  duration_ms: 18.303625
+  ...
+# Subtest: scooter and mechanical hound have three distinct, renderable tiers and movable wheels or legs
+ok 119 - scooter and mechanical hound have three distinct, renderable tiers and movable wheels or legs
+  ---
+  duration_ms: 3.668417
+  ...
+# Subtest: stations have boarding capacity and do not break the connected bus catchment
+ok 120 - stations have boarding capacity and do not break the connected bus catchment
+  ---
+  duration_ms: 278.146875
+  ...
+# Subtest: first maglev station is allowed, retains its road, and gives a non-blocking connection notice
+ok 121 - first maglev station is allowed, retains its road, and gives a non-blocking connection notice
+  ---
+  duration_ms: 29.070417
+  ...
+# Subtest: second station automatically creates an elevated link, charges its path and never replaces intervening roads
+ok 122 - second station automatically creates an elevated link, charges its path and never replaces intervening roads
+  ---
+  duration_ms: 19.639292
+  ...
+# Subtest: automatic space links bridge disconnected surfaces; an out-of-range site warns without blocking construction
+ok 123 - automatic space links bridge disconnected surfaces; an out-of-range site warns without blocking construction
+  ---
+  duration_ms: 17.666125
+  ...
+# Subtest: funded, supplied maglev carries actual commuters and removes their intermediate-road load
+ok 124 - funded, supplied maglev carries actual commuters and removes their intermediate-road load
+  ---
+  duration_ms: 306.433459
+  ...
+# Subtest: manual track removal persists, leaves stations and roads, can be undone or explicitly restored
+ok 125 - manual track removal persists, leaves stations and roads, can be undone or explicitly restored
+  ---
+  duration_ms: 381.216542
+  ...
+# Subtest: station demolition removes its lines atomically and undo restores the complete network
+ok 126 - station demolition removes its lines atomically and undo restores the complete network
+  ---
+  duration_ms: 209.13975
+  ...
+# Subtest: malformed magnetic tracks are rejected and obsolete passenger ports or hand rails cannot be newly built
+ok 127 - malformed magnetic tracks are rejected and obsolete passenger ports or hand rails cannot be newly built
+  ---
+  duration_ms: 283.949916
+  ...
+1..127
+# tests 127
+# suites 0
+# pass 127
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8629.873667

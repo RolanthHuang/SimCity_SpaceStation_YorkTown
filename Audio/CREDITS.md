@@ -1,13 +1,9 @@
-# Starlit Resolve — Warm Cello
+# Firstlight — 初見星海
 
-《星海靜謐・大提琴暖光》是本專案原創配樂，長 173.4 秒。2026-10-03 完成獨立試聽後，使用者接受此大提琴版本並授權加入主遊戲。
+背景配樂使用已完成的原創混音《First Light Over Yorktown》。2026-10-04 使用者再次試聽完整 MP3 後，指定取代原本的大提琴配樂。
 
-以同一首原創旋律改編為低音域大提琴主奏，保留六段和聲、變速、高潮與尾奏，降低高音鐘琴、豎琴及亮色音效。音檔為 44.1 kHz 立體聲；成品約 −18 LUFS、真實峰值 −2.8 dBTP，採整體線性音量調整保留動態。
+沿用原始音檔，不重新合成、變速或更改編曲。44.1 kHz、立體聲、139.513 秒、2,791,572 bytes。來源製作紀錄的素材授權為 CC0-1.0；只發佈完成混音。
 
-樂器來源包含 VSCO 2 Community Edition 與 VCSL 的 CC0 音源，以及本機 GarageBand 授權樂器。只發佈完整混音，不發佈任何 Apple 原始音源、樂器庫或獨立素材迴圈。
+SHA-256: `7dd37c465338ca3a233aead972440af230c4a8466a4595829c0658484c3d5320`
 
-- [VSCO 2 Community Edition](https://versilian-studios.com/vsco-community/)
-- [VCSL](https://github.com/sgossner/VCSL)
-- [Apple GarageBand audio-content guidance](https://support.apple.com/en-us/102034)
-
-創作方向為靜謐、溫暖、未來感與迎向未知；沒有使用電影或藝人的錄音，也沒有抄錄其旋律。
+網頁使用一個 HTML audio 元件，`preload="none"`，玩家操作後才播放；關閉配樂或頁面隱藏時暫停，返回時續播。線上版串流 MP3；離線單檔含相同音檔。

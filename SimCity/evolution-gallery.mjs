@@ -1,3 +1,6 @@
+import {residentialShapes} from './residential-shapes.mjs';
+import {industrialShapes} from './industrial-shapes.mjs';
+import {commercialShapes} from './commercial-shapes.mjs';
 import * as T from '../YorktownPreview/three.module.js';
 import {complexBuilding} from './architecture.mjs';
 import {stageHeight,stageName,stageUpkeep} from './evolution.mjs';
@@ -13,37 +16,39 @@ export function mountGallery(host){
  const scene=new T.Scene();scene.background=new T.Color(0xa5bac1);const camera=new T.PerspectiveCamera(38,1,.02,200),assets=makeAtelierMaterials(renderer,scene);
  scene.add(new T.HemisphereLight(0xc0e0ef,0x939b80,.95));const sun=new T.DirectionalLight(0xffe0ad,2.65);sun.position.set(-9,15,10);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-24,right:24,top:14,bottom:-14,near:1,far:50});sun.shadow.normalBias=.015;scene.add(sun);
  const ground=new T.Mesh(new T.PlaneGeometry(120,120),assets.m.stone);ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
- const geometries={...architecturalShapes(),box:new T.BoxGeometry(1,1,1),cylinder:new T.CylinderGeometry(.5,.5,1,24),foliage:foliageGeometry()};let model=new T.Group();scene.add(model);let zone='R',stage=6,span=2,branch='garden',mode='compare',yaw=.28,pitch=.34,distance=14,targetY=1,pointer=null;
- const materials={};for(const name of ['ivory','stone','titanium','gold','dark','window','glass','pane','leaf','red']){materials[name]=assets.m[name].clone();materials[name].color.set(0xffffff);}
+ const geometries={...architecturalShapes(),...commercialShapes(),...residentialShapes(),...industrialShapes(),box:new T.BoxGeometry(1,1,1),cylinder:new T.CylinderGeometry(.5,.5,1,24),foliage:foliageGeometry()};let model=new T.Group();scene.add(model);let zone='R',stage=6,span=2,branch='garden',mode='compare',yaw=.28,pitch=.34,distance=14,targetY=1,pointer=null,work=0;
+ const materials={};for(const name of ['ivory','stone','titanium','gold','dark','window','glass','pane','leaf','red','wood','bark','charcoal']){materials[name]=assets.m[name].clone();materials[name].color.set(0xffffff);}
  const glow=new T.MeshStandardMaterial({color:0xe8dbbb,emissive:0xcab189,emissiveIntensity:.25});
  function draw(){camera.position.set(Math.sin(yaw)*distance*Math.cos(pitch),targetY+distance*Math.sin(pitch),Math.cos(yaw)*distance*Math.cos(pitch));camera.lookAt(0,targetY,0);renderer.render(scene,camera);}
  function release(){for(const child of model.children)if(child.isInstancedMesh){child.material.dispose();child.dispose();}scene.remove(model);}
  function rebuild(){
   release();model=new T.Group();scene.add(model);const ids=Object.keys(BRANCHES[zone]);if(!ids.includes(branch))branch=ids[0];
   const configurations=mode==='lineup'?[1,2,3,4,5,6,7,8].map(level=>({type:zone,level,branch:level>=5?branch:null,span})):mode==='compare'&&stage>=5?ids.map(id=>({type:zone,level:stage,branch:id,span})):[{type:zone,level:stage,branch:stage>=5?branch:null,span}];
-  const pieces=[],spacing=span+1.05;
+  for(const c of configurations)c.age=work*8;const pieces=[],spacing=span+1.05;
   configurations.forEach((c,index)=>{const ox=(index-(configurations.length-1)/2)*spacing;complexBuilding({x:ox,y:0,c,far:false,occupied:true,add:(x,z,y,w,h,d,color,shape='box',role='ivory')=>pieces.push({x,y,z,w,h,d,color,shape,role}),light:p=>pieces.push({x:p.x,y:p.h,z:p.y,w:p.sx,h:p.sy,d:p.sz,color:p.color,shape:'box',role:'glow'})});});
   const sets=new Map();for(const p of pieces){const key=p.role+':'+p.shape;if(!sets.has(key))sets.set(key,[]);sets.get(key).push(p);}
   const dummy=new T.Object3D();for(const list of sets.values()){const mat=(list[0].role==='glow'?glow:materials[list[0].role]||materials.ivory).clone(),mesh=new T.InstancedMesh(geometries[list[0].shape]||geometries.box,mat,list.length);list.forEach((p,n)=>{dummy.position.set(p.x,p.y,p.z);dummy.scale.set(p.w,p.h,p.d);dummy.updateMatrix();mesh.setMatrixAt(n,dummy.matrix);mesh.setColorAt(n,new T.Color(p.color));});mesh.castShadow=true;mesh.receiveShadow=true;model.add(mesh);}
-  const maxH=Math.max(...pieces.map(p=>p.y+p.h/2)),width=configurations.length*spacing;targetY=maxH*.5;distance=Math.max(3.2,maxH*1.98,(span+(configurations.length-1)*spacing)/(.688*Math.max(.65,camera.aspect))*1.12);yaw=mode==='single'?.5:.08;pitch=mode==='single'?.38:.27;
+  const bounds=new T.Box3().setFromObject(model),maxH=bounds.max.y,width=bounds.max.x-bounds.min.x;targetY=maxH*.5;distance=Math.max(3.2,maxH*1.98,(span+(configurations.length-1)*spacing)/(.688*Math.max(.65,camera.aspect))*1.12);yaw=mode==='single'?.5:.08;pitch=mode==='single'?.38:.27;
   document.querySelectorAll('[data-gallery-zone]').forEach(b=>b.classList.toggle('active',b.dataset.galleryZone===zone));document.querySelectorAll('[data-gallery-stage]').forEach(b=>b.classList.toggle('active',mode!=='lineup'&&Number(b.dataset.galleryStage)===stage));document.querySelectorAll('[data-gallery-span]').forEach(b=>b.classList.toggle('active',Number(b.dataset.gallerySpan)===span));document.getElementById('gallery-lineup').classList.toggle('active',mode==='lineup');document.getElementById('gallery-compare').classList.toggle('active',mode==='compare');
   document.getElementById('gallery-branches').innerHTML=ids.map(id=>`<button data-gallery-branch="${id}" class="${branch===id&&mode!=='compare'?'active':''}">${BRANCHES[zone][id].name}</button>`).join('');document.querySelectorAll('[data-gallery-branch]').forEach(b=>b.onclick=()=>{branch=b.dataset.galleryBranch;stage=Math.max(5,stage);mode='single';rebuild();});
   const cell={type:zone,level:stage,branch:stage>=5?branch:null,span,enabled:true};const desc=document.getElementById('gallery-description');
   if(mode==='compare'&&stage>=5)desc.innerHTML=`<strong>${zoneName[zone]} · 第 ${stage} 階 · ${span} × ${span} 地基</strong><div class="gallery-caption-grid">${configurations.map(c=>`<div><strong>${BRANCHES[zone][c.branch].name}</strong><span>${BRANCHES[zone][c.branch].form}</span><small>${branchEffectText(c)}</small></div>`).join('')}</div>`;
   else if(mode==='lineup')desc.innerHTML=`<strong>${zoneName[zone]} · ${BRANCHES[zone][branch].name} · 01 → 08</strong><span>左側四階是共同基礎；後四階增加新的空間與設施。${BRANCHES[zone][branch].form}</span>`;
   else desc.innerHTML=`<strong>第 ${stage} 階 · ${stageName(cell)}</strong><span>${stage>=5?BRANCHES[zone][branch].form:'共同基礎街坊；第 5 階起才選擇分支'} · ${zone==='R'?'居住':'工作'}容量 ${buildingCapacity(cell)*span*span} · 分支與階層維護 ${(stageUpkeep(cell)*span*span).toFixed(1)} / 月</span><small>${branchEffectText(cell)}${stage<8?` · 下一階需穩定 ${EVOLUTION_WAITS[stage+1]} 個月`:''}</small>`;
+  const workButton=document.getElementById('gallery-work-next');workButton.hidden=zone!=='I'||(branch!=='logistics'&&mode!=='compare');workButton.textContent=`下一個船塢施工階段 · ${work+1}/9`;
   draw();
  }
  const resize=new ResizeObserver(()=>{renderer.setSize(host.clientWidth,host.clientHeight,false);camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();rebuild();});resize.observe(host);
  host.onpointerdown=e=>{host.setPointerCapture(e.pointerId);pointer={x:e.clientX,y:e.clientY};};host.onpointermove=e=>{if(!pointer)return;yaw-=(e.clientX-pointer.x)*.009;pitch=Math.max(.08,Math.min(1.3,pitch+(e.clientY-pointer.y)*.006));pointer={x:e.clientX,y:e.clientY};draw();};host.onpointerup=host.onpointercancel=()=>{pointer=null;};host.onwheel=e=>{e.preventDefault();distance=Math.max(1.6,Math.min(65,distance*Math.exp(e.deltaY*.001)));draw();};
  document.querySelectorAll('[data-gallery-zone]').forEach(b=>b.onclick=()=>{zone=b.dataset.galleryZone;rebuild();});document.querySelectorAll('[data-gallery-stage]').forEach(b=>b.onclick=()=>{stage=Number(b.dataset.galleryStage);mode=mode==='lineup'?'single':mode;rebuild();});document.querySelectorAll('[data-gallery-span]').forEach(b=>b.onclick=()=>{span=Number(b.dataset.gallerySpan);rebuild();});document.getElementById('gallery-compare').onclick=()=>{mode=mode==='compare'?'single':'compare';stage=Math.max(stage,5);rebuild();};document.getElementById('gallery-lineup').onclick=()=>{mode=mode==='lineup'?'single':'lineup';rebuild();};
+ const workButton=document.createElement('button');workButton.id='gallery-work-next';document.getElementById('gallery-description').after(workButton);workButton.onclick=()=>{work=(work+1)%9;rebuild();};
  const saveImage=document.createElement('button');saveImage.textContent='輸出建築圖片';saveImage.id='gallery-save-image';document.getElementById('gallery-description').after(saveImage);
  saveImage.onclick=()=>{
-  const ratio=renderer.getPixelRatio(),w=host.clientWidth,h=host.clientHeight,aspect=camera.aspect;
-  renderer.setPixelRatio(1);renderer.setSize(1600,1000,false);camera.aspect=1.6;camera.updateProjectionMatrix();draw();
+  const ratio=renderer.getPixelRatio(),w=host.clientWidth,h=host.clientHeight,aspect=camera.aspect,originalDistance=distance;
+  renderer.setPixelRatio(1);renderer.setSize(1600,1000,false);camera.aspect=1.6;camera.updateProjectionMatrix();const bounds=new T.Box3().setFromObject(model),size=bounds.getSize(new T.Vector3());distance=Math.max(distance,size.x/(.688*camera.aspect)*1.25+size.z*.55,size.y*1.98);draw();
   const png=renderer.domElement.toDataURL('image/png'),name=`Yorktown-${zone}-${mode}-${branch}-L${stage}-${span}x${span}.png`;
   document.getElementById('gallery-export')?.remove();const figure=document.createElement('figure');figure.id='gallery-export';figure.style.margin='16px 0';const img=document.createElement('img');img.src=png;img.alt='輸出的實際建築模型';img.style.cssText='width:100%;height:auto;border-radius:10px';const link=document.createElement('a');link.href=png;link.download=name;link.textContent='下載 PNG 圖片';link.className='muted-link';figure.append(img,link);saveImage.after(figure);
-  renderer.setPixelRatio(ratio);renderer.setSize(w,h,false);camera.aspect=aspect;camera.updateProjectionMatrix();draw();
+  renderer.setPixelRatio(ratio);renderer.setSize(w,h,false);camera.aspect=aspect;distance=originalDistance;camera.updateProjectionMatrix();draw();
  };
- rebuild();return ()=>{resize.disconnect();release();saveImage.remove();Object.values(geometries).forEach(g=>g.dispose());Object.values(materials).forEach(m=>m.dispose());Object.values(assets.m).forEach(m=>m.dispose());assets.detailTextures.forEach(t=>t.dispose());assets.paving.dispose();assets.environment.dispose();ground.geometry.dispose();glow.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();};
+ rebuild();return ()=>{resize.disconnect();release();workButton.remove();saveImage.remove();Object.values(geometries).forEach(g=>g.dispose());Object.values(materials).forEach(m=>m.dispose());Object.values(assets.m).forEach(m=>m.dispose());assets.detailTextures.forEach(t=>t.dispose());assets.paving.dispose();assets.environment.dispose();ground.geometry.dispose();glow.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();};
 }

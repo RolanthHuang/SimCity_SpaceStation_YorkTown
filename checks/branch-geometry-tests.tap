@@ -1,0 +1,55 @@
+TAP version 13
+# Subtest: all nine authored branches remain inside every fused foundation and camera height bound
+ok 1 - all nine authored branches remain inside every fused foundation and camera height bound
+  ---
+  duration_ms: 82.79225
+  ...
+# Subtest: fine silhouettes have bounded geometry and distant models keep less than a tenth of fine triangles
+ok 2 - fine silhouettes have bounded geometry and distant models keep less than a tenth of fine triangles
+  ---
+  duration_ms: 1.380375
+  ...
+# Subtest: forest high tiers have one central ground trunk with crowns well above street level
+ok 3 - forest high tiers have one central ground trunk with crowns well above street level
+  ---
+  duration_ms: 0.12225
+  ...
+# Subtest: shipyard work varies by site and advances only at an eight-month work boundary
+ok 4 - shipyard work varies by site and advances only at an eight-month work boundary
+  ---
+  duration_ms: 0.377417
+  ...
+# Subtest: passive timber homes save power progressively without bypassing branch availability
+ok 5 - passive timber homes save power progressively without bypassing branch availability
+  ---
+  duration_ms: 0.107958
+  ...
+# Subtest: organic trunk normals face outward so crowns have solid supports in WebGL
+ok 6 - organic trunk normals face outward so crowns have solid supports in WebGL
+  ---
+  duration_ms: 0.094916
+  ...
+# Subtest: all three completed shipyard objects have distinct geometry and remain within budget
+ok 7 - all three completed shipyard objects have distinct geometry and remain within budget
+  ---
+  duration_ms: 0.395333
+  ...
+# Subtest: market canopy upper surface faces the sky rather than disappearing from above
+ok 8 - market canopy upper surface faces the sky rather than disappearing from above
+  ---
+  duration_ms: 0.101042
+  ...
+# Subtest: high-tier near models expose inhabited trunks and industrial hardware while far geometry omits them
+ok 9 - high-tier near models expose inhabited trunks and industrial hardware while far geometry omits them
+  ---
+  duration_ms: 0.417333
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 244.8015

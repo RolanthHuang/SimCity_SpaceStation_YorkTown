@@ -1,0 +1,132 @@
+{
+  "release": "11.2.0",
+  "scope": "Actual shared geometry; maximum per prototype across levels 5-8 and all nine shipyard work states. Submitted triangles, not measured GPU time.",
+  "branches": {
+    "garden": {
+      "fine": {
+        "triangles": 44084,
+        "pieces": 344
+      },
+      "medium": {
+        "triangles": 10644,
+        "pieces": 32
+      },
+      "distant": {
+        "triangles": 1038,
+        "pieces": 19
+      }
+    },
+    "civic": {
+      "fine": {
+        "triangles": 41868,
+        "pieces": 346
+      },
+      "medium": {
+        "triangles": 10960,
+        "pieces": 29
+      },
+      "distant": {
+        "triangles": 1476,
+        "pieces": 15
+      }
+    },
+    "research": {
+      "fine": {
+        "triangles": 29452,
+        "pieces": 452
+      },
+      "medium": {
+        "triangles": 3264,
+        "pieces": 71
+      },
+      "distant": {
+        "triangles": 444,
+        "pieces": 12
+      }
+    },
+    "market": {
+      "fine": {
+        "triangles": 41400,
+        "pieces": 672
+      },
+      "medium": {
+        "triangles": 5136,
+        "pieces": 111
+      },
+      "distant": {
+        "triangles": 1284,
+        "pieces": 15
+      }
+    },
+    "finance": {
+      "fine": {
+        "triangles": 40898,
+        "pieces": 180
+      },
+      "medium": {
+        "triangles": 5744,
+        "pieces": 31
+      },
+      "distant": {
+        "triangles": 564,
+        "pieces": 9
+      }
+    },
+    "innovation": {
+      "fine": {
+        "triangles": 19700,
+        "pieces": 296
+      },
+      "medium": {
+        "triangles": 7022,
+        "pieces": 58
+      },
+      "distant": {
+        "triangles": 356,
+        "pieces": 13
+      }
+    },
+    "logistics": {
+      "fine": {
+        "triangles": 24080,
+        "pieces": 188
+      },
+      "medium": {
+        "triangles": 3200,
+        "pieces": 46
+      },
+      "distant": {
+        "triangles": 484,
+        "pieces": 11
+      }
+    },
+    "precision": {
+      "fine": {
+        "triangles": 16856,
+        "pieces": 212
+      },
+      "medium": {
+        "triangles": 4928,
+        "pieces": 60
+      },
+      "distant": {
+        "triangles": 632,
+        "pieces": 12
+      }
+    },
+    "circular": {
+      "fine": {
+        "triangles": 36036,
+        "pieces": 159
+      },
+      "medium": {
+        "triangles": 6564,
+        "pieces": 69
+      },
+      "distant": {
+        "triangles": 850,
+        "pieces": 9
+      }
+    }
+  }
+}

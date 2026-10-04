@@ -1,0 +1,79 @@
+{
+  "release": "11.2.0",
+  "date": "2026-10-04",
+  "environment": "Codex in-app browser on local macOS; viewport about 614 x 397 CSS pixels",
+  "automatedTests": {
+    "passed": 127,
+    "failed": 0,
+    "evidence": "branch-release-tests.tap"
+  },
+  "normalDemo": {
+    "speed": 4,
+    "advancedMonths": 18,
+    "finalDate": "2264/07",
+    "population": 7777,
+    "cash": 177837,
+    "netMonthlyIncome": 2568
+  },
+  "operating20pctCity": {
+    "occupiedTiles": 4068,
+    "buildableTiles": 20256,
+    "coveragePercent": 20.08,
+    "speed": 4,
+    "advancedMonths": 31,
+    "finalDate": "2265/08",
+    "population": 50094,
+    "cash": 5802201,
+    "netMonthlyIncome": 32886,
+    "cameraLimit": "Progression observed from initial camera position, not the dense-zone near view."
+  },
+  "forcedLevel8RenderStress": {
+    "coveragePercent": 20.08,
+    "paused": true,
+    "camera": "Morning Star dense district",
+    "fineModels": 21,
+    "drawCalls": 273,
+    "submittedTriangles": 3255354,
+    "pixelRatio": 2,
+    "renderPixels": 972576,
+    "geometries": 355,
+    "textures": 26,
+    "economyLimit": "Synthetic high-tier zoning has negative income; rendering stress fixture only, not a viable city demo."
+  },
+  "normalNearView": {
+    "paused": true,
+    "fineModels": 21,
+    "drawCalls": 529,
+    "submittedTriangles": 1451247,
+    "pixelRatio": 2,
+    "renderPixels": 975032,
+    "textures": 28
+  },
+  "interactionObservations": [
+    "4x cap",
+    "left/right heading and map controls",
+    "walking and third-person pilot",
+    "short pilot jump/flight ability triggered",
+    "free flight mode",
+    "traffic overlay",
+    "shipyard and megastructure panel",
+    "park build on empty tile, undo restored cash",
+    "all nine branch gallery models and shipyard phases"
+  ],
+  "firstlight": {
+    "playbackError": null,
+    "readyState": 4,
+    "loopBeyondTrackDurationObserved": true,
+    "muteAndHiddenPause": true,
+    "pausedCityMusicAdvancesWithoutPersistentRendering": true,
+    "sha256": "7dd37c465338ca3a233aead972440af230c4a8466a4595829c0658484c3d5320"
+  },
+  "browserErrors": [],
+  "limitations": [
+    "Short browser checks do not establish thermal, battery or crash resolution.",
+    "No full-station coverage benchmark.",
+    "No measured sustained FPS or GPU timing at desktop-scale viewport.",
+    "Normal demo and operating dense-city progression are different fixtures from forced-level-8 rendering stress.",
+    "Station-link algorithms and landmark interiors were not exhaustively re-tested in this release."
+  ]
+}

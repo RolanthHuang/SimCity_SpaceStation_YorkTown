@@ -1,6 +1,6 @@
-# Yorktown Clear Dawn v11.1
+# Yorktown Branch Evolution v11.2
 
-Authoritative code lives in `SimCity/`. `build-simcity.mjs` generates four web entries with bundled Three.js and deferred local MP3 playback, plus one standalone offline HTML containing the approved MP3. Edit sources, not generated HTML. This isolated output preserves the prior v11 source directory. Earlier sections describe inherited systems; the v11.1 section below supersedes older render limits.
+Authoritative code lives in `SimCity/`. `build-simcity.mjs` generates four web entries with bundled Three.js and deferred local MP3 playback, plus one standalone offline HTML containing the approved MP3. Edit sources, not generated HTML. This isolated output preserves the prior v11 source directory. Earlier sections describe inherited systems; the v11.2 section below supersedes older branch geometry and render budgets.
 
 ## Branch state and progression
 
@@ -106,3 +106,17 @@ The complete 109-test suite, CPU parity/timing report, synthetic capacity fixtur
 The fixed-direction morning shadow uses a cached 2048px map following the camera target in snapped four-unit steps. Glass atlases are 1024px with anisotropy up to 8, limited by device capability. LINE uses a cached 1280px settled backdrop and 640px motion backdrop; unchanged backgrounds are reused. These restore detail beyond the earlier budgeted settings without making static scenes redraw continuously.
 
 Current evidence: `checks/clear-dawn-tests.tap` (117 passed, zero failures), `checks/clear-dawn-browser.json` (20.08% populated close view at 4× with music; bounded pause observation), and `checks/clear-dawn-verification.json` (build/source hashes and final screenshot settings). The earlier 4.4× equal-month CPU speedup is inherited, not a new GPU, energy or thermal measurement. The 20% browser fixture contains no sail/shell landmarks, so its observation remains applicable after that isolated batching change; final starter screenshots were recaptured from the rebuilt source. Long-running thermal/battery stability, browser-specific crash coverage and full-station performance are still unverified.
+
+## v11.2 shared branch geometry and budgets
+
+`residential-architecture.mjs`, `commercial-architecture.mjs` and `industrial-architecture.mjs` generate all nine level 5–8 branches for each foundation. They share preallocated shapes from their respective `*-shapes.mjs` modules with the gallery. `adoptedForm()` now returns null so the former three showcase overrides cannot replace the branch models in the main city. Common level 1–4 buildings retain their existing renderer.
+
+`render-plan.mjs` admits fine models from 20 CSS pixels (18 retention), up to 96 buildings AND 900,000 estimated submitted triangles; medium is up to 320 AND 700,000. `branch-visuals.mjs` holds conservative bounds checked against actual generated geometry. These are branch-detail budgets, not total-scene triangle limits. Far geometry remains under 1,600 triangles per prototype. Static instancing and cached geometry avoid rebuilding detailed geometry per frame. The CPU worker pacing, 4× cap, stationary render cessation and cached lighting are inherited from 11.1.
+
+Shipyard work selection is deterministic from the city month: three objects, each with three work phases, changing every eight months. Object/phase changes invalidate only the appropriate visual state, not every animation frame. Timber co-living retains its economic branch identity but applies passive-envelope electricity/water coefficients. Other branch effects and evolution waits remain unchanged.
+
+Shared facade textures add window room layers, timber grain, leaf masks and panel seams. Full detail supplies real curved frames, support members, railings, hull panels, casting hydraulics and tank access ladders; distant models retain silhouette and color. The corrected canopy winding prevents the upper surface from disappearing. No claim of film-quality material equivalence is made.
+
+`music.mjs` uses one deferred HTML audio element and the approved Firstlight file, remembers mute, pauses hidden playback and performs a short fade. Web entries stream the MP3; the offline file embeds identical bytes.
+
+Validation: 127 automated tests, per-model geometry report and browser observations are recorded in `checks/branch-*`. Distinguish the normal 20.08% city's simulation progression from the paused, forced-level-8 near-view stress test. Neither is a long-running battery, thermal or crash certification.

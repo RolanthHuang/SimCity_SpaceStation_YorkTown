@@ -1,9 +1,9 @@
-const PREFERENCE='yorktown-warm-cello-music-v1';
+const PREFERENCE='yorktown-background-music-v1',LEGACY_PREFERENCE='yorktown-warm-cello-music-v1';
 
 export class CityMusic {
  constructor({audio,button,document:doc=globalThis.document,window:win=globalThis.window,storage=null}){
   this.audio=audio;this.button=button;this.doc=doc;this.win=win;this.enabled=true;this.engaged=false;this.pending=false;this.generation=0;this.frame=0;this.level=.55;this.blocked=false;
-  try{this.storage=storage||win.localStorage;this.enabled=this.storage.getItem(PREFERENCE)!=='off';}catch{}
+  try{this.storage=storage||win.localStorage;this.enabled=(this.storage.getItem(PREFERENCE)??this.storage.getItem(LEGACY_PREFERENCE))!=='off';}catch{}
   audio.loop=true;audio.preload='none';audio.volume=0;
   this.gesture=e=>{if(button.contains(e.target))return;this.engaged=true;this.start();};
   this.visibility=()=>{if(doc.hidden)this.pause();else this.start();};
@@ -16,8 +16,8 @@ export class CityMusic {
  update(){
   this.button.textContent=this.blocked?'♪ 點此播放':this.enabled?'♪ 配樂開啟':'♪ 配樂關閉';
   this.button.setAttribute('aria-pressed',String(this.enabled));
-  this.button.title='星海靜謐・大提琴暖光';
-  this.button.setAttribute('aria-label',this.blocked?'播放大提琴配樂':this.enabled?'關閉背景配樂':'開啟背景配樂');
+  this.button.title='Firstlight・初見星海';
+  this.button.setAttribute('aria-label',this.blocked?'播放 Firstlight 配樂':this.enabled?'關閉背景配樂':'開啟背景配樂');
  }
  async start(){
   if(!this.enabled||!this.engaged||this.doc.hidden||this.pending||!this.audio.paused)return;

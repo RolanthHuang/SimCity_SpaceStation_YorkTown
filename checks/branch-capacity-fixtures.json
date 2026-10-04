@@ -1,0 +1,23 @@
+{
+  "scope": "Synthetic fixtures. Existing 20% coverage test reused; new all-level-8 variant is a rendering stress case, not a recommended viable city.",
+  "scenarios": [
+    {
+      "kind": "operating",
+      "occupiedCells": 4068,
+      "buildableCells": 20256,
+      "newBranchPlots": null,
+      "oneMonthMs": 600,
+      "population": 32076,
+      "net": 13982
+    },
+    {
+      "kind": "high-tier-rendering",
+      "occupiedCells": 4068,
+      "buildableCells": 20256,
+      "newBranchPlots": 2985,
+      "oneMonthMs": 543,
+      "population": 32076,
+      "net": -51863
+    }
+  ]
+}

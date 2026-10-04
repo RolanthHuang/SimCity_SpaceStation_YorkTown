@@ -32,8 +32,8 @@ test('music waits for interaction, fades gently and suspends hidden-page playbac
 });
 test('an explicitly muted preference survives reload and the single control enables or disables playback',async()=>{
  const f=fixture('off');f.document.fire('keydown');await settle();assert.equal(f.audio.plays,0);
- f.button.onclick();await settle();assert.equal(f.audio.paused,false);assert.equal(f.values.get('yorktown-warm-cello-music-v1'),'on');
- f.button.onclick();assert.equal(f.audio.paused,true);assert.equal(f.values.get('yorktown-warm-cello-music-v1'),'off');assert.equal(f.button.attributes['aria-pressed'],'false');
+ f.button.onclick();await settle();assert.equal(f.audio.paused,false);assert.equal(f.values.get('yorktown-background-music-v1'),'on');
+ f.button.onclick();assert.equal(f.audio.paused,true);assert.equal(f.values.get('yorktown-background-music-v1'),'off');assert.equal(f.button.attributes['aria-pressed'],'false');
  f.music.dispose();
 });
 test('a browser playback rejection offers one retry control and does not break the city',async()=>{

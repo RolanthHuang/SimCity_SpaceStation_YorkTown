@@ -22,17 +22,17 @@ test('moving mechanisms and individually coloured instances are kept live',()=>{
  const moving=new T.Mesh(geometry,material),a=new T.Mesh(geometry,material),b=new T.Mesh(geometry,material),colours=new T.InstancedMesh(geometry,material,1);colours.setColorAt(0,new T.Color('red'));mechanism.add(moving);root.add(a,b,mechanism,colours);
  batchStaticArchitecture(root);assert.equal(moving.parent,mechanism);assert.equal(colours.parent,root);assert.equal(root.children.length,3);mechanism.position.x=8;root.updateMatrixWorld(true);assert.equal(moving.getWorldPosition(new T.Vector3()).x,8);
 });
-test('a fully detailed fused plot creates one adopted building, including 4x4 member cells',()=>{
+test('all fused district branches bypass old showcase replacements',()=>{
  const s=createCity({starter:false}),scene=new T.Scene(),models=new Map(),detailPlan=new Map(),operational=new Float32Array(s.cells.length).fill(1);
  for(const [type,branch,size,x,key] of [['R','garden',4,20,'residence'],['c','finance',3,30,'commerce'],['i','precision',3,40,'industry']]){
   const anchor=idx(x,20),ids=square(anchor,size);for(const i of ids){Object.assign(s.cells[i],{type,branch,level:6});detailPlan.set(i,2);}assert.equal(fuse(s,anchor,size),true);
   const proto=new T.Group(),body=new T.Group(),addon=new T.Group();body.name='mature';body.add(new T.Mesh(new T.BoxGeometry(),new T.MeshBasicMaterial()));addon.name='addition6';proto.add(body,addon);models.set(key,proto);
  }
  const a=Object.assign(Object.create(AtelierScene.prototype),{view:{scene,detailPlan,mode:'build'},models,landmarks:new Map(),pickables:[]});
- a.updateLandmarks(s,{operational});assert.equal(a.landmarks.size,3);assert.equal(scene.children.length,3);assert.equal(a.pickables.length,3);
+ a.updateLandmarks(s,{operational});assert.equal(a.landmarks.size,0);assert.equal(scene.children.length,0);assert.equal(a.pickables.length,0);assert.equal(a.landmarks.has(idx(30,20)),false,'finance cannot be replaced by the old twin-sail landmark');
  const first=[...a.landmarks.values()];a.updateLandmarks(s,{operational});assert.deepEqual([...a.landmarks.values()],first,'unchanged lots reuse existing models');
- detailPlan.clear();a.updateLandmarks(s,{operational});assert.equal(scene.children.filter(g=>g.visible).length,0);assert.equal(a.landmarks.size,3,'distant models remain cached');
- for(const i of square(idx(20,20),4))s.cells[i].type=null;a.updateLandmarks(s,{operational});assert.equal(a.landmarks.size,2);assert.equal(a.pickables.length,2,'removed plots leave no retained pick targets');
+ detailPlan.clear();a.updateLandmarks(s,{operational});assert.equal(scene.children.filter(g=>g.visible).length,0);assert.equal(a.landmarks.size,0,'branch buildings remain in the shared renderer');
+ for(const i of square(idx(20,20),4))s.cells[i].type=null;a.updateLandmarks(s,{operational});assert.equal(a.landmarks.size,0);assert.equal(a.pickables.length,0,'removed plots leave no retained pick targets');
 });
 test('real sail and shell landmarks retain their complete geometry with fewer static submissions',()=>{
  const oldDoc=globalThis.document;globalThis.document={createElement:()=>({getContext:()=>({fillRect(){},strokeRect(){},fillText(){},beginPath(){},moveTo(){},lineTo(){},stroke(){}})})};

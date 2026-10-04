@@ -86,3 +86,9 @@ test('display meshes are reused for population changes and only the affected chu
   s.cells[valid[0]].level++;v.update(s,analyze(s));assert.equal(v.geometryBuilds,builds+1);assert.ok(meshes.some(m=>v.buildings.children.includes(m)));assert.ok(meshes.some(m=>!v.buildings.children.includes(m)));
  }finally{globalThis.document=oldDoc;}
 });
+
+test('dense detailed prototypes stay within triangle budgets and prioritize the closest visible plots',()=>{
+ const items=Array.from({length:6000},(_,i)=>({i,distance:2+i*.01,pixels:100,visible:true,detailCost:{fine:41000,medium:13000}}));
+ const plan=buildingDetailPlan(items),count=d=>[...plan.values()].filter(v=>v===d).length;
+ assert.ok(count(2)*41000<=900000);assert.ok(count(1)*13000<=700000);assert.equal(plan.get(0),2);assert.equal(plan.get(5999),0);assert.equal(plan.size,6000);
+});

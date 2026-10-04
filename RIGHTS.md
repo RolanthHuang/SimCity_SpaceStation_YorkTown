@@ -4,7 +4,7 @@ This is an independently generated, unofficial fan study inspired by Starbase Yo
 
 The city simulation, procedural architecture and exploration code were authored for this project. This version includes no film footage, extracted film models, commercial soundtrack recordings, paid textures or rejected composition drafts. User-supplied screenshots and prior art concepts guided the visual direction; they are not embedded in gameplay.
 
-The approved original soundtrack, “Starlit Resolve — Warm Cello / 星海靜謐・大提琴暖光,” was composed and rendered for this project. It contains no copied reference recording or transcribed film melody. Rendered instruments use CC0 VSCO 2 Community Edition/VCSL samples and locally licensed GarageBand instruments. Only the complete mixed composition is included; no raw GarageBand instrument files are redistributed. See Audio/CREDITS.md.
+The active approved original soundtrack is “Firstlight — 初見星海 / First Light Over Yorktown.” The published MP3 is byte-identical to the original completed mix approved for this project. The source verification records CC0-1.0 samples from VSCO 2 Community Edition and VCSL. No film soundtrack recording or transcribed film melody is included. Only the complete mix is used by this release; see Audio/CREDITS.md. Older release archives retain their separately documented soundtrack.
 
 Copyright 2026 RolanthHuang. Original project material is shared for viewing and evaluation; no additional reuse license is granted here.
 

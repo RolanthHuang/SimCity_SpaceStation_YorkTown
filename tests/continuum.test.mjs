@@ -84,7 +84,7 @@ test('camouflage is used on long side views; end, inside and overhead views expo
  assert.equal(lineAppearance({x:100,y:40,z:0},80).side,true);assert.equal(lineAppearance({x:0,y:20,z:120},80).side,false);assert.equal(lineAppearance({x:0,y:20,z:0},80).side,false);assert.equal(lineAppearance({x:0,y:150,z:0},80).side,false);
 });
 test('adopted forms remain distinct district branches with valid stages and footprints',()=>{
- for(const [type,branch,form]of [['R','garden','residence'],['C','finance','commerce'],['I','precision','industry']]){assert.equal(adoptedForm({type,branch,level:6,span:3}),form);assert.equal(adoptedForm({type,branch,level:4,span:3}),null);assert.equal(adoptedForm({type,branch,level:6,span:2}),null);assert.equal(adoptedForm({type,branch,level:6,span:3,vacant:true}),null);}
+ for(const [type,branch,form]of [['R','garden',null],['C','finance',null],['I','precision',null]]){assert.equal(adoptedForm({type,branch,level:6,span:3}),form);assert.equal(adoptedForm({type,branch,level:4,span:3}),null);assert.equal(adoptedForm({type,branch,level:6,span:2}),null);assert.equal(adoptedForm({type,branch,level:6,span:3,vacant:true}),null);}
 });
 test('Line floor area has real elevator openings while central train corridors retain floors',()=>{
  const L=160,patches=lineFloorPatches(L),covered=(x,z)=>patches.some(p=>Math.abs(x-p.x)<p.w/2&&Math.abs(z-p.z)<p.d/2);assert.equal(covered(0,0),true);assert.equal(covered(10,68),false);assert.equal(covered(10,-68),false);assert.equal(covered(10,0),true);assert.equal(covered(20,68),true);assert.equal(patches.reduce((n,p)=>n+p.w*p.d,0),80*L-2*8*6);

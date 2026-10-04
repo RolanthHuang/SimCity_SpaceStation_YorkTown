@@ -8,7 +8,8 @@ import {placeOnDeck} from './dawn-scene.mjs';
 import {LINE} from './continuum.mjs';
 import {batchStaticArchitecture} from './static-batch.mjs';
 
-export function adoptedForm(c){if(c.level<5||(c.span||1)<3||c.fire||c.vacant)return null;const z=zoneOf(c.type);return z==='R'&&c.branch==='garden'?'residence':z==='C'&&c.branch==='finance'?'commerce':z==='I'&&c.branch==='precision'?'industry':null;}
+// Legacy showcase models no longer override merged district branch buildings.
+export function adoptedForm(){return null;}
 export function lineAppearance(camera,halfLength,width=40){
  const outside=Math.abs(camera.x)>width+.2||Math.abs(camera.z)>halfLength+.2||camera.y>120;
  const side=outside&&Math.abs(camera.x)/(width+1)>Math.abs(camera.z)/(halfLength+1)*1.12;

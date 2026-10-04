@@ -1,3 +1,8 @@
+import {branchVisualHeight,branchDetailCost} from './branch-visuals.mjs';
+import {industrialVisualKey} from './industrial-architecture.mjs';
+import {residentialShapes} from './residential-shapes.mjs';
+import {industrialShapes} from './industrial-shapes.mjs';
+import {commercialShapes} from './commercial-shapes.mjs';
 import {ContinuumScene,adoptedForm} from './continuum-scene.mjs';
 import {RenderBudget,ViewQuality,renderPixelRatio} from './render-budget.mjs';
 import {buildingDetailPlan,renderChunk,distantBuilding} from './render-plan.mjs';
@@ -37,12 +42,12 @@ export class CityView{
   this.world=new THREE.Group();this.scene.add(this.world);this.buildings=new THREE.Group();this.scene.add(this.buildings);
   this.box=new THREE.BoxGeometry(1,1,1);this.mat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.48,metalness:.24});
   this.valid=Array.from({length:CELL_COUNT},(_,i)=>i).filter(terrain);this.floor=new THREE.InstancedMesh(this.box,new THREE.MeshStandardMaterial({color:0xffffff,roughness:.86,metalness:.12}),this.valid.length);this.floor.userData.ground=true;this.world.add(this.floor);
-  this.dummy=new THREE.Object3D();this.shapes={...architecturalShapes(),box:this.box,cylinder:new THREE.CylinderGeometry(.5,.5,1,24)};this.color=new THREE.Color();
+  this.dummy=new THREE.Object3D();this.shapes={...architecturalShapes(),...commercialShapes(),...residentialShapes(),...industrialShapes(),box:this.box,cylinder:new THREE.CylinderGeometry(.5,.5,1,24)};this.color=new THREE.Color();
   this.valid.forEach((i,n)=>{const [x,y]=xy(i);this.matrix(this.floor,n,x,-.37,y,1.005,.86,1.005);this.floor.setColorAt(n,this.color.setHex(0x263f51));});
   this.floor.instanceMatrix.needsUpdate=true;this.floorStyles=new Uint32Array(this.valid.length).fill(0xffffffff);this.floorIsolation='all';
   this.station=createStation(this.scene);
   this.maglev=new MaglevScene(this);this.addRails();this.dawn=new DawnScene(this.scene);this.atelier=new AtelierScene(this);this.continuum=new ContinuumScene(this);
-  this.cityMaterials={};for(const role of ['ivory','stone','titanium','gold','dark','window','glass','pane','leaf','red']){const mat=this.atelier.assets.m[role].clone();mat.color.set(0xffffff);this.cityMaterials[role]=mat;}
+  this.cityMaterials={};for(const role of ['ivory','stone','titanium','gold','dark','window','glass','pane','leaf','red','wood','bark','charcoal']){const mat=this.atelier.assets.m[role].clone();mat.color.set(0xffffff);this.cityMaterials[role]=mat;}
   this.cityMaterials.contact=this.atelier.assets.m.contact;
   this.shapes.foliage=foliageGeometry();this.shapes.plane=new THREE.PlaneGeometry(1,1);this.shapes.plane.rotateX(-Math.PI/2);
   this.sharedMaterials=new Set([this.mat,...Object.values(this.cityMaterials)]);
@@ -95,9 +100,9 @@ export class CityView{
  detailItems(s){
   this.camera.updateMatrixWorld();const frustum=new THREE.Frustum().setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(this.camera.projectionMatrix,this.camera.matrixWorldInverse)),forward=this.camera.getWorldDirection(new THREE.Vector3()),focal=(this.host?.clientHeight||720)/(2*Math.tan(this.camera.fov*Math.PI/360));
   return this.valid.filter(i=>{const c=s.cells[i];return c.level&&!c.subplot&&plotAnchor(s,i)===i&&(zoneOf(c.type)||isFacility(c.type));}).map(i=>{
-   const c=s.cells[i],span=c.span||1,[x,y]=xy(i),form=adoptedForm(c),h=form?({residence:10,commerce:13,industry:7}[form])*span/5:Math.max(.8,stageHeight(c)*(1+(span-1)*.18)+.5);
+   const c=s.cells[i],span=c.span||1,[x,y]=xy(i),form=adoptedForm(c),h=form?({residence:10,commerce:13,industry:7}[form])*span/5:branchVisualHeight(c);
    const center=new THREE.Vector3(...surface(x+(span-1)/2-27.5,y+(span-1)/2-27.5,h/2)),delta=center.clone().sub(this.camera.position),radius=Math.hypot(span*.78,h*.53),depth=delta.dot(forward);
-   return {i,hero:!!form,distance:delta.length(),pixels:Math.max(h,span)*focal/Math.max(1,depth),visible:frustum.intersectsSphere(new THREE.Sphere(center,radius))&&!(this.isolate&&this.mode==='build'&&deckOf(i)!==this.deck)};
+   return {i,detailCost:branchDetailCost(c),hero:!!form,distance:delta.length(),pixels:Math.max(h,span)*focal/Math.max(1,depth),visible:frustum.intersectsSphere(new THREE.Sphere(center,radius))&&!(this.isolate&&this.mode==='build'&&deckOf(i)!==this.deck)};
   });
  }
  pickTrack(clientX,clientY){
@@ -171,7 +176,7 @@ export class CityView{
   this.detailPlan=buildingDetailPlan(this.detailItems(s),this.mode,this.detailPlan);
   this.atelier.updateShadowFocus?.(this.mode==='build'?this.target:this.camera.position);
   const desired=new Map(),prefix=`${overlay}:${overlay==='normal'?'':s.month}:${this.isolate&&this.mode==='build'?this.deck:'all'}:${s.artSample}`;
-  for(const i of this.valid){const c=s.cells[i],key=renderChunk(i);if(!desired.has(key))desired.set(key,[]);if(c.type||c.wire||c.pipe)desired.get(key).push(`${i},${c.type},${c.level},${c.plot},${c.span},${c.branch},${c.vacant},${c.fire},${c.enabled},${c.upgrade},${c.roadBase},${c.wire},${c.pipe},${c.pop>0||a.filled[i]>0},${this.detailPlan.get(i)||0}`);}
+  for(const i of this.valid){const c=s.cells[i],key=renderChunk(i);if(!desired.has(key))desired.set(key,[]);if(c.type||c.wire||c.pipe)desired.get(key).push(`${i},${c.type},${c.level},${c.plot},${c.span},${c.branch},${c.vacant},${c.fire},${c.enabled},${c.upgrade},${c.roadBase},${c.wire},${c.pipe},${c.pop>0||a.filled[i]>0},${this.detailPlan.get(i)||0},${industrialVisualKey(c,i%SIZE,Math.floor(i/SIZE))}`);}
   const changed=new Set();for(const [key,parts]of desired){const signature=prefix+'|'+parts.join(';'),old=this.chunkModels.get(key);if(old?.signature===signature)continue;changed.add(key);for(const child of old?.meshes||[]){this.buildings.remove(child);child.dispose();if(!this.sharedMaterials.has(child.material))child.material.dispose();}this.chunkModels.set(key,{signature,meshes:[]});}
   this.growing=this.growing.filter(g=>g.mesh.parent===this.buildings);
   this.dawn.update(s,a);this.atelier.update(s,a);this.continuum.update(s,a);this.maglev.update(s,a);document.body.classList.toggle('atelier-city',!!s.artSample);this.secondaryRails.visible=!(this.isolate&&this.mode==='build'&&this.deck===0);this.station.visible=!(this.isolate&&this.mode==='build');this.dawn.root.visible=this.station.visible;const first=this.signatures.size===0,now=performance.now();for(const i of this.valid){const c=s.cells[i],signature=`${c.type}:${c.level}:${c.plot}:${c.span}:${c.branch}:${c.vacant}`;if(!first&&this.signatures.get(i)!==signature&&solid(c)&&this.detailPlan.get(i)===2)this.growth.set(i,now);if(!solid(c))this.growth.delete(i);this.signatures.set(i,signature);}if(this.mode==='walk')this.ensureWalkable();this.updatePeople();if(this.mode==='interior'){const c=s.cells[this.interiorTile];if(!c||c.type!==this.room.type||c.fire||!c.level)this.setMode('walk');else this.room.update(c,a,this.interiorTile,s.month);}
