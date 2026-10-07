@@ -41,7 +41,11 @@ test('8-stage geometry is finite, distinct, and bounded for all zones, densities
 test('stopping a high-tier building retains only 15 percent of progression upkeep',()=>{const c={type:'R',level:8,upgrade:0,enabled:true};const cost=stageUpkeep(c);assert.equal(cost,18);assert.equal(stageUpkeep({...c,enabled:false}),cost*.15);});
 test('with automatic investment disabled, free natural growth never exceeds common stage 4',()=>{const s=sample();s.autoDevelopment=false;const common=s.cells.find(c=>c.type==='R'&&c.level===3);const highest=s.cells.filter(c=>['R','C','I','r','c','i'].includes(c.type));for(let k=0;k<18;k++)step(s);assert.ok(highest.every(c=>c.level<=5));assert.ok(common.level<=4);assert.ok(Number.isFinite(s.cash));assert.equal(analyze(deserialize(serialize(s,{compact:true}))).stats.population,analyze(s).stats.population);});
 test('real city permits each R/C/I building to reach tier 8 and pays the whole resource bill',()=>{
- for(const lot of ATELIER_LOTS){const s=sample();if(lot.type==='I'){
+ for(const lot of ATELIER_LOTS){const s=sample();if(lot.type==='C'){
+  // A growing commercial tower also needs a real, nearby workforce when
+  // manufacturing can compete for commuters rather than remaining empty.
+  Object.assign(s.cells[idx(29,31)],{type:'R',level:5,pop:165,age:0,wire:true,pipe:true,enabled:true,upgrade:0,fire:0});
+ }if(lot.type==='I'){
   for(let i=0;i<s.cells.length;i++)if(i!==lot.anchor&&zoneOf(s.cells[i].type)==='I')s.cells[i].enabled=false;
   // A viable factory district needs nearby workers, not a bypass of its occupancy gate.
   for(const x of [34,35,36,37,38])Object.assign(s.cells[idx(x,23)],{type:'R',level:5,pop:165,age:0,wire:true,pipe:true,enabled:true,upgrade:0,fire:0});

@@ -19,5 +19,5 @@ await writeFile('simcity.html',webPage);
 await writeFile('index.html',webPage);
 await writeFile('showcase.html',webPage);
 await writeFile('SimCity/template.html',nestedPage);
-await writeFile('Yorktown-Branch-Evolution-v11.2.0.html',offlinePage);
+await writeFile('Yorktown-Industry-Balance-v11.2.1.html',offlinePage);
 console.log(`Built web entries (${Math.round(Buffer.byteLength(webPage)/1024)} KiB) with deferred audio streaming and a fully offline single file (${Math.round(Buffer.byteLength(offlinePage)/1024)} KiB).`);

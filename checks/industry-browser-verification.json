@@ -1,0 +1,60 @@
+{
+  "release": "11.2.1",
+  "baseCommit": "304121c33420d490b3375b8445ffbe11e2d1a665",
+  "tests": {
+    "pass": 140,
+    "fail": 0
+  },
+  "browser": "Codex in-app browser, 1280 CSS pixels wide",
+  "demoBrowser": {
+    "months": 16,
+    "population": 7682,
+    "net": 3520,
+    "unemploymentPercent": 0
+  },
+  "highDemandBrowser": {
+    "months": 15,
+    "demandI": 100,
+    "factoryLevel": 2,
+    "filled": 14,
+    "jobs": 28,
+    "population": 552,
+    "stockAlloy": 151,
+    "nextStageConditions": "satisfied"
+  },
+  "finalDense": {
+    "coveragePercent": 20.08,
+    "cliMonths": 77,
+    "cliPopulation": 60540,
+    "cliNet": 42842,
+    "cliUnemploymentPercent": 2.115,
+    "additionalBrowserMonths": 65,
+    "finalGameDate": "2274/11",
+    "browserPopulation": 60592,
+    "browserEmployed": 28441,
+    "browserNet": 42957,
+    "browserCash": 10889615,
+    "browserUnemploymentPercent": 2
+  },
+  "controls": [
+    "map rotation and pan",
+    "pollution overlay",
+    "industrial building panel and evolution conditions",
+    "park build 180 and undo refunded 180",
+    "warehouse real alloy production",
+    "third-person pilot selection and walking",
+    "free-flight mode at height 8",
+    "manual save preserved before fixture imports"
+  ],
+  "shortFlightLimit": "Pilot selected and ability key delivered; sustained short-flight ability not fully tested.",
+  "consoleWarnings": [],
+  "consoleErrors": [],
+  "cpuComparison": "industry-performance.json; 174ms before, 201ms after median analyze cost on same 20.08% fixture",
+  "intermediateIssue": "During pre-release browser stress, a synchronized demand-only abandonment wave was found; final source fixes occupied-building retention and was subsequently replayed and checked.",
+  "limits": [
+    "No battery, thermal or full-station benchmark.",
+    "No new benchmark of all-level-8 graphical stress.",
+    "Not all policies, layout choices or disaster cases are calibrated.",
+    "Model, material, music and existing save schema are preserved."
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "scope": "Same 20.08% city, one process, one warmup and five repeated analyze calls. CPU observations only; no battery or GPU benchmark.",
+  "cases": [
+    {
+      "kind": "before",
+      "ms": [
+        179,
+        165,
+        174,
+        173,
+        174
+      ],
+      "medianMs": 174,
+      "population": 32076,
+      "employed": 13800,
+      "workers": 14580,
+      "unemployment": 0.053497942386831275
+    },
+    {
+      "kind": "after",
+      "ms": [
+        215,
+        209,
+        201,
+        197,
+        189
+      ],
+      "medianMs": 201,
+      "population": 32076,
+      "employed": 13800,
+      "workers": 14580,
+      "unemployment": 0.053497942386831275
+    }
+  ],
+  "ratio": 1.1551724137931034
+}

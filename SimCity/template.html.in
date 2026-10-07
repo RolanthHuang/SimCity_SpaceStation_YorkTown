@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta name="yorktown-version" content="11.2.0"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#08131f"><meta name="description" content="Yorktown：在環形太空站建設與經營城市。住宅、工作、交通、水電與財政相互連動的單人城市模擬。"><title>Yorktown · 晨光立體城</title><style>/*STYLE*/</style></head>
+<meta name="yorktown-version" content="11.2.1"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#08131f"><meta name="description" content="Yorktown：在環形太空站建設與經營城市。住宅、工作、交通、水電與財政相互連動的單人城市模擬。"><title>Yorktown · 晨光立體城</title><style>/*STYLE*/</style></head>
 <body>
 <main id="game">
  <div id="viewport"></div><div id="portal-flash" aria-hidden="true"></div><div class="vignette"></div>
  <header class="topbar">
-  <div class="brand"><span class="brand-icon">Y</span><div><strong>YORKTOWN</strong><small>CLEAR DAWN · 11.2</small></div></div>
+  <div class="brand"><span class="brand-icon">Y</span><div><strong>YORKTOWN</strong><small>CLEAR DAWN · 11.2.1</small></div></div>
   <div class="metrics"><div><small>財庫 · 信用點</small><strong id="cash">65,000</strong><span id="net" class="positive">— / 月</span></div><div><small>居民</small><strong id="population">120</strong><span id="jobs">—</span></div><div class="happiness-metric"><small>滿意度</small><strong id="happiness">—</strong><span id="employment">—</span></div></div>
   <nav class="top-actions"><button id="orbital-button">船塢與巨構</button><button id="assistant-button">延續街區</button><button id="showcase-toggle" aria-pressed="false">示範城市</button><button id="budget-button">財政</button><button id="save-button">存檔</button><details class="more-menu"><summary>更多</summary><div><button id="new-architecture">晨光新街區</button><button id="arm-button">街區導航</button><button id="space-button">維生</button><button id="data-button">城市報告</button><button id="plant-button">⚡ 電廠更新</button><button id="evolution-gallery">分支進化圖鑑</button><button id="music-toggle" aria-pressed="true">♪ 配樂開啟</button><button id="help-button">操作指南</button></div></details></nav>
  </header>

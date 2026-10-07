@@ -58,7 +58,7 @@ test('route traffic moves along road geometry and reverses its heading rather th
 });
 test('citizens give measured city and local road information, and change when the city changes',()=>{
  const s=prepareLiving(createCity()),a=analyze(s),tile=idx(25,29),net=forecast(s,a).net;
- const resident=citizenReport(s,a,{id:0,tile},net);assert.match(resident.text,/2,840/);assert.match(resident.text,/94%/);
+ const resident=citizenReport(s,a,{id:0,tile},net);assert.match(resident.text,/2,840/);assert.ok(resident.text.includes(`${Math.round(a.stats.happiness)}%`));
  const shop=citizenReport(s,a,{id:1,tile},net);assert.match(shop.text,/1,338/);assert.ok(shop.text.includes(`+${Math.round(net).toLocaleString('en-US')} 信用點`));
  a.power.coverage[tile]=.2;assert.match(citizenReport(s,a,{id:2,tile},net).text,/20%/);a.traffic[tile]=a.roadCapacity[tile]*2;assert.match(citizenReport(s,a,{id:3,tile},net).text,/200%/);
 });

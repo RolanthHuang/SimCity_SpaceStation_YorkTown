@@ -5,7 +5,7 @@ import {plotMembers,plotAnchor} from './plots.mjs';
 export function branchContext(s,a,i){
  i=plotAnchor(s,i);const members=plotMembers(s,i),c=s.cells[i],own=new Set(members),[xx,yy]=xy(i),x=xx+((c.span||1)-1)/2,y=yy+((c.span||1)-1)/2;
  const avg=(data,fallback=0)=>members.reduce((n,j)=>n+(data?.[j]??fallback),0)/members.length;
- const ctx={parks:avg(a.baseParks||a.parks),school:avg(a.services?.school),hospital:avg(a.services?.hospital),pollution:avg(a.pollution),value:avg(a.landValue),operational:Math.min(...members.map(j=>a.operational[j])),education:s.education,homePop:0,commerce:0,industry:0,matureCommerce:0,docks:0,stations:0,green:!!s.policies.green,freight:members.every(j=>a.freight[j]),occupancy:0};
+ const ctx={parks:avg(a.baseParks||a.parks),school:avg(a.services?.school),hospital:avg(a.services?.hospital),pollution:avg(a.pollution),value:avg(branchZone(c)==='I'?(a.industrialSuitability||a.landValue):a.landValue),operational:Math.min(...members.map(j=>a.operational[j])),education:s.education,homePop:0,commerce:0,industry:0,matureCommerce:0,docks:0,stations:0,green:!!s.policies.green,freight:members.every(j=>a.freight[j]),occupancy:0};
  for(let dy=-8;dy<=8;dy++)for(let dx=-8;dx<=8;dx++){
   const d=Math.hypot(dx,dy);if(d>8)continue;const ny=Math.round(y)+dy;if(ny<0||ny>=HEIGHT)continue;const j=idx(wrapX(Math.round(x)+dx),ny);
   if(own.has(j)||deckOf(j)!==deckOf(i))continue;const b=s.cells[j];if(!b?.level||!isEnabled(b)||b.fire||b.subplot)continue;
@@ -31,7 +31,7 @@ export const preferredBranch=(s,a,i)=>branchCandidates(s,a,i).find(d=>d.eligible
 export function advanceConditions(s,a,i,next=s.cells[plotAnchor(s,i)].level+1){
  const members=plotMembers(s,i),c=s.cells[members[0]],z=branchZone(c);if(!z)return [];
  const q=branchContext(s,a,i),education=[0,0,20,28,36,46,58,68,78][next]||0,land=[0,0,20,26,32,38,45,53,60][next]||0;
- const checks=[{label:'建築正在營運',ok:isEnabled(c)&&!c.fire&&c.level>0},{label:'水電與維生至少 98%',ok:q.operational>=.98},{label:`教育 ${education}`,ok:s.education>=education},{label:`地價 ${z==='I'?Math.round(land*.42):land}`,ok:q.value>=(z==='I'?Math.round(land*.42):land)},{label:z==='R'?'入住率至少 55%':'職位使用率至少 40%',ok:q.occupancy>=(z==='R'?.55:.4)},{label:'分區需求為正',ok:a.stats.demand[z]>0}];
+ const checks=[{label:'建築正在營運',ok:isEnabled(c)&&!c.fire&&c.level>0},{label:'水電與維生至少 98%',ok:q.operational>=.98},{label:`教育 ${education}`,ok:s.education>=education},{label:`${z==='I'?'工業適地度':'地價'} ${z==='I'?Math.round(land*.42):land}`,ok:q.value>=(z==='I'?Math.round(land*.42):land)},{label:z==='R'?'入住率至少 55%':'職位使用率至少 40%',ok:q.occupancy>=(z==='R'?.55:.4)},{label:'分區需求為正',ok:a.stats.demand[z]>0}];
  if(z==='I')checks.push({label:'連通貨運船塢',ok:q.freight});
  if(z==='R')checks.push({label:'居住滿意度至少 50',ok:members.reduce((n,j)=>n+a.happiness[j],0)/members.length>=50});
  if(next>=6)checks.push({label:`已完成 ${next-5} 張船塢訂單`,ok:s.orbital.completed>=next-5});
@@ -67,7 +67,11 @@ export function tickBranches(s,a,notify=()=>{}){
   }
   if(c.enabled===false){assign(s,members,{growthMonths:0,branchMonths:0,branchStress:0});continue;}
   const retentionLand=[0,0,0,0,0,30,36,43,50][c.level]*(z==='I'?.42:1);
-  const bad=q.operational<.75||a.stats.demand[z]<-45||q.value<18||(c.level>=5&&(!current?.eligible||q.occupancy<.18||q.value<retentionLand));
+  // Negative citywide demand stops new investment. It is not a failure of
+  // an existing occupied building; only persistently empty excess capacity
+  // contributes to abandonment stress.
+  const excessIdle=a.stats.demand[z]<-45&&q.occupancy<.18;
+  const bad=q.operational<.75||excessIdle||q.value<18||(c.level>=5&&(!current?.eligible||q.occupancy<.18||q.value<retentionLand));
   const stress=bad?(c.branchStress||0)+1:Math.max(0,(c.branchStress||0)-2),cooldown=Math.max(0,(c.branchCooldown||0)-1);
   const shift=c.level>=5?best&&best.id!==c.branch&&best.score-(current?.score||0)>=.14&&!bad:best;
   const candidate=shift?best.id:null,months=candidate?(candidate===c.branchCandidate?(c.branchMonths||0)+1:1):0;

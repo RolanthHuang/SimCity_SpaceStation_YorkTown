@@ -10,6 +10,7 @@ import {SIZE,HEIGHT,CELL_COUNT,VERSION,deckOf,wrapX,deltaX,upgradeFactor,buildin
 import {createOrbital,restoreOrbital,orbitalLoads,orbitalReport,tickOrbital,PORTS,GATES,GATE_FOOTINGS,canPortal} from './orbital.mjs';
 import {spaceNetworks} from './space.mjs';
 import {reservedSample} from './atelier-plan.mjs';
+import {industrialWorkerBudget,industrialEmission,industrialConcentration,industrialSiteValue,industrialTax} from './industry-balance.mjs';
 const N=CELL_COUNT;
 const empty=()=>({...branchDefaults(),type:null,level:0,pop:0,age:0,wire:false,pipe:false,fire:0,renewal:'inherit',retiredPlant:null,enabled:true,upgrade:0,preserve:false,plot:null,span:1,subplot:false,roadBase:null});
 const fundingKey=t=>TYPES[t]?.group==='utility'?'utilities':TYPES[t]?.group==='transport'?'transport':['fire','police','school','hospital'].includes(t)?t:'parks';
@@ -139,7 +140,6 @@ export function analyze(s){
  compileRoutes(graph,cells,roadCapacity);
  const pollution=new Float32Array(N),parks=new Float32Array(N),services=Object.fromEntries(['fire','police','school','hospital'].map(k=>[k,new Float32Array(N)]));
  for(const i of active){const c=cells[i],t=c.type;
-  if(zoneOf(t)==='I'&&c.level>0&&isEnabled(c))around(i,7,(j,d)=>pollution[j]+=(t==='I'?28:16)*developmentFactor(c)*(1-d/8)*(s.policies.green?.6:1)*(s.education>70?.7:1)*(districtCore(c)?.pollution||1)*branchEffects(c).pollution);
   const core=districtCore(c);if(core?.amenity&&plotAnchor(s,i)===i){const [x,y]=xy(i),offset=Math.floor((c.span-1)/2),center=idx(wrapX(x+offset),y+offset);around(center,5,(j,d)=>parks[j]+=core.amenity*(1-d/6)*operational[i]);}
   if(t==='power')around(i,4,(j,d)=>pollution[j]+=8*(1-d/5));
   if(t==='park'||t==='stadium')around(i,TYPES[t].radius,(j,d)=>parks[j]+=22*(1-d/(TYPES[t].radius+1))*scale(s,t)*upgradeFactor(c)*operational[i]);
@@ -150,30 +150,44 @@ export function analyze(s){
  const hospitalCapacity=active.filter(i=>cells[i].type==='hospital').reduce((a,i)=>a+900*upgradeFactor(cells[i])*facilityFactor(cells[i])*operational[i]*scale(s,'hospital'),0);
  for(let i=0;i<N;i++){services.school[i]*=Math.min(1,schoolCapacity/Math.max(1,population));services.hospital[i]*=Math.min(1,hospitalCapacity/Math.max(1,population));}
  const baseParks=parks.slice(),branchHome=new Float32Array(N),branchTrade=new Float32Array(N),branchProduction=new Float32Array(N);
- const crime=new Float32Array(N),landValue=new Float32Array(N),happiness=new Float32Array(N);
+ const crime=new Float32Array(N),landValue=new Float32Array(N),industrialSuitability=new Float32Array(N),happiness=new Float32Array(N);
  const nominal=active.reduce((a,i)=>a+nominalJobs(cells[i]),0),jobs=new Float32Array(N),filled=new Float32Array(N),employed=new Float32Array(N),commute=new Float32Array(N);
  for(const i of active){const c=cells[i];let factor=1;if(zoneOf(c.type)==='I')factor=freight[i]?1:.2;if(zoneOf(c.type)==='C')factor=clamp(population/Math.max(100,nominal*.7),.15,1)+(passengers[i]?.2:0);jobs[i]=Math.floor(nominalJobs(c)*Math.min(1,factor)*operational[i]*(c.level?1:0));}
  // Assign finite job seats along actual paths. Rotating origin priority prevents permanent residential bias.
  const homes=active.filter(i=>residential(cells[i].type)&&cells[i].pop>0),jobSites=active.filter(i=>jobs[i]>0),offset=s.month%Math.max(1,homes.length);
  let totalWorkers=0,totalEmployed=0,commuteTotal=0;const commuteWorkspace=routeWorkspace();
+ const industrySeats=jobSites.reduce((n,j)=>n+(zoneOf(cells[j].type)==='I'?nominalJobs(cells[j]):0),0),highIndustryDemand=industrySeats<population*.32+65;
+ const industrialTarget=highIndustryDemand?.5:.35;let remainingWorkers=homes.reduce((n,i)=>n+Math.floor(cells[i].pop*.48),0),pendingIndustry=jobSites.reduce((n,j)=>n+(zoneOf(cells[j].type)==='I'&&freight[j]?Math.ceil(jobs[j]*industrialTarget):0),0);
  for(let h=0;h<homes.length;h++){
-  const i=homes[(h+offset)%homes.length],workers=Math.floor(cells[i].pop*.48);totalWorkers+=workers;if(!workers||!access[i].length)continue;
+  const i=homes[(h+offset)%homes.length],workers=Math.floor(cells[i].pop*.48);totalWorkers+=workers;if(!workers||!access[i].length){remainingWorkers-=workers;continue;}
   // Commutes above 42 were already rejected. Do not explore farther network nodes.
   const path=routes(graph,access[i],traffic,roadCapacity,cells,commuteWorkspace,42),candidates=[];
   for(const j of jobSites)if(jobs[j]-filled[j]>=1){let best=-1,d=Infinity;for(const n of access[j])if(path.dist[n]<d){d=path.dist[n];best=n;}d+=Math.max(0,pedestrian.dist[i])+Math.max(0,pedestrian.dist[j]);if(d<=42)candidates.push({j,d,best});}
   candidates.sort((a,b)=>a.d-b.d);let needed=workers,travel=0;
-  for(const {j,d,best} of candidates){const count=Math.min(needed,jobs[j]-filled[j]);if(!count)continue;filled[j]+=count;employed[i]+=count;needed-=count;travel+=count*d;
-   let n=best,guard=0;while(n>=0&&guard++<N){const prev=path.previous[n],link=prev>=0?graph.railEdges?.get(`${prev}:${n}`):null;if(link)link.riders+=count;traffic[n]+=count;n=prev;}if(!needed)break;
-  }totalEmployed+=employed[i];commuteTotal+=travel;commute[i]=employed[i]?travel/employed[i]:0;
+  const place=({j,d,best},quota)=>{const count=Math.max(0,Math.min(needed,jobs[j]-filled[j],quota));if(!count)return 0;if(zoneOf(cells[j].type)==='I'&&freight[j])pendingIndustry-=Math.min(count,Math.max(0,Math.ceil(jobs[j]*industrialTarget)-filled[j]));filled[j]+=count;employed[i]+=count;needed-=count;travel+=count*d;
+   let n=best,guard=0;while(n>=0&&guard++<N){const prev=path.previous[n],link=prev>=0?graph.railEdges?.get(`${prev}:${n}`):null;if(link)link.riders+=count;traffic[n]+=count;n=prev;}return count;};
+  const industrial=candidates.filter(({j})=>zoneOf(cells[j].type)==='I'&&freight[j]&&filled[j]<Math.ceil(jobs[j]*industrialTarget));
+  let budget=industrialWorkerBudget(workers,candidates,jobs,filled,cells,freight,industrialTarget,remainingWorkers,pendingIndustry);
+  const gap=j=>Math.max(0,Math.ceil(jobs[j]*industrialTarget)-filled[j]),seats=industrial.reduce((n,{j})=>n+gap(j),0),shares=industrial.map(site=>({site,share:budget*gap(site.j)/Math.max(1,seats)}));
+  // Spread the first pass across the industrial district; a single nearby
+  // factory must not monopolize the entire sector's workforce.
+  for(const {site,share}of shares)budget-=place(site,Math.floor(share));
+  for(const {site}of shares.sort((a,b)=>(b.share%1)-(a.share%1)||a.site.d-b.site.d)){if(budget<=0)break;budget-=place(site,1);}
+  for(const site of candidates){place(site,needed);if(!needed)break;}
+  remainingWorkers-=workers;totalEmployed+=employed[i];commuteTotal+=travel;commute[i]=employed[i]?travel/employed[i]:0;
  }
  for(const i of active){const c=cells[i],e=branchEffects(c);if(!c.branch||plotAnchor(s,i)!==i||operational[i]<=0)continue;const members=plotMembers(s,i),own=new Set(members),occupied=members.reduce((n,j)=>n+(residential(c.type)?cells[j].pop:filled[j]),0),seats=members.reduce((n,j)=>n+(residential(c.type)?capacity(cells[j]):jobs[j]),0),activity=clamp(occupied/Math.max(1,seats),0,1)*Math.min(...members.map(j=>operational[j])),[x,y]=xy(i),offset=Math.floor((c.span-1)/2),center=idx(wrapX(x+offset),y+offset),radius=4+offset;
   around(center,radius,(j,d)=>{if(deckOf(j)!==deckOf(i))return;const weight=(1-d/(radius+1))*activity;if(e.amenity)parks[j]+=Math.min(12,e.amenity*weight);if(own.has(j))return;branchHome[j]=Math.min(.08,branchHome[j]+e.homeAura*weight);branchTrade[j]=Math.min(.10,branchTrade[j]+e.tradeAura*weight);branchProduction[j]=Math.min(.20,branchProduction[j]+e.productionAura*weight);});
  }
+ const industrialPollution=new Float32Array(N),industrialInfluence=new Float32Array(N);
+ for(const i of active){const emission=industrialEmission(cells[i],operational[i],filled[i],jobs[i],s.policies,s.education);if(!emission)continue;around(i,4,(j,d)=>{if(deckOf(j)!==deckOf(i))return;const weight=(1-d/5)**2;industrialPollution[j]+=emission*weight;industrialInfluence[j]+=weight;});}
+ for(let i=0;i<N;i++){industrialPollution[i]=industrialConcentration(industrialPollution[i],industrialInfluence[i]);pollution[i]+=industrialPollution[i];}
  for(let i=0;i<N;i++)if(isRoad(cells[i].type)&&traffic[i]>0)around(i,2,(j,d)=>pollution[j]+=Math.min(12,traffic[i]*.018)*(1-d/3)*(s.policies.transit?.75:1));
  let satisfied=0,coveragePower=0,coverageWater=0,edu=0,health=0,crimeSum=0,pollutionSum=0;
  for(let i=0;i<N;i++){if(!terrain(i))continue;const c=cells[i],workers=Math.floor(c.pop*.48),employment=workers?employed[i]/workers:1;
   crime[i]=clamp(12+(1-employment)*45+(c.type==='R'?8:0)-services.police[i]*.6,0,100);
-  landValue[i]=clamp(42+parks[i]+services.school[i]*.13+services.hospital[i]*.13+services.police[i]*.1-pollution[i]*.45-crime[i]*.25,1,100);
+  const land=42+parks[i]+services.school[i]*.13+services.hospital[i]*.13+services.police[i]*.1-pollution[i]*.45-crime[i]*.25;
+  landValue[i]=clamp(land,1,100);industrialSuitability[i]=industrialSiteValue(land,industrialPollution[i],freight[i]);
   happiness[i]=clamp(55+(s.health-65)*.18+parks[i]*.25+services.school[i]*.12+services.hospital[i]*.12+employment*20-(s.tax.R-8)*2-pollution[i]*.35-crime[i]*.2-(1-power.coverage[i])*35-(1-water.coverage[i])*35-(access[i].length?0:30),0,100);
   if(c.pop){satisfied+=happiness[i]*c.pop;coveragePower+=power.coverage[i]*c.pop;coverageWater+=water.coverage[i]*c.pop;edu+=services.school[i]*c.pop;health+=services.hospital[i]*c.pop;crimeSum+=crime[i]*c.pop;pollutionSum+=pollution[i]*c.pop;}
  }
@@ -183,7 +197,7 @@ export function analyze(s){
  const demand={R:clamp(12+(vacancies-Math.max(0,totalWorkers-totalEmployed))*100/Math.max(40,workforce)-(s.tax.R-9)*6+(s.policies.campaign?12:0),-100,100),C:clamp((population*.23+20-totalC)*100/Math.max(80,totalC)-(s.tax.C-9)*6+(s.policies.campaign?12:0),-100,100),I:clamp((population*.32+65-totalI)*100/Math.max(80,totalI)-(s.tax.I-9)*6,-100,100)};
  const congestion=Array.from(traffic).reduce((v,n,i)=>Math.max(v,roadCapacity[i]?n/roadCapacity[i]:0),0);
  const stats={oxygen:space.oxygenCoverage,cooling:space.coolingCoverage,population,workers:totalWorkers,employed:totalEmployed,jobs:availableJobs,unemployment,happiness:population?satisfied/population:50,power:population?coveragePower/population:power.demand?power.delivered/power.demand:1,water:population?coverageWater/population:water.demand?water.delivered/water.demand:1,school:population?edu/population:0,hospital:population?health/population:0,crime:population?crimeSum/population:0,pollution:population?pollutionSum/population:0,commute:totalEmployed?commuteTotal/totalEmployed:0,congestion,demand};
- return {stats,maglev,lineTransit,space,power,water,access,baseParks,branchHome,branchTrade,branchProduction,roadDistance:pedestrian.dist,operational,freight,passengers,pollution,parks,services,crime,landValue,happiness,jobs,filled,employed,traffic,roadCapacity,commute};
+ return {stats,maglev,lineTransit,space,power,water,access,baseParks,branchHome,branchTrade,branchProduction,roadDistance:pedestrian.dist,operational,freight,passengers,pollution,industrialPollution,industrialSuitability,parks,services,crime,landValue,happiness,jobs,filled,employed,traffic,roadCapacity,commute};
 }
 
 export function forecast(s,a=analyze(s)){
@@ -191,10 +205,10 @@ export function forecast(s,a=analyze(s)){
  for(let i=0;i<N;i++){const c=s.cells[i],def=TYPES[c.type];if(!def||c.subplot)continue;
   if(residential(c.type))income.R+=c.pop*s.tax.R/100*5*(.45+.55*(a.employed[i]/Math.max(1,Math.floor(c.pop*.48))))*(1+(a.branchHome?.[i]||0));
   if(zoneOf(c.type)==='C')income.C+=a.filled[i]*s.tax.C/100*16*(districtCore(c)?.trade||1)*branchEffects(c).trade*(1+(a.branchTrade?.[i]||0));
-  if(zoneOf(c.type)==='I')income.I+=a.filled[i]*s.tax.I/100*14*(a.freight[i]?1:.4);
+  if(zoneOf(c.type)==='I')income.I+=industrialTax(c,a.filled[i],s.tax.I,a.freight[i],a.branchProduction?.[i]||0);
   expenses.policies+=stageUpkeep(c);
   if(def.upkeep)expenses[fundingKey(c.type)]+=def.upkeep*facilityUpkeep(c)*scale(s,c.type)*(1+(c.upgrade||0)*.2)*(isEnabled(c)?1:.15);
-  if(s.policies.green&&zoneOf(c.type)==='I')expenses.policies+=a.jobs[i]*.08;
+  if(s.policies.green&&zoneOf(c.type)==='I')expenses.policies+=a.filled[i]*.08;
  }
  expenses.transport+=a.maglev.upkeep;
  expenses.policies+=(s.policies.transit?a.stats.population*.05:0)+(s.policies.campaign?35:0);
@@ -348,7 +362,7 @@ export function explain(s,a,i){
  if(zoneOf(t)==='I'&&!a.freight[i])reasons.push('無法沿交通網抵達貨運船塢。');
  if(residential(t)&&c.pop>0){const workers=Math.floor(c.pop*.48);if(workers&&a.employed[i]<workers)reasons.push(`${workers-a.employed[i]} 位居民找不到可達的工作。`);}
  if(zoneOf(t)&&a.stats.demand[zoneOf(t)]<=0)reasons.push('目前同類分區供給充足，需求偏低。');
- if(a.pollution[i]>30)reasons.push('工業污染偏高，影響地價與居住品質。');
+ if(a.pollution[i]>30)reasons.push(zoneOf(t)==='I'?'周邊污染偏高；工廠依工業適地度發展，鄰近住商仍需綠地與清潔工業規範。':'工業污染偏高，影響地價與居住品質。');
  if(isPowerPlant(c))reasons.push(`剩餘使用年限 ${Math.max(0,600-c.age)} 個月；${renewalEnabled(s,c)?'自動更新已開啟':'到期不更新，將變為殘骸'}。`);
  if(!reasons.length)reasons.push(c.level===0?'條件已滿足，等待私人開發。':'運作正常。城市需求與地價會影響後續發展。');
  return reasons;
@@ -381,7 +395,7 @@ export function buildingReport(s,a,i){
  for(const j of members){const v=s.cells[j];if(v.subplot)continue;upkeep+=(v.type==='line'?lineMaintenance(v)*(isEnabled(v)?1:.18):0)+stageUpkeep(v)+(d.upkeep||0)*facilityUpkeep(v)*scale(s,v.type)*(1+(v.upgrade||0)*.2)*(isEnabled(v)?1:.15);pop+=v.pop;capacityTotal+=capacity(v);jobs+=a.jobs[j];filled+=a.filled[j];employed+=a.employed[j];operational=Math.min(operational,a.operational[j]);
  if(residential(v.type))revenue+=v.pop*s.tax.R/100*5*(.45+.55*a.employed[j]/Math.max(1,Math.floor(v.pop*.48)))*(1+(a.branchHome?.[j]||0));
  if(zoneOf(v.type)==='C')revenue+=a.filled[j]*s.tax.C/100*16*(districtCore(v)?.trade||1)*branchEffects(v).trade*(1+(a.branchTrade?.[j]||0));
- if(zoneOf(v.type)==='I')revenue+=a.filled[j]*s.tax.I/100*14*(a.freight[j]?1:.4);if(v.type==='line')revenue+=a.filled[j]*.72*(isEnabled(v)?1:0);}
+ if(zoneOf(v.type)==='I')revenue+=industrialTax(v,a.filled[j],s.tax.I,a.freight[j],a.branchProduction?.[j]||0);if(v.type==='line')revenue+=a.filled[j]*.72*(isEnabled(v)?1:0);}
  return {branch:branchZone(c)?branchProgress(s,a,i):null,name:d.name,upkeep,revenue,pop,capacity:capacityTotal,jobs,filled,employed,operational,area:members.length,span:c.span||1,core:districtCore(c),interior:c.level&&!c.fire?INTERIORS[c.type]:null,upgradeCost:Math.max(100,Math.round(d.cost*.6*((c.upgrade||0)+1)))*(LANDMARK_TYPES.includes(c.type)||c.type==='line'?1:members.length)};
 }
 export function deserialize(text){

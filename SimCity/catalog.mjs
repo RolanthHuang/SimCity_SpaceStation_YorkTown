@@ -41,7 +41,7 @@ export const TYPES={
 };
 export const GROUPS=[['inspect','檢視'],['zone','分區'],['transport','交通'],['utility','水電'],['service','服務'],['special','地標'],['bulldoze','拆除']];
 export const FUNDING={utilities:'水電維護',transport:'交通維護',fire:'消防',police:'治安',school:'教育',hospital:'醫療',parks:'公園文化'};
-export const POLICIES={green:{name:'清潔工業規範',description:'工業污染降低 40%；每名工業職位每月支出 0.08。'},transit:{name:'大眾運輸補助',description:'道路承載量增加 35%；每位居民每月支出 0.05。'},campaign:{name:'招商與移居計畫',description:'住宅與商業需求增加 12；每月支出 35。'}};
+export const POLICIES={green:{name:'清潔工業規範',description:'工業源頭排放降低 40%；每名實際就業工人每月支出 0.08。'},transit:{name:'大眾運輸補助',description:'道路承載量增加 35%；每位居民每月支出 0.05。'},campaign:{name:'招商與移居計畫',description:'住宅與商業需求增加 12；每月支出 35。'}};
 export const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export const idx=(x,y)=>y*SIZE+x;
 export const xy=i=>[i%SIZE,Math.floor(i/SIZE)];

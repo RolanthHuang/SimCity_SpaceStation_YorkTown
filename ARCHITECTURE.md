@@ -120,3 +120,13 @@ Shared facade textures add window room layers, timber grain, leaf masks and pane
 `music.mjs` uses one deferred HTML audio element and the approved Firstlight file, remembers mute, pauses hidden playback and performs a short fade. Web entries stream the MP3; the offline file embeds identical bytes.
 
 Validation: 127 automated tests, per-model geometry report and browser observations are recorded in `checks/branch-*`. Distinguish the normal 20.08% city's simulation progression from the paused, forced-level-8 near-view stress test. Neither is a long-running battery, thermal or crash certification.
+
+## v11.2.1 industry balance
+
+`industry-balance.mjs` provides bounded recruitment, actual-activity industrial emissions, concentration, industrial site suitability and shared industrial tax calculations. The employment matcher reserves a bounded share of real reachable workers for underfilled factories, proportional to their participation deficits; distance-based allocation handles remaining workers. Existing path searches and commute limits remain. No new resident or job seats are created.
+
+Industrial emissions are evaluated after employment allocation. Closed, burning, idle or unstaffed factories do not generate industrial emissions; production follows a sublinear stage scale. Industrial concentration attenuates within four tiles and divides overlapping emission load by a concentration factor rather than unbounded addition. Physical pollution still affects housing and retail; only industrial suitability cancels the residential-price penalty from industrial nuisance.
+
+Normal and compact city save schemas remain version 9. New suitability/pollution arrays are derived analysis data transferred by the existing worker protocol, not additional saved state. The 11.2 geometry, material, lighting and render budgets remain byte-identical. See `checks/industry-*` for reproducible baseline/after tests and CPU limitations.
+
+Citywide negative demand is an admission/investment gate. Abandonment stress from excess supply applies only below 18% actual occupancy; healthy occupied buildings no longer disappear in a synchronized citywide wave solely because nominal capacity is high. Physical/service/branch retention failures still apply.
