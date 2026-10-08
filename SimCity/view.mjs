@@ -1,3 +1,4 @@
+import {GrandOrbitScene} from './grand-orbit-scene.mjs';
 import {branchVisualHeight,branchDetailCost} from './branch-visuals.mjs';
 import {industrialVisualKey} from './industrial-architecture.mjs';
 import {residentialShapes} from './residential-shapes.mjs';
@@ -46,7 +47,7 @@ export class CityView{
   this.valid.forEach((i,n)=>{const [x,y]=xy(i);this.matrix(this.floor,n,x,-.37,y,1.005,.86,1.005);this.floor.setColorAt(n,this.color.setHex(0x263f51));});
   this.floor.instanceMatrix.needsUpdate=true;this.floorStyles=new Uint32Array(this.valid.length).fill(0xffffffff);this.floorIsolation='all';
   this.station=createStation(this.scene);
-  this.maglev=new MaglevScene(this);this.addRails();this.dawn=new DawnScene(this.scene);this.atelier=new AtelierScene(this);this.continuum=new ContinuumScene(this);
+  this.maglev=new MaglevScene(this);this.addRails();this.dawn=new DawnScene(this.scene);this.atelier=new AtelierScene(this);this.grandOrbit=new GrandOrbitScene(this);this.continuum=new ContinuumScene(this);
   this.cityMaterials={};for(const role of ['ivory','stone','titanium','gold','dark','window','glass','pane','leaf','red','wood','bark','charcoal']){const mat=this.atelier.assets.m[role].clone();mat.color.set(0xffffff);this.cityMaterials[role]=mat;}
   this.cityMaterials.contact=this.atelier.assets.m.contact;
   this.shapes.foliage=foliageGeometry();this.shapes.plane=new THREE.PlaneGeometry(1,1);this.shapes.plane.rotateX(-Math.PI/2);
@@ -142,7 +143,7 @@ export class CityView{
    if(e.code==='KeyV'&&['walk','interior'].includes(this.mode)){e.preventDefault();if(!e.repeat)this.explorer.togglePerspective();return;}
    if(e.code==='KeyT'&&['walk','interior'].includes(this.mode)){e.preventDefault();if(!e.repeat)this.cb.characters?.();return;}
    if(e.code==='Space'&&this.mode==='interior'&&this.room?.jump&&!e.repeat)this.room.jump();
-   if(e.code==='KeyM'&&this.mode==='interior'){this.cb.manage?.(this.interiorTile);return;}
+   if(e.code==='KeyM'&&this.mode==='interior'&&this.room?.kind!=='dock'){this.cb.manage?.(this.interiorTile);return;}
    if(e.code==='KeyG'){e.preventDefault();this.setMode(this.mode==='fly'?'build':'fly');return;}
    if(e.code==='KeyF'){e.preventDefault();this.setMode(this.mode==='walk'?'build':'walk');return;}
    if(['build','overview','walk','fly','interior'].includes(this.mode)&&['KeyQ','KeyC','KeyW','KeyA','KeyS','KeyD','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','ShiftLeft','ShiftRight'].includes(e.code)){
@@ -179,7 +180,7 @@ export class CityView{
   for(const i of this.valid){const c=s.cells[i],key=renderChunk(i);if(!desired.has(key))desired.set(key,[]);if(c.type||c.wire||c.pipe)desired.get(key).push(`${i},${c.type},${c.level},${c.plot},${c.span},${c.branch},${c.vacant},${c.fire},${c.enabled},${c.upgrade},${c.roadBase},${c.wire},${c.pipe},${c.pop>0||a.filled[i]>0},${this.detailPlan.get(i)||0},${industrialVisualKey(c,i%SIZE,Math.floor(i/SIZE))}`);}
   const changed=new Set();for(const [key,parts]of desired){const signature=prefix+'|'+parts.join(';'),old=this.chunkModels.get(key);if(old?.signature===signature)continue;changed.add(key);for(const child of old?.meshes||[]){this.buildings.remove(child);child.dispose();if(!this.sharedMaterials.has(child.material))child.material.dispose();}this.chunkModels.set(key,{signature,meshes:[]});}
   this.growing=this.growing.filter(g=>g.mesh.parent===this.buildings);
-  this.dawn.update(s,a);this.atelier.update(s,a);this.continuum.update(s,a);this.maglev.update(s,a);document.body.classList.toggle('atelier-city',!!s.artSample);this.secondaryRails.visible=!(this.isolate&&this.mode==='build'&&this.deck===0);this.station.visible=!(this.isolate&&this.mode==='build');this.dawn.root.visible=this.station.visible;const first=this.signatures.size===0,now=performance.now();for(const i of this.valid){const c=s.cells[i],signature=`${c.type}:${c.level}:${c.plot}:${c.span}:${c.branch}:${c.vacant}`;if(!first&&this.signatures.get(i)!==signature&&solid(c)&&this.detailPlan.get(i)===2)this.growth.set(i,now);if(!solid(c))this.growth.delete(i);this.signatures.set(i,signature);}if(this.mode==='walk')this.ensureWalkable();this.updatePeople();if(this.mode==='interior'){const c=s.cells[this.interiorTile];if(!c||c.type!==this.room.type||c.fire||!c.level)this.setMode('walk');else this.room.update(c,a,this.interiorTile,s.month);}
+  this.dawn.update(s,a);this.grandOrbit?.update(s,a,this.dawn.report);this.atelier.update(s,a);this.continuum.update(s,a);this.maglev.update(s,a);document.body.classList.toggle('atelier-city',!!s.artSample);this.secondaryRails.visible=!(this.isolate&&this.mode==='build'&&this.deck===0);this.station.visible=!(this.isolate&&this.mode==='build');this.dawn.root.visible=this.station.visible;const first=this.signatures.size===0,now=performance.now();for(const i of this.valid){const c=s.cells[i],signature=`${c.type}:${c.level}:${c.plot}:${c.span}:${c.branch}:${c.vacant}`;if(!first&&this.signatures.get(i)!==signature&&solid(c)&&this.detailPlan.get(i)===2)this.growth.set(i,now);if(!solid(c))this.growth.delete(i);this.signatures.set(i,signature);}if(this.mode==='walk')this.ensureWalkable();this.updatePeople();if(this.mode==='interior'){if(this.room.kind==='dock')this.room.update();else{const c=s.cells[this.interiorTile];if(!c||c.type!==this.room.type||c.fire||!c.level)this.setMode('walk');else this.room.update(c,a,this.interiorTile,s.month);}}
   const pieces=[],lights=[],lines=[];let tile=-1;const add=(x,y,h,sx,sy,sz,color,shape='box',role='ivory')=>pieces.push({x,y,h,sx,sy,sz,color,tile,shape,role});
   const floorIsolation=this.isolate&&this.mode==='build'?this.deck:'all',floorMatrices=this.floorIsolation!==floorIsolation;this.floorIsolation=floorIsolation;this.floorStyles??=new Uint32Array(this.valid.length).fill(0xffffffff);let floorColours=false;
   this.valid.forEach((i,n)=>{
@@ -271,6 +272,7 @@ export class CityView{
  }
 
  setMode(mode){
+  if(mode!=='overview'&&this.grandOrbit)this.grandOrbit.focused=null;
   if(mode===this.mode)return;
   const oldMode=this.mode;if(oldMode==='interior'&&mode!=='interior'){this.room.dispose();this.room=null;this.target.set(...surface(this.walker.u,this.walker.v));}
   if(mode==='fly'){const [u,v]=localPoint(this.target.x,this.target.y,this.target.z,this.deck);Object.assign(this.flyer,{u:oldMode==='walk'?this.walker.u:u,v:oldMode==='walk'?this.walker.v:v,h:8});}
@@ -291,8 +293,8 @@ export class CityView{
   }
   this.mode=mode;this.explorer.modeChanged(oldMode,mode);this.keys={};this.pointers.clear();this.start=null;this.setPreview([]);this.camera.fov=['walk','fly','interior'].includes(mode)?74:48;this.camera.updateProjectionMatrix();
   document.body.dataset.view=mode;document.querySelectorAll('[data-view-mode]').forEach(b=>{b.classList.toggle('active',b.dataset.viewMode===mode);b.setAttribute('aria-pressed',String(b.dataset.viewMode===mode));});
-  const hint=document.getElementById('view-hint');if(hint)hint.textContent=mode==='interior'?`${INTERIORS[this.state.cells[this.interiorTile].type]} · WASD 移動 · 方向鍵轉向 · E 探索／入口退出`:mode==='fly'?'WASD 飛行 · 空白上升 / C 下降 · Shift 加速 · G 返回建造':mode==='walk'?'WASD 移動 · 方向鍵／拖曳轉頭 · Space 角色能力 · E 互動 · V 人稱 · F 建造':mode==='overview'?'全站觀察 · 拖曳旋轉 · 點「建造」返回開放街區':'方向鍵轉向 · 左拖平移 · 右拖旋轉 · F 步行 / G 飛行';
-  const exit=document.getElementById('interior-exit');if(exit)exit.hidden=mode!=='interior'||!!this.room?.ui;const manage=document.getElementById('interior-manage');if(manage)manage.hidden=mode!=='interior';
+  const hint=document.getElementById('view-hint');if(hint)hint.textContent=mode==='interior'?`${this.room.kind==='dock'?'中央泊位':INTERIORS[this.state.cells[this.interiorTile].type]} · WASD 移動 · 方向鍵轉向 · V 人稱 · E 入口退出`:mode==='fly'?'WASD 飛行 · 空白上升 / C 下降 · Shift 加速 · G 返回建造':mode==='walk'?'WASD 移動 · 方向鍵／拖曳轉頭 · Space 角色能力 · E 互動 · V 人稱 · F 建造':mode==='overview'?'全站觀察 · 拖曳旋轉 · 點「建造」返回開放街區':'方向鍵轉向 · 左拖平移 · 右拖旋轉 · F 步行 / G 飛行';
+  const exit=document.getElementById('interior-exit');if(exit)exit.hidden=mode!=='interior'||!!this.room?.ui;const manage=document.getElementById('interior-manage');if(manage)manage.hidden=mode!=='interior'||this.room?.kind==='dock';
   this.cb.mode?.(mode);this.cameraUpdate();if(this.state)this.update(this.state,this.analysis,this.overlay);
  }
  ensureWalkable(){
@@ -317,6 +319,7 @@ export class CityView{
   w.h=Math.max(1,Math.min(65,w.h+((k.Space?1:0)-(k.KeyC||k.KeyQ?1:0))*speed));this.cameraUpdate();
  }
  walkInterior(dt){
+  if(this.room.kind==='dock'&&!Object.keys(this.keys).length&&!this.room.guide){this.explorer.state.moving=0;return;}
   const p=this.room.position,k=this.keys,e=this.explorer.state,before={x:p.x,z:p.z};turnInput(p,k,dt);if(this.room.step){this.room.step(dt,k);const distance=Math.hypot(p.x-before.x,p.z-before.z);e.moving=distance/Math.max(dt,.001)*.3;e.phase+=distance*3.6;if(distance>.0001)e.heading=Math.atan2(p.x-before.x,-(p.z-before.z));this.cameraUpdate();return;}const f=(k.KeyW?1:0)-(k.KeyS?1:0),side=(k.KeyD?1:0)-(k.KeyA?1:0),speed=2.3*dt/Math.max(1,Math.hypot(f,side));this.room.move((Math.sin(p.yaw)*f+Math.cos(p.yaw)*side)*speed,(-Math.cos(p.yaw)*f+Math.sin(p.yaw)*side)*speed);
   const distance=Math.hypot(p.x-before.x,p.z-before.z);e.moving=distance/Math.max(dt,.001)*.3;e.phase+=distance*3.6;if(distance>.0001){const heading=Math.atan2(p.x-before.x,-(p.z-before.z));e.heading=wrapAngle(e.heading+wrapAngle(heading-e.heading)*Math.min(1,dt*14));}this.cameraUpdate();
  }
@@ -360,7 +363,9 @@ export class CityView{
  renderActivity(){
   if(document.querySelector('dialog[open]')||document.getElementById('structure-puzzle')?.hidden===false)return 0;
   if(Object.keys(this.keys).length||this.pointers.size||this.walker.velocity||this.walker.jump>.01||this.explorer.state.cooldown>0)return 30;
+  if(this.grandOrbit?.pending())return 15;
   if(this.growing.length)return 20;
+  if(this.room?.kind==='dock'&&this.simulationSpeed===0)return this.room.guide?12:0;
   if(this.simulationSpeed>0)return ['walk','fly','interior'].includes(this.mode)?12:8;
   return ['walk','fly','interior'].includes(this.mode)?12:0;
  }
@@ -368,7 +373,7 @@ export class CityView{
   const blocked=!!document.querySelector('dialog[open]')||document.getElementById('structure-puzzle')?.hidden===false;if(blocked)this.keys={};
   if(['build','overview'].includes(this.mode)&&!blocked)this.turnBuild(dt);if(this.mode==='walk'&&!blocked)this.walk(dt);if(this.mode==='fly'&&!blocked)this.fly(dt);if(this.mode==='interior'&&!blocked)this.walkInterior(dt);
   this.streetDelta=blocked?0:this.simulationSpeed>0?dt*Math.min(2,this.simulationSpeed):this.mode==='walk'?dt*.65:0;this.streetClock+=this.streetDelta;
-  this.animatePeople();this.explorer.animate(blocked?0:dt,this.streetDelta);if(blocked)this.explorer.state.moving=0;this.dawn.animate(this.streetDelta);this.atelier.animate(this.streetDelta);this.maglev.animate(this.streetDelta);this.continuum.animate(this.streetDelta);
+  this.animatePeople();this.explorer.animate(blocked?0:dt,this.streetDelta);if(blocked)this.explorer.state.moving=0;this.dawn.animate(this.streetDelta);this.grandOrbit?.animate(blocked?0:dt);this.atelier.animate(this.streetDelta);this.maglev.animate(this.streetDelta);this.continuum.animate(this.streetDelta);
   const touched=new Set();this.growing=this.growing.filter(g=>{const f=Math.min(1,Math.max(.02,(now-g.start)/2400));this.matrix(g.mesh,g.n,g.p.x,.08+(g.p.h-.08)*f,g.p.y,g.p.sx,g.p.sy*f,g.p.sz);touched.add(g.mesh);return f<1;});for(const m of touched)m.instanceMatrix.needsUpdate=true;
   for(const [i,start] of this.growth)if(now-start>=2400)this.growth.delete(i);
   const t=now*.00006;for(let i=0;i<this.ships.length;i++){const a=t+i*Math.PI*2/7,r=55;this.ships[i].position.set(Math.sin(a)*r,18+Math.sin(a*3+i)*6,Math.cos(a)*r);this.ships[i].rotation.y=a;}

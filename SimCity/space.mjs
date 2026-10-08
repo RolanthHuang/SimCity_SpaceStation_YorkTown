@@ -27,7 +27,7 @@ export function spaceNetworks(s,power,water){
   }
   if(d.group==='network'||d.group==='transport'&&!d.jobs)continue;
   const nominalJobs=['C','I'].includes(zoneOf(c.type))?buildingCapacity(c):(d.jobs||0)*upgradeFactor(c)*facilityFactor(c);
-  airLoad[i]=residential(c.type)?1+c.pop*.45*(c.type==='line'?.75:1):2+nominalJobs*.15;
+  airLoad[i]=(residential(c.type)?1+c.pop*.45*(c.type==='line'?.75:1):2+nominalJobs*.15)+(orbitalLoads(s,i).oxygen||0);
   heatLoad[i]=((residential(c.type)?4+c.pop*.8+(c.type==='line'?lineJobs(c)*.6:0):8+nominalJobs*1.2)*branchEffects(c).power+orbitalLoads(s,i).heat)*power.coverage[i];
   if(wg>=0)air[wg].demand+=airLoad[i];
   if(pg>=0)heat[pg].demand+=heatLoad[i];

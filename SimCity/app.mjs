@@ -1,3 +1,4 @@
+import {prepareGrandShowcase} from './grand-orbit-showcase.mjs';
 import {ContinuumUI} from './continuum-ui.mjs';
 import {CityMusic} from './music.mjs';
 import {SIMULATION_WORKER_SOURCE} from 'yorktown-worker-source';
@@ -12,7 +13,7 @@ import {prepareLiving} from './living-plan.mjs';
 import {galleryHTML,mountGallery} from './evolution-gallery.mjs';
 import {evolvable,evolutionStatus,stageName,STAGE_NAMES,stageUpkeep} from './evolution.mjs';
 import {SIZE,DECK,SECTORS,sectorX,idx,INTERIORS,upgradeFactor,buildingCapacity,isEnabled,TYPES,facilityFactor,facilityUpkeep,GROUPS,FUNDING,POLICIES,xy,district,zoneOf,residential,isTransport} from './catalog.mjs';
-import {createCity,analyze,forecast,step,build,undo,takeLoan,emergency,triggerDisaster,explain,serialize,deserialize,isPowerPlant,renewalEnabled,renewPlant,renewalCost,manageBuilding,buildingReport,buildStation,removeMaglev} from './engine.mjs';
+import {createCity,analyze,forecast,step,build,undo,takeLoan,emergency,triggerDisaster,explain,serialize,deserialize,isPowerPlant,renewalEnabled,renewPlant,renewalCost,manageBuilding,buildingReport,buildStation,removeMaglev,grandOrbitAction} from './engine.mjs';
 import {CityView} from './view.mjs';
 import {PROJECTS,DISTRICTS,PORTS,GATES,orbitalAction,orbitalReport} from './orbital.mjs';
 import {orbitalPanelHTML} from './orbital-ui.mjs';
@@ -30,7 +31,7 @@ let previewCity=false,returnCity=null,galleryDispose=null,monthRunner,cityRevisi
 let city=prepareContinuum(prepareLiving(createCity())),a,speed=0,category='inspect',tool='inspect',selected=-1,overlay='normal',receipts=[],view,modalType='',lastTime=performance.now(),accumulator=0,toastTimer,loaded=false,storageWarning=false,wasRunning=0,continuumUI;
 try{const text=localStorage.getItem(AUTO);if(text){city=deserialize(text);loaded=true;}}catch(e){storageWarning=true;}
 if(new URL(location.href).searchParams.get('demo')==='1'||location.hash==='#showcase'){
- returnCity=city;city=prepareContinuum(prepareLiving(createCity()));previewCity=true;
+ returnCity=city;city=prepareGrandShowcase(prepareContinuum(prepareLiving(createCity())));previewCity=true;
 }
 initializeBranches(city,analyze(city));
 function characters(){
@@ -108,7 +109,7 @@ function refresh(recompute=true,draw=true){if(recompute){invalidateSimulation();
 }
 function showModal(title,type,html){galleryDispose?.();galleryDispose=null;if(!$('modal').open){wasRunning=speed;setSpeed(0);}$('modal').dataset.kind=type;$('modal-title').textContent=title;$('modal-body').innerHTML=html;modalType=type;if(!$('modal').open)$('modal').showModal();view?.budget?.invalidate();}
 function closeModal(){view?.showPlan(null);galleryDispose?.();galleryDispose=null;modalType='';$('modal').close();setSpeed(wasRunning);}
-function updateLedger(){const f=forecast(city,a);if(!$('budget-revenue'))return;$('budget-revenue').textContent=fmt(f.revenue);$('budget-expenses').textContent=fmt(f.cost);$('budget-net').textContent=(f.net>=0?'+':'')+fmt(f.net);$('budget-net').className=f.net>=0?'positive':'negative';$('ledger').innerHTML=[...Object.entries(f.income).map(([k,v])=>[`${{R:'住宅稅收',C:'商業稅收',I:'工業稅收',orbital:'訪客與科研租金',continuum:'長廊租金與文化活動'}[k]}`,v]),...Object.entries(f.expenses).map(([k,v])=>[FUNDING[k]||{policies:'法令與進階建築維護',debt:'債券本息',megastructures:'巨構維護',production:'市營材料支出',continuum:'長廊與環帶花園維護'}[k],-v])].map(([label,v])=>`<tr><td>${label}</td><td class="${v>=0?'positive':''}">${v>=0?'+':''}${fmt(v)}</td></tr>`).join('');}
+function updateLedger(){const f=forecast(city,a);if(!$('budget-revenue'))return;$('budget-revenue').textContent=fmt(f.revenue);$('budget-expenses').textContent=fmt(f.cost);$('budget-net').textContent=(f.net>=0?'+':'')+fmt(f.net);$('budget-net').className=f.net>=0?'positive':'negative';$('ledger').innerHTML=[...Object.entries(f.income).map(([k,v])=>[`${{R:'住宅稅收',C:'商業稅收',I:'工業稅收',orbital:'訪客與科研租金',grandOrbit:'旗艦消費與中繼服務',continuum:'長廊租金與文化活動'}[k]}`,v]),...Object.entries(f.expenses).map(([k,v])=>[FUNDING[k]||{policies:'法令與進階建築維護',debt:'債券本息',megastructures:'巨構維護',production:'市營材料支出',grandOrbit:'旗艦接待與中繼維護',continuum:'長廊與環帶花園維護'}[k],-v])].map(([label,v])=>`<tr><td>${label}</td><td class="${v>=0?'positive':''}">${v>=0?'+':''}${fmt(v)}</td></tr>`).join('');}
 function plantRows(){return city.cells.flatMap((c,i)=>plotAnchor(city,i)===i&&(isPowerPlant(c)||c.type==='rubble'&&c.retiredPlant)?[{c,i,type:isPowerPlant(c)?c.type:c.retiredPlant}]:[]);}
 function plantControl(c,i){return `<label class="plant-setting">自動更新<select aria-label="${i+1} 號電廠自動更新" data-renewal="${i}"><option value="inherit" ${c.renewal==='inherit'?'selected':''}>依全城設定（${city.powerRenewal?'開啟':'關閉'}）</option><option value="on" ${c.renewal==='on'?'selected':''}>這座開啟</option><option value="off" ${c.renewal==='off'?'selected':''}>這座關閉</option></select></label>`;}
 function bindPlantControls(){document.querySelectorAll('[data-renewal]').forEach(el=>el.onchange=()=>{for(const j of plotMembers(city,Number(el.dataset.renewal)))city.cells[j].renewal=el.value;persist();refresh();if(modalType==='plants')plants();});}
@@ -173,6 +174,9 @@ function goDistrict(n){selected=-1;view.showSelection(-1);view.focus(DISTRICTS[n
 function orbitalPanel(){
  showModal('船塢與巨構','orbital',orbitalPanelHTML(city,a));
  document.querySelectorAll('[data-orbit-action]').forEach(b=>b.onclick=()=>{const r=orbitalAction(city,a,b.dataset.orbitAction,b.dataset.key);toast(r.text||r.error,!r.ok);if(r.ok){receipts=[];refresh();persist();orbitalPanel();}});
+ document.querySelectorAll('[data-grand-action]').forEach(b=>b.onclick=()=>{const r=grandOrbitAction(city,b.dataset.grandAction);toast(r.text||r.error,!r.ok);if(r.ok){receipts=[];refresh();persist();orbitalPanel();}});
+ document.querySelectorAll('[data-grand-board]').forEach(b=>b.onclick=()=>{closeModal();view.isolate=false;$('isolate').classList.remove('active');$('isolate').textContent='專注本臂';view.grandOrbit.board();});
+ document.querySelectorAll('[data-grand-focus]').forEach(b=>b.onclick=()=>{closeModal();view.isolate=false;$('isolate').classList.remove('active');$('isolate').textContent='專注本臂';if(!view.grandOrbit.focus(b.dataset.grandFocus,b.dataset.grandPart))toast('此項目尚未啟動或建造。',true);});
  document.querySelectorAll('[data-district]').forEach(b=>b.onclick=()=>{closeModal();goDistrict(Number(b.dataset.district));});
  document.querySelectorAll('[data-port]').forEach(b=>b.onclick=()=>{closeModal();const i=PORTS[Number(b.dataset.port)];selected=i;view.focus(i);$('inspector').hidden=false;inspector();});
  document.querySelectorAll('[data-gate]').forEach(b=>b.onclick=()=>{closeModal();view.visitGate(Number(b.dataset.gate));});
@@ -193,14 +197,14 @@ function toggleShowcase(){
    if(!previewCity){
     // Build only the preview in the next page, rather than both cities in one renderer.
     if(persist()){const target=new URL(location.href);target.searchParams.set('demo','1');location.assign(target.href);return;}
-    returnCity=city;city=prepareContinuum(prepareLiving(createCity()));previewCity=true;
+    returnCity=city;city=prepareGrandShowcase(prepareContinuum(prepareLiving(createCity())));previewCity=true;
    }else{
     city=returnCity;returnCity=null;previewCity=false;
     // Restore the original save, then release the preview's GPU resources with a fresh page.
     // When storage is unavailable, keep the in-memory return path instead of losing progress.
     if(persist()){const target=new URL(location.href);target.searchParams.delete('demo');if(target.hash==='#showcase')target.hash='';location.replace(target.href);return;}
    }
-   view.setMode('build');selected=-1;receipts=[];category='inspect';chooseTool('inspect');a=analyze(city);view.state=city;view.analysis=a;view.home();refresh(false,false);renderTools();button.classList.toggle('active',previewCity);button.setAttribute('aria-pressed',String(previewCity));$('showcase-banner').hidden=!previewCity;toast(previewCity?'晨光示範城已接通全部供應並安排就業。按 1× 開始經營；返回時保留你的城市與存檔。':'已返回你的城市。');
+   view.setMode('build');selected=-1;receipts=[];category='inspect';chooseTool('inspect');a=analyze(city);view.state=city;view.analysis=a;view.home();refresh(false,false);renderTools();button.classList.toggle('active',previewCity);button.setAttribute('aria-pressed',String(previewCity));$('showcase-banner').hidden=!previewCity;toast(previewCity?'遠航示範已自費邀請旗艦並啟動中繼；展示進度不改動你的城市。':'已返回你的城市。');
   }finally{button.textContent=previewCity?'回我的城':'示範城市';button.disabled=false;}
  }));
 }

@@ -1,0 +1,51 @@
+{
+  "version": "11.3.0",
+  "localURL": "http://127.0.0.1:8784/",
+  "observed": {
+    "launchBalance": [
+      1000000,
+      820000,
+      520000,
+      485000
+    ],
+    "reloadBalance": 485000,
+    "musicAnd4x": {
+      "dateBefore": "2263 / 01",
+      "dateAfter": "2263 / 07",
+      "cashAfter": 456239,
+      "audioTimeBefore": 32.40097,
+      "audioTimeAfter": 44.690282,
+      "error": null
+    },
+    "pausedDock": {
+      "seconds": 10,
+      "framesBefore": 6,
+      "framesAfter": 6,
+      "audioBefore": 26.594555,
+      "audioAfter": 36.614879
+    },
+    "controls": [
+      "whole flagship",
+      "engine close-up",
+      "bay interior",
+      "relay overview",
+      "first/third person central dock",
+      "guided promenade",
+      "return to same street lift",
+      "street lift interaction"
+    ],
+    "backupRestoredCash": 160000,
+    "console": []
+  },
+  "limits": [
+    "Short browser smoke test; not a heat, battery, long-run browser-memory or full-map guarantee.",
+    "80-month financial scenario is a deterministic model check, not 80 months of browser runtime.",
+    "Dock lift transfer is instantaneous; no animated cabin ride."
+  ],
+  "finalDockHeight": 33.55,
+  "keyboardObserved": {
+    "headingBefore": 114,
+    "headingAfter": 130,
+    "forwardInput": true
+  }
+}

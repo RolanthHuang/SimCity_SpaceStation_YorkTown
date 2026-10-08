@@ -1,4 +1,4 @@
-# Yorktown Branch Evolution v11.2
+# Yorktown Grand Orbit v11.3
 
 Authoritative code lives in `SimCity/`. `build-simcity.mjs` generates four web entries with bundled Three.js and deferred local MP3 playback, plus one standalone offline HTML containing the approved MP3. Edit sources, not generated HTML. This isolated output preserves the prior v11 source directory. Earlier sections describe inherited systems; the v11.2 section below supersedes older branch geometry and render budgets.
 
@@ -130,3 +130,14 @@ Industrial emissions are evaluated after employment allocation. Closed, burning,
 Normal and compact city save schemas remain version 9. New suitability/pollution arrays are derived analysis data transferred by the existing worker protocol, not additional saved state. The 11.2 geometry, material, lighting and render budgets remain byte-identical. See `checks/industry-*` for reproducible baseline/after tests and CPU limitations.
 
 Citywide negative demand is an admission/investment gate. Abandonment stress from excess supply applies only below 18% actual occupancy; healthy occupied buildings no longer disappear in a synchronized citywide wave solely because nominal capacity is high. Physical/service/branch retention failures still apply.
+
+
+## v11.3 paid orbit and central dock
+
+`grand-orbit.mjs` owns bounded paid-project state, trial utility loads, unlocks, reserves, activity-dependent income, cooldowns, monthly upkeep and expiry. `orbital.mjs` migrates schema 1→2 without granting projects and adds the order-payment bonus at shipment. `engine.mjs` forecasts and settles income/upkeep before decrementing remaining months, so the final service month is charged once. `space.mjs` incorporates oxygen. Paid state is part of existing saves and Worker snapshots; save keys and the outer city save version remain unchanged.
+
+`grand-orbit-scene.mjs` lazily creates the approved 0.1.1 geometry from `orbital-assets`, batches static materials, uses a cheap closed hull at a distance, and restores full detail nearby. Existing city PMREM, audio and the renderer remain shared; no second renderer/animation loop is added. Only finite arrival/activation runs request continuous frames. Both LODs share the same placement. Moving pieces remain separate from static batches.
+
+`central-dock.mjs` adds one underslung cantilever at the existing floating platform and a guarded promenade. A visible service conduit and street lift entrance connect the retained ordinary boat-yard street with the floating platform. Lift transfer is instantaneous; it does not simulate an elevator ride. `DockWalk` uses the same city scene, real floor coordinates, the normal city avatar scale, floor-safe first/third-person cameras and axis sliding. `dock-walking.mjs` defines a connected rectangle union and only exposed railing edges. `CityView` treats this as a special traversal room, with no building tile/manager and no shared-scene disposal. Paused idle visits produce a final still frame and stop; a guided walk explicitly invalidates and resumes the render budget.
+
+The dock remains after the first paid visit, while the flagship disappears at expiry. Invitations include access infrastructure; there is no extra docking construction fee. Ordinary cities receive no dock before paying. The temporary funded demonstration pays 515,000 without changing the player's city. Fleet crash/drone events are not part of this release.

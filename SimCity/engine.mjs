@@ -1,3 +1,4 @@
+import {grandAction,grandStatus} from './grand-orbit.mjs';
 import {emptyContinuum,ensureContinuum,lineAt,lineJobs,lineMaintenance,previewLine,constructLine,continuumIncome,applyContinuumAuras,tickGardens,tickGardenMonths,restoreContinuum,attachLineTransit} from './continuum.mjs';
 import {branchDefaults,BRANCH_FIELDS,branchZone,branchDefinition,branchEffects,BRANCHES} from './branches.mjs';
 import {initializeBranches,tickBranches,advancePlot,branchProgress} from './branch-development.mjs';
@@ -195,6 +196,7 @@ export function analyze(s){
  const workforce=totalWorkers||1,unemployment=totalWorkers?(totalWorkers-totalEmployed)/workforce:0;
  const totalC=active.filter(i=>zoneOf(cells[i].type)==='C').reduce((a,i)=>a+nominalJobs(cells[i]),0),totalI=active.filter(i=>zoneOf(cells[i].type)==='I').reduce((a,i)=>a+nominalJobs(cells[i]),0);
  const demand={R:clamp(12+(vacancies-Math.max(0,totalWorkers-totalEmployed))*100/Math.max(40,workforce)-(s.tax.R-9)*6+(s.policies.campaign?12:0),-100,100),C:clamp((population*.23+20-totalC)*100/Math.max(80,totalC)-(s.tax.C-9)*6+(s.policies.campaign?12:0),-100,100),I:clamp((population*.32+65-totalI)*100/Math.max(80,totalI)-(s.tax.I-9)*6,-100,100)};
+ const grand=grandStatus(s,{operational});demand.C=clamp(demand.C+(grand.flagship?12:0)+(grand.relay?8:0),-100,100);
  const congestion=Array.from(traffic).reduce((v,n,i)=>Math.max(v,roadCapacity[i]?n/roadCapacity[i]:0),0);
  const stats={oxygen:space.oxygenCoverage,cooling:space.coolingCoverage,population,workers:totalWorkers,employed:totalEmployed,jobs:availableJobs,unemployment,happiness:population?satisfied/population:50,power:population?coveragePower/population:power.demand?power.delivered/power.demand:1,water:population?coverageWater/population:water.demand?water.delivered/water.demand:1,school:population?edu/population:0,hospital:population?health/population:0,crime:population?crimeSum/population:0,pollution:population?pollutionSum/population:0,commute:totalEmployed?commuteTotal/totalEmployed:0,congestion,demand};
  return {stats,maglev,lineTransit,space,power,water,access,baseParks,branchHome,branchTrade,branchProduction,roadDistance:pedestrian.dist,operational,freight,passengers,pollution,industrialPollution,industrialSuitability,parks,services,crime,landValue,happiness,jobs,filled,employed,traffic,roadCapacity,commute};
@@ -214,7 +216,7 @@ export function forecast(s,a=analyze(s)){
  expenses.policies+=(s.policies.transit?a.stats.population*.05:0)+(s.policies.campaign?35:0);
  expenses.debt=s.loans.reduce((v,l)=>v+Math.min(l.principal,l.balance)+l.balance*.004,0);
  const continuum=continuumIncome(s,a);income.continuum=continuum.income;expenses.continuum=continuum.upkeep;
- const orbit=orbitalReport(s,a);income.orbital=orbit.income;expenses.megastructures=orbit.upkeep;expenses.production=orbit.productionCost;
+ const orbit=orbitalReport(s,a);income.orbital=orbit.income;income.grandOrbit=orbit.grand.income;expenses.grandOrbit=orbit.grand.upkeep;expenses.megastructures=orbit.upkeep;expenses.production=orbit.productionCost;
  const revenue=Object.values(income).reduce((a,b)=>a+b,0),cost=Object.values(expenses).reduce((a,b)=>a+b,0);
  return {income,expenses,revenue,cost,net:revenue-cost};
 }
@@ -271,13 +273,14 @@ export function step(s){
  if(s.disasters&&s.month%12===0&&random(s)<.28){const vulnerable=s.cells.map((c,i)=>({c,i})).filter(({c,i})=>building(c.type)&&c.level&&a.services.fire[i]<45);if(vulnerable.length){const {i}=vulnerable[Math.floor(random(s)*vulnerable.length)];s.cells[i].fire=5;message(s,'站內發生火災。消防覆蓋不足時，火勢會延燒；可派遣應變隊。','bad');}}
  if(s.emergency>0){s.emergency--;for(const c of s.cells)if(c.fire)c.fire=Math.max(0,c.fire-2);}
  cleanTransit(s);a=analyze(s);const notify=(text,tone)=>message(s,text,tone);tickGardenMonths(s,a);if(tickGardens(s,a,forecast(s,a),notify))a=analyze(s);if(redevelopment(s,a,forecast(s,a),notify))a=analyze(s);if(autoInvest(s,a,forecast(s,a),notify))a=analyze(s);if(Math.min(a.stats.oxygen,a.stats.cooling)<.9&&s.spaceIncident===null){s.spaceIncident=s.month;message(s,'生命維持或散熱不足。請從「太空維生」檢查容量與管網。','bad');}else if(Math.min(a.stats.oxygen,a.stats.cooling)>=.95)s.spaceIncident=null;const f=forecast(s,a),contractNet=tickOrbital(s,a,(text,tone)=>message(s,text,tone));s.cash=Math.round((s.cash+f.net+contractNet)*100)/100;
+ if(s.orbital.last.loadsChanged)a=analyze(s);
  for(const l of s.loans){l.balance=Math.max(0,l.balance-l.principal);l.months--;}
  s.loans=s.loans.filter(l=>l.balance>.01&&l.months>0);
  s.highPopulation=Math.max(s.highPopulation,a.stats.population);
  for(const [milestone,label] of [[400,'公共會館'],[2000,'垂直居住塔']])if(s.highPopulation>=milestone&&!s.unlocks.includes(milestone)){s.unlocks.push(milestone);message(s,`人口達到 ${milestone}，已開放${label}。`,'good');}
  if(s.cash<0&&s.month%3===0)message(s,'財庫已透支。請增加收入、調整預算或發行債券。','warn');
  if(s.cash<=-20000){s.insolvent=true;message(s,'財政進入接管：時間暫停。可發債補足資金，或重新建立殖民地。','bad');}
- s.history.push({month:s.month,population:a.stats.population,cash:s.cash,net:f.net+contractNet-renewalCost,happiness:a.stats.happiness,unemployment:a.stats.unemployment});s.history=s.history.slice(-240);
+ s.history.push({month:s.month,population:a.stats.population,cash:s.cash,net:f.net+contractNet-renewalCost,grandIncome:f.income.grandOrbit,grandUpkeep:f.expenses.grandOrbit,happiness:a.stats.happiness,unemployment:a.stats.unemployment});s.history=s.history.slice(-240);
  return a;
 }
 
@@ -448,8 +451,10 @@ export function deserialize(text){
  if(typeof raw.disasters!=='boolean'||!number(raw.emergency,0,3,true)||!number(raw.highPopulation,0,1e7,true))throw new Error('城市狀態不正確。');
  s.disasters=raw.disasters;s.emergency=raw.emergency;s.highPopulation=Math.max(raw.highPopulation,s.cells.reduce((a,c)=>a+c.pop,0));s.insolvent=s.cash<=-20000;
  s.unlocks=[400,800,2000].filter(n=>s.highPopulation>=n);
- s.history=Array.isArray(raw.history)?raw.history.slice(-240).filter(h=>h&&['month','population','cash','net','happiness','unemployment'].every(k=>Number.isFinite(h[k]))).map(h=>Object.fromEntries(['month','population','cash','net','happiness','unemployment'].map(k=>[k,h[k]]))):[];
+ s.history=Array.isArray(raw.history)?raw.history.slice(-240).filter(h=>h&&['month','population','cash','net','happiness','unemployment'].every(k=>Number.isFinite(h[k]))).map(h=>({...Object.fromEntries(['month','population','cash','net','happiness','unemployment'].map(k=>[k,h[k]])),grandIncome:number(h.grandIncome,0,1e12)?h.grandIncome:0,grandUpkeep:number(h.grandUpkeep,0,1e12)?h.grandUpkeep:0})):[];
  s.events=Array.isArray(raw.events)?raw.events.slice(0,45).filter(e=>e&&typeof e.text==='string'&&number(e.month,0,1e7,true)).map(e=>({month:e.month,text:e.text.slice(0,250),tone:['good','bad','warn','info'].includes(e.tone)?e.tone:'info'})):[];
  if(raw.version<8)initializeBranches(s,analyze(s));
  return s;
 }
+
+export function grandOrbitAction(s,action){const result=grandAction(s,analyze(s),action,analyze,forecast);if(result.ok)message(s,result.text,'good');return result;}

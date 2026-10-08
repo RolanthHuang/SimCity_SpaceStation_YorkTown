@@ -1,7 +1,8 @@
+import {GRAND_PORTS,createGrandOrbit,grandLoads,grandReport,tickGrandOrbit,restoreGrandOrbit} from './grand-orbit.mjs';
 import {branchEffects} from './branches.mjs';
 import {idx,xy,deckOf,zoneOf,districtCore,isEnabled,isRoad,clamp} from './catalog.mjs';
 
-export const PORTS=[idx(14,14),idx(14,66)];
+export const PORTS=GRAND_PORTS;
 export const GATES=[idx(12,25),idx(12,77)];
 export const GATE_FOOTINGS=[24,25,26,76,77,78].flatMap(y=>[idx(9,y),idx(15,y)]);
 export const DISTRICTS=[{name:'曙光花園',tile:idx(23,19)},{name:'星港折臂',tile:idx(26,71)}];
@@ -10,17 +11,18 @@ export const PROJECTS={
  lift:{name:'天際升降港',cost:30000,upkeep:180,power:700,water:45,heat:750,orders:4,pop:800,anchor:1,description:'升降艙往返外側泊位；兩區出口合約酬勞增加 25%，運送時間縮短一個月。',effect:'出口收入 +25% · 快速裝船'},
  citadel:{name:'浮航城邦',cost:48000,upkeep:300,power:1000,water:200,heat:1100,orders:8,pop:1100,anchor:1,description:'獨立科研居住城邦。依主城人口、教育、滿意度招待最多 100 位外來研究員，每位每月 9 點租金；精密製造產能 +25%。',effect:'科研租金 · 精密製造 +25%'}
 };
-const blank=()=>({version:1,stock:[{alloy:0,parts:0},{alloy:0,parts:0}],projects:Object.fromEntries(Object.keys(PROJECTS).map(k=>[k,{built:false,enabled:true}])),completed:0,earned:0,sequence:0,orders:[],visitorUnlocked:false,visitorCycle:0,last:{reward:0,delivered:0},travel:0});
+const blank=()=>({version:2,grand:createGrandOrbit(),stock:[{alloy:0,parts:0},{alloy:0,parts:0}],projects:Object.fromEntries(Object.keys(PROJECTS).map(k=>[k,{built:false,enabled:true}])),completed:0,earned:0,sequence:0,orders:[],visitorUnlocked:false,visitorCycle:0,last:{reward:0,delivered:0},travel:0});
 export function createOrbital(){return blank();}
-export function orbitalLoads(s,i){const o=s.orbital;if(!o||!PORTS.includes(i))return {power:0,water:0,heat:0};const result={power:0,water:0,heat:0};for(const [k,d]of Object.entries(PROJECTS))if(o.projects[k].built&&o.projects[k].enabled&&PORTS[d.anchor]===i&&s.cells[i]?.type==='dock'&&isEnabled(s.cells[i]))for(const key of Object.keys(result))result[key]+=d[key];return result;}
+export function orbitalLoads(s,i){const o=s.orbital;if(!o||!PORTS.includes(i))return {power:0,water:0,heat:0};const result=grandLoads(s,i);for(const [k,d]of Object.entries(PROJECTS))if(o.projects[k].built&&o.projects[k].enabled&&PORTS[d.anchor]===i&&s.cells[i]?.type==='dock'&&isEnabled(s.cells[i]))for(const key of Object.keys(result))result[key]+=d[key]||0;return result;}
 export function projectOnline(s,a,k){const o=s.orbital,d=PROJECTS[k];if(!o?.projects[k]?.built||!o.projects[k].enabled)return false;const i=PORTS[d.anchor];return s.cells[i]?.type==='dock'&&a.operational[i]>.95&&(k!=='arch'||PORTS.every(n=>s.cells[n]?.type==='dock'&&a.operational[n]>.95)&&GATES.every(n=>isRoad(s.cells[n]?.type)));}
 export function canPortal(s,a){return projectOnline(s,a,'arch');}
 export function orbitalReport(s,a){
  const o=s.orbital||blank(),online=Object.fromEntries(Object.keys(PROJECTS).map(k=>[k,projectOnline(s,a,k)]));
- const areas=DISTRICTS.map((d,n)=>({name:d.name,pop:0,industry:0,makers:0,docks:0,alloy:0,parts:0,productionCost:0,capacity:240}));
+ const areas=DISTRICTS.map((d,n)=>({name:d.name,pop:0,industry:0,makers:0,docks:0,alloy:0,parts:0,productionCost:0,commercial:0,commercialTax:0,capacity:240}));
  for(let i=0;i<s.cells.length;i++){const c=s.cells[i],d=areas[deckOf(i)];d.pop+=c.pop;
   if(c.type==='dock'&&a.operational[i]>.75)d.docks++;
   if(zoneOf(c.type)==='I'&&a.freight[i])d.industry+=a.filled[i]*(districtCore(c)?.production||1)*branchEffects(c).production*(1+(a.branchProduction?.[i]||0));
+  if(zoneOf(c.type)==='C'&&!c.subplot){d.commercial+=a.filled[i];d.commercialTax+=a.filled[i]*s.tax.C/100*16*(districtCore(c)?.trade||1)*branchEffects(c).trade*(1+(a.branchTrade?.[i]||0));}
   if(c.type==='fabricator'&&a.freight[i])d.makers+=a.filled[i];
  }
  for(let n=0;n<2;n++){
@@ -32,7 +34,7 @@ export function orbitalReport(s,a){
  const tourists=o.visitorUnlocked&&o.visitorCycle<5&&areas[0].docks>0&&areas[1].docks>0?Math.floor(Math.min(90,a.stats.population*.075)*a.stats.happiness/100):0;
  const researchers=online.citadel?Math.floor(Math.min(100,a.stats.population*.065)*clamp(s.education/70,0,1)*clamp(a.stats.happiness/70,0,1)):0;
  const upkeep=Object.entries(PROJECTS).reduce((sum,[k,d])=>sum+(o.projects[k].built?d.upkeep*(o.projects[k].enabled?1:.15):0),0);
- return {areas,online,tourists,researchers,income:tourists*5+researchers*9,upkeep,productionCost:areas.reduce((sum,d)=>sum+d.productionCost,0),visitorPresent:o.visitorUnlocked&&o.visitorCycle<5};
+ return {grand:grandReport(s,a,areas),areas,online,tourists,researchers,income:tourists*5+researchers*9,upkeep,productionCost:areas.reduce((sum,d)=>sum+d.productionCost,0),visitorPresent:o.visitorUnlocked&&o.visitorCycle<5};
 }
 const TEMPLATES=[
  {title:'軌道修復材料',alloy:45,parts:4,reward:2400},
@@ -77,23 +79,24 @@ export function tickOrbital(s,a,notify){
    o.orders=o.orders.filter(row=>row.id!==c.id);notify(`「${c.title}」完成交貨，入帳 ${payment.toLocaleString()}。`,'good');continue;
   }
   if(s.month>c.deadline){reward-=400;o.orders=o.orders.filter(row=>row.id!==c.id);notify(`「${c.title}」逾期取消，支出 400；已裝船原料不退還。`,'warn');continue;}
-  if(c.status==='producing'&&dock&&stock.alloy>=c.alloy&&stock.parts>=c.parts){stock.alloy-=c.alloy;stock.parts-=c.parts;c.status='shipping';c.eta=s.month+(r.online.lift?1:2);c.payment=Math.round(c.reward*(r.online.lift?1.25:1));notify(`「${c.title}」已裝船，預計 ${c.eta-s.month} 個月後到款。`);}
+  if(c.status==='producing'&&dock&&stock.alloy>=c.alloy&&stock.parts>=c.parts){stock.alloy-=c.alloy;stock.parts-=c.parts;c.status='shipping';c.eta=s.month+(r.online.lift?1:2);c.payment=Math.round(c.reward*(1+(r.online.lift?.25:0)+r.grand.exportBonus));notify(`「${c.title}」已裝船，預計 ${c.eta-s.month} 個月後到款。`);}
  }
  if(!o.visitorUnlocked&&o.completed>=2&&s.highPopulation>=600){o.visitorUnlocked=true;o.visitorCycle=0;notify('巨型訪客船「極光號」首次抵港。每 12 個月停泊 5 個月；兩區船塢運作時產生訪客收益。','good');}
  else if(o.visitorUnlocked)o.visitorCycle=(o.visitorCycle+1)%12;
- o.last={reward,delivered};return reward;
+ o.last={reward,delivered,loadsChanged:tickGrandOrbit(s,notify)};return reward;
 }
 // Explicit schema: imported contracts cannot mint arbitrary rewards or duplicate a delivery.
 export function restoreOrbital(raw){
  if(raw===undefined)return blank();const o=blank();
  const num=(v,max=1e9)=>Number.isFinite(v)&&v>=0&&v<=max&&Number.isInteger(v);
- if(!raw||raw.version!==1||!Array.isArray(raw.stock)||raw.stock.length!==2||!num(raw.completed)||!num(raw.sequence)||raw.sequence<raw.completed||!num(raw.earned)||!num(raw.visitorCycle,11)||typeof raw.visitorUnlocked!=='boolean'||!Array.isArray(raw.orders)||raw.orders.length>2)throw new Error('軌道經營存檔損毀。');
+ if(!raw||![1,2].includes(raw.version)||!Array.isArray(raw.stock)||raw.stock.length!==2||!num(raw.completed)||!num(raw.sequence)||raw.sequence<raw.completed||!num(raw.earned)||!num(raw.visitorCycle,11)||typeof raw.visitorUnlocked!=='boolean'||!Array.isArray(raw.orders)||raw.orders.length>2)throw new Error('軌道經營存檔損毀。');
  o.stock=raw.stock.map(v=>{if(!num(v?.alloy,1e6)||!num(v?.parts,1e6))throw new Error('倉庫數值損毀。');return {alloy:v.alloy,parts:v.parts};});
  for(const k of Object.keys(PROJECTS)){const p=raw.projects?.[k];if(typeof p?.built!=='boolean'||typeof p?.enabled!=='boolean')throw new Error('巨構存檔損毀。');o.projects[k]={built:p.built,enabled:p.enabled};}
  const ids=new Set();o.orders=raw.orders.map(v=>{
   const t=TEMPLATES.find(t=>t.title===v.title&&t.alloy===v.alloy&&t.parts===v.parts&&t.reward===v.reward);
-  if(!t||!num(v.id)||v.id<1||v.id>raw.sequence||ids.has(v.id)||![0,1].includes(v.deck)||!num(v.deadline)||!['producing','shipping'].includes(v.status)||!num(v.eta)||v.status==='shipping'&&![v.reward,Math.round(v.reward*1.25)].includes(v.payment))throw new Error('訂單資料損毀。');
+  if(!t||!num(v.id)||v.id<1||v.id>raw.sequence||ids.has(v.id)||![0,1].includes(v.deck)||!num(v.deadline)||!['producing','shipping'].includes(v.status)||!num(v.eta)||v.status==='shipping'&&![v.reward,Math.round(v.reward*1.25),Math.round(v.reward*1.5)].includes(v.payment))throw new Error('訂單資料損毀。');
   ids.add(v.id);return {...t,id:v.id,deck:v.deck,deadline:v.deadline,status:v.status,eta:v.eta,...(v.status==='shipping'?{payment:v.payment}:{})};
  });
+ o.grand=restoreGrandOrbit(raw.version===1?undefined:raw.grand);
  for(const k of ['completed','earned','sequence','visitorUnlocked','visitorCycle'])o[k]=raw[k];o.travel=num(raw.travel)?raw.travel:0;return o;
 }

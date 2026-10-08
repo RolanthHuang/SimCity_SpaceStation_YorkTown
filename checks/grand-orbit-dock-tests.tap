@@ -1,0 +1,50 @@
+TAP version 13
+# Subtest: the central deck has connected floors; railings do not close passage junctions
+ok 1 - the central deck has connected floors; railings do not close passage junctions
+  ---
+  duration_ms: 2.406458
+  ...
+# Subtest: large steps cannot tunnel through rails and oblique contact slides
+ok 2 - large steps cannot tunnel through rails and oblique contact slides
+  ---
+  duration_ms: 2.019167
+  ...
+# Subtest: both human camera modes stay above the real dock floor at all pitch limits
+ok 3 - both human camera modes stay above the real dock floor at all pitch limits
+  ---
+  duration_ms: 0.566
+  ...
+# Subtest: the underslung dock has finite 3D surfaces and uses at most 16 material batches
+ok 4 - the underslung dock has finite 3D surfaces and uses at most 16 material batches
+  ---
+  duration_ms: 18.229959
+  ...
+# Subtest: leaving a dock visit does not dispose the shared city scene
+ok 5 - leaving a dock visit does not dispose the shared city scene
+  ---
+  duration_ms: 0.171375
+  ...
+# Subtest: paused idle dock stops rendering; guided walking resumes the existing frame budget
+ok 6 - paused idle dock stops rendering; guided walking resumes the existing frame budget
+  ---
+  duration_ms: 17.292958
+  ...
+# Subtest: an idle dock camera does not invalidate itself into a perpetual render loop
+ok 7 - an idle dock camera does not invalidate itself into a perpetual render loop
+  ---
+  duration_ms: 0.139334
+  ...
+# Subtest: finishing the guided promenade updates its button before rendering becomes idle
+ok 8 - finishing the guided promenade updates its button before rendering becomes idle
+  ---
+  duration_ms: 0.139667
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 99.991041

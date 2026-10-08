@@ -1,0 +1,256 @@
+{
+  "version": "11.3.0",
+  "startupPaid": 515000,
+  "initialCash": 485000,
+  "timeline": [
+    {
+      "month": 0,
+      "cash": 485000,
+      "population": 5845,
+      "net": -7105.365781627386,
+      "grand": {
+        "version": 1,
+        "flagship": {
+          "remaining": 5,
+          "cooldown": 12,
+          "visits": 1,
+          "spent": 180000
+        },
+        "relay": {
+          "remaining": 4,
+          "cooldown": 12,
+          "activations": 1,
+          "spent": 335000,
+          "built": true,
+          "enabled": true
+        }
+      },
+      "income": 2277.953589669602,
+      "upkeep": 10400,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1
+    },
+    {
+      "month": 1,
+      "cash": 478265.61,
+      "population": 6109,
+      "net": -6524.3890600269115,
+      "grand": {
+        "version": 1,
+        "flagship": {
+          "remaining": 4,
+          "cooldown": 11,
+          "visits": 1,
+          "spent": 180000
+        },
+        "relay": {
+          "remaining": 3,
+          "cooldown": 11,
+          "activations": 1,
+          "spent": 335000,
+          "built": true,
+          "enabled": true
+        }
+      },
+      "income": 2454.3676384204045,
+      "upkeep": 10400,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1
+    },
+    {
+      "month": 4,
+      "cash": 461094.09,
+      "population": 6680,
+      "net": -3518.2555974032093,
+      "grand": {
+        "version": 1,
+        "flagship": {
+          "remaining": 1,
+          "cooldown": 8,
+          "visits": 1,
+          "spent": 180000
+        },
+        "relay": {
+          "remaining": 0,
+          "cooldown": 8,
+          "activations": 1,
+          "spent": 335000,
+          "built": true,
+          "enabled": true
+        }
+      },
+      "income": 2131.898481397316,
+      "upkeep": 7800,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1
+    },
+    {
+      "month": 5,
+      "cash": 457765.22,
+      "population": 6838,
+      "net": 56.82849747888304,
+      "grand": {
+        "version": 1,
+        "flagship": {
+          "remaining": 0,
+          "cooldown": 7,
+          "visits": 1,
+          "spent": 180000
+        },
+        "relay": {
+          "remaining": 0,
+          "cooldown": 7,
+          "activations": 1,
+          "spent": 335000,
+          "built": true,
+          "enabled": true
+        }
+      },
+      "income": 0,
+      "upkeep": 1800,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1
+    },
+    {
+      "month": 12,
+      "cash": 453674.28,
+      "population": 7506,
+      "net": 1086.2529049386776,
+      "grand": {
+        "version": 1,
+        "flagship": {
+          "remaining": 0,
+          "cooldown": 0,
+          "visits": 1,
+          "spent": 180000
+        },
+        "relay": {
+          "remaining": 0,
+          "cooldown": 0,
+          "activations": 1,
+          "spent": 335000,
+          "built": true,
+          "enabled": true
+        }
+      },
+      "income": 0,
+      "upkeep": 1800,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1
+    },
+    {
+      "month": 24,
+      "cash": 456961.23,
+      "population": 8031,
+      "net": 2204.2593734539187,
+      "grand": {
+        "version": 1,
+        "flagship": {
+          "remaining": 0,
+          "cooldown": 0,
+          "visits": 1,
+          "spent": 180000
+        },
+        "relay": {
+          "remaining": 0,
+          "cooldown": 0,
+          "activations": 1,
+          "spent": 335000,
+          "built": true,
+          "enabled": true
+        }
+      },
+      "income": 0,
+      "upkeep": 1800,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1
+    },
+    {
+      "month": 60,
+      "cash": 424971.61,
+      "population": 9225,
+      "net": 2433.0612906507467,
+      "grand": {
+        "version": 1,
+        "flagship": {
+          "remaining": 0,
+          "cooldown": 0,
+          "visits": 1,
+          "spent": 180000
+        },
+        "relay": {
+          "remaining": 0,
+          "cooldown": 0,
+          "activations": 1,
+          "spent": 335000,
+          "built": true,
+          "enabled": true
+        }
+      },
+      "income": 0,
+      "upkeep": 1800,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1
+    },
+    {
+      "month": 80,
+      "cash": 380629.49,
+      "population": 10060,
+      "net": 3279.201497080264,
+      "grand": {
+        "version": 1,
+        "flagship": {
+          "remaining": 0,
+          "cooldown": 0,
+          "visits": 1,
+          "spent": 180000
+        },
+        "relay": {
+          "remaining": 0,
+          "cooldown": 0,
+          "activations": 1,
+          "spent": 335000,
+          "built": true,
+          "enabled": true
+        }
+      },
+      "income": 0,
+      "upkeep": 1800,
+      "power": 1,
+      "water": 1,
+      "oxygen": 1,
+      "cooling": 1
+    }
+  ],
+  "normal80": {
+    "cash": 227123.18,
+    "population": 10060,
+    "net": 5079.201497080264
+  },
+  "grand80": {
+    "cash": 380629.49,
+    "population": 10060,
+    "net": 3279.201497080264
+  },
+  "cpu": {
+    "baselineMedianMs": 25.177209000001312,
+    "grandMedianMs": 26.86870899999849
+  },
+  "limits": [
+    "This fixed funded scenario does not calibrate every city or certify heat/battery performance."
+  ]
+}

@@ -9,6 +9,7 @@ import {wrapAngle} from './camera-controls.mjs';
 import {canPortal,GATES} from './orbital.mjs';
 import {bodyClear,resolveBodyContacts} from './body-collision.mjs';
 import {constrainDeckCamera,constrainRoomCamera,groundOrbitPitch} from './camera-ground.mjs';
+import {dockStreet} from './central-dock.mjs';
 
 const PREF='yorktown-surrogate-preferences-v1';
 export class ExplorerController{
@@ -49,7 +50,7 @@ export class ExplorerController{
    const mount=e.mounted,h=.065+w.jump+(mount?(mount.kind==='hound'?.19:.065):0);this.rig.root.scale.setScalar(.165);this.rig.place(w.u,w.v,h,e.heading);this.rig.animate(e,w);
   }else if(v.mode==='interior'&&v.room){
    if(this.rig.root.parent!==v.room.scene)v.room.scene.add(this.rig.root);
-   const p=v.room.position;this.rig.root.scale.setScalar(1);this.rig.root.position.set(p.x,p.y+.01,p.z);this.rig.root.quaternion.setFromAxisAngle(new THREE.Vector3(0,1,0),-e.heading);this.rig.animate(e,{jump:0});
+   const p=v.room.position;this.rig.root.scale.setScalar(v.room.avatarScale||1);if(v.room.placeAvatar)v.room.placeAvatar(this.rig,e.heading);else{this.rig.root.position.set(p.x,p.y+.01,p.z);this.rig.root.quaternion.setFromAxisAngle(new THREE.Vector3(0,1,0),-e.heading);}this.rig.animate(e,{jump:0});
   }
   if(v.mode!=='interior'&&this.rig.root.parent!==v.scene)v.scene.add(this.rig.root);
   this.hud();
@@ -83,6 +84,7 @@ export class ExplorerController{
   const v=this.view,w=v.walker,e=this.state;if(v.mode==='interior')return {kind:'room',label:'E · 探索／返回街道'};if(v.mode!=='walk')return null;
   if(e.mounted)return {kind:'dismount',label:`E · 下車 · ${VEHICLES[e.mounted.kind].name}`,disabled:!safeDismount(v.state.cells,w,e.mounted,this.vehicles.fleet)};
   const targets=[];
+  if(v.state.orbital.grand?.flagship.visits){const dock=dockStreet(v);if(dock)targets.push(dock);}
   for(const vehicle of this.vehicles.fleet)targets.push({kind:'ride',vehicle,u:vehicle.u,v:vehicle.v,deck:vehicle.deck,radius:.63,priority:2,label:`E · 搭乘 ${VEHICLES[vehicle.kind].name} · 第 ${vehicle.tier} 階`});
   v.people.forEach((person,id)=>{if(person.u===undefined)return;targets.push({kind:'talk',person:{id,tile:tileAt(person.u,person.v)},u:person.u,v:person.v,deck:deckOf(tileAt(person.u,person.v)),radius:.52,label:'E · 對話 · 城市居民'});});
   for(const i of v.valid){const c=v.state.cells[i];if(!INTERIORS[c.type]||!c.level||c.fire||c.subplot||c.plot!==null&&c.plot!==i)continue;for(const door of buildingDoors(v.state,i))targets.push({kind:'enter',tile:i,...door,deck:deckOf(i),radius:1.0,priority:1,label:'E · 進入 · '+INTERIORS[c.type]});}
@@ -100,6 +102,7 @@ export class ExplorerController{
   }
   if(target.kind==='talk')v.cb.talk?.(target.person);
   if(target.kind==='enter')v.enterInterior(target.tile);
+  if(target.kind==='dock')v.grandOrbit.board();
   if(target.kind==='portal')v.tryPortal(true);
  }
  dismount(force=false){
@@ -112,7 +115,7 @@ export class ExplorerController{
   const active=['walk','interior'].includes(v.mode),bar=document.getElementById('surrogate-bar');if(bar)bar.hidden=!active;
   const p=currentProfile(e),button=document.getElementById('perspective-toggle');if(button){button.textContent=e.thirdPerson?'第三人稱':'第一人稱';button.setAttribute('aria-pressed',String(e.thirdPerson));}
   const char=document.getElementById('surrogate-character');if(char)char.textContent=`${p.name} · ${p.role}`;
-  const status=document.getElementById('surrogate-status');if(status){status.textContent=e.mounted?`${VEHICLES[e.mounted.kind].name} · 第 ${e.mounted.tier} 階`:v.mode==='interior'?'室內步行':p.id==='pilot'?`飛行電量 ${Math.round(e.energy*100)}%${e.cooldown>0?' · 降落中':e.flightExhausted?' · 鬆開空白再飛':''}`:p.ability;status.dataset.ability=p.id;}
+  const status=document.getElementById('surrogate-status');if(status){status.textContent=e.mounted?`${VEHICLES[e.mounted.kind].name} · 第 ${e.mounted.tier} 階`:v.mode==='interior'?(v.room.kind==='dock'?'泊位步行':'室內步行'):p.id==='pilot'?`飛行電量 ${Math.round(e.energy*100)}%${e.cooldown>0?' · 降落中':e.flightExhausted?' · 鬆開空白再飛':''}`:p.ability;status.dataset.ability=p.id;}
   const ability=document.querySelector('[data-walk-key="Space"]');if(ability){ability.disabled=v.mode==='walk'&&(p.id==='architect'||!!e.mounted);ability.setAttribute('aria-label',p.id==='pilot'?'按住短程飛行':'強化跳躍');}
   const target=active?this.nearby():null;this.target=target;const interact=document.getElementById('interaction-button');if(interact){interact.hidden=!active||!target||v.mode==='interior'&&!!v.room?.ui;interact.disabled=!!target?.disabled;interact.textContent=target?.label||'';}
  }
