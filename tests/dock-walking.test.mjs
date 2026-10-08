@@ -27,15 +27,51 @@ test('leaving a dock visit does not dispose the shared city scene',()=>{
 
 test('paused idle dock stops rendering; guided walking resumes the existing frame budget',async()=>{
  const {CityView}=await import('../SimCity/view.mjs');globalThis.document={querySelector(){return null;},getElementById(){return null;}};
- const v={room:{kind:'dock',guide:null},keys:{},pointers:new Map(),walker:{velocity:0,jump:0},explorer:{state:{cooldown:0}},growing:[],simulationSpeed:0,grandOrbit:{pending:()=>false}};
+ const v={room:{kind:'dock',guide:null,pending:()=>false},keys:{},pointers:new Map(),walker:{velocity:0,jump:0},explorer:{state:{cooldown:0}},growing:[],simulationSpeed:0,grandOrbit:{pending:()=>false}};
  assert.equal(CityView.prototype.renderActivity.call(v),0);v.room.guide={};assert.equal(CityView.prototype.renderActivity.call(v),12);v.keys.KeyW=true;assert.equal(CityView.prototype.renderActivity.call(v),30);delete globalThis.document;
 });
 test('an idle dock camera does not invalidate itself into a perpetual render loop',async()=>{
- const {CityView}=await import('../SimCity/view.mjs');let frames=0;const v={room:{kind:'dock',guide:null},keys:{},explorer:{state:{moving:1}},cameraUpdate(){frames++;}};
+ const {CityView}=await import('../SimCity/view.mjs');let frames=0;const v={room:{kind:'dock',guide:null,pending:()=>false},keys:{},explorer:{state:{moving:1}},cameraUpdate(){frames++;}};
  CityView.prototype.walkInterior.call(v,.1);assert.equal(frames,0);assert.equal(v.explorer.state.moving,0);
 });
 test('finishing the guided promenade updates its button before rendering becomes idle',()=>{
  const elements=new Map();globalThis.document={getElementById(id){if(!elements.has(id))elements.set(id,{});return elements.get(id);}};
  const view={scene:{},state:{orbital:{grand:{flagship:{remaining:5}}}}},room=new DockWalk(view);room.guide={index:2};Object.assign(room.position,DOCK_ROUTE[2]);room.step(.01,{});
  assert.equal(room.guide,null);assert.equal(elements.get('room-guide').textContent,'沿甲板走向觀景端');room.dispose();delete globalThis.document;
+});
+
+test('dock jump follows the same arc across frame rates, lands safely, and rejects airborne relaunches',async()=>{
+ const {beginDockJump,stepDockAir,dockAirborne,DOCK_JUMP}=await import('../SimCity/dock-walking.mjs');
+ for(const fps of [15,30,60]){const air={height:0,velocity:0};assert.equal(beginDockJump(air),true);let peak=0;
+  for(let k=0;k<fps;k++){stepDockAir(air,1/fps);peak=Math.max(peak,air.height);assert.ok(air.height>=0);if(dockAirborne(air))assert.equal(beginDockJump(air),false);}
+  assert.ok(Math.abs(peak-DOCK_JUMP.speed**2/(2*DOCK_JUMP.gravity))<.002);assert.deepEqual(air,{height:0,velocity:0});assert.equal(beginDockJump(air),true);
+ }
+});
+test('both camera modes rise with the jumping avatar and remain above the deck',()=>{
+ for(const pitch of [-1.3,0,1.3])for(const third of [false,true]){
+  const base=dockCamera({...DOCK_START,pitch},third),air=dockCamera({...DOCK_START,pitch,y:.2},third);
+  assert.ok(Math.abs(air.eye[1]-base.eye[1]-.2)<1e-10);assert.ok(Math.abs(air.aim[1]-base.aim[1]-.2)<1e-10);assert.ok(air.eye[1]>DOCK_FRAME.position[1]);
+ }
+});
+test('jump keeps advancing after Space is released and restores zero idle rendering after landing',async()=>{
+ const {CityView}=await import('../SimCity/view.mjs');const elements=new Map();globalThis.document={querySelector(){return null;},getElementById(id){if(!elements.has(id))elements.set(id,{hidden:true});return elements.get(id);}};
+ let cameraFrames=0;const view={scene:{},state:{orbital:{grand:{flagship:{remaining:5}}}},cameraUpdate(){cameraFrames++;},keys:{},pointers:new Map(),walker:{velocity:0,jump:0},explorer:{state:{cooldown:0,moving:0,phase:0}},growing:[],simulationSpeed:0,grandOrbit:{pending:()=>false}};
+ const room=view.room=new DockWalk(view);room.guide={index:0};assert.equal(room.jump(),true);assert.equal(room.guide,null);assert.equal(elements.get('room-jump').disabled,true);assert.equal(CityView.prototype.renderActivity.call(view),30);
+ CityView.prototype.walkInterior.call(view,.1);assert.ok(room.position.y>0,'released key cannot freeze the jump');assert.ok(cameraFrames>1);
+ for(let k=0;k<30;k++)CityView.prototype.walkInterior.call(view,1/30);
+ assert.equal(room.position.y,0);assert.equal(room.pending(),false);assert.equal(CityView.prototype.renderActivity.call(view),0);assert.equal(elements.get('room-jump').disabled,false);assert.ok(!elements.get('structure-floor').textContent.includes('跳躍中'));
+ room.dispose();delete globalThis.document;
+});
+test('moving while airborne does not reset height, permits no fence escape, and recovery cancels momentum',()=>{
+ const elements=new Map();globalThis.document={getElementById(id){if(!elements.has(id))elements.set(id,{});return elements.get(id);}};
+ const view={scene:{},state:{orbital:{grand:{flagship:{remaining:5}}}},cameraUpdate(){}},room=new DockWalk(view);room.position.x=35.90;room.position.z=-11.9;room.position.yaw=Math.PI/2;
+ room.jump();room.step(.2,{KeyW:true});assert.ok(room.position.y>.15);assert.ok(onDock(room.position.x,room.position.z));assert.ok(room.position.x<36);
+ elements.get('room-recover').onclick();assert.equal(room.pending(),false);assert.deepEqual(room.position,DOCK_START);assert.deepEqual(room.air,{height:0,velocity:0});room.dispose();delete globalThis.document;
+});
+test('the third-person camera stays within the promenade rather than clipping through its rails',()=>{
+ const c=Math.cos(DOCK_FRAME.yaw),s=Math.sin(DOCK_FRAME.yaw);
+ for(const p of [DOCK_START,{...DOCK_START,x:35.92,z:-10,yaw:-Math.PI/2},{...DOCK_START,x:16,z:-8.92,yaw:0}])for(const height of [0,.2]){
+  const eye=dockCamera({...p,y:height},true).eye,dx=eye[0]-DOCK_FRAME.position[0],dz=eye[2]-DOCK_FRAME.position[2];
+  assert.ok(onDock(c*dx-s*dz,s*dx+c*dz,.03));assert.ok(eye[1]>=DOCK_FRAME.position[1]+height+.18);
+ }
 });

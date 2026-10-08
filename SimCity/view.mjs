@@ -293,7 +293,7 @@ export class CityView{
   }
   this.mode=mode;this.explorer.modeChanged(oldMode,mode);this.keys={};this.pointers.clear();this.start=null;this.setPreview([]);this.camera.fov=['walk','fly','interior'].includes(mode)?74:48;this.camera.updateProjectionMatrix();
   document.body.dataset.view=mode;document.querySelectorAll('[data-view-mode]').forEach(b=>{b.classList.toggle('active',b.dataset.viewMode===mode);b.setAttribute('aria-pressed',String(b.dataset.viewMode===mode));});
-  const hint=document.getElementById('view-hint');if(hint)hint.textContent=mode==='interior'?`${this.room.kind==='dock'?'中央泊位':INTERIORS[this.state.cells[this.interiorTile].type]} · WASD 移動 · 方向鍵轉向 · V 人稱 · E 入口退出`:mode==='fly'?'WASD 飛行 · 空白上升 / C 下降 · Shift 加速 · G 返回建造':mode==='walk'?'WASD 移動 · 方向鍵／拖曳轉頭 · Space 角色能力 · E 互動 · V 人稱 · F 建造':mode==='overview'?'全站觀察 · 拖曳旋轉 · 點「建造」返回開放街區':'方向鍵轉向 · 左拖平移 · 右拖旋轉 · F 步行 / G 飛行';
+  const hint=document.getElementById('view-hint');if(hint)hint.textContent=mode==='interior'?`${this.room.kind==='dock'?'中央泊位 · Space 跳躍':INTERIORS[this.state.cells[this.interiorTile].type]} · WASD 移動 · 方向鍵轉向 · V 人稱 · E 入口退出`:mode==='fly'?'WASD 飛行 · 空白上升 / C 下降 · Shift 加速 · G 返回建造':mode==='walk'?'WASD 移動 · 方向鍵／拖曳轉頭 · Space 角色能力 · E 互動 · V 人稱 · F 建造':mode==='overview'?'全站觀察 · 拖曳旋轉 · 點「建造」返回開放街區':'方向鍵轉向 · 左拖平移 · 右拖旋轉 · F 步行 / G 飛行';
   const exit=document.getElementById('interior-exit');if(exit)exit.hidden=mode!=='interior'||!!this.room?.ui;const manage=document.getElementById('interior-manage');if(manage)manage.hidden=mode!=='interior'||this.room?.kind==='dock';
   this.cb.mode?.(mode);this.cameraUpdate();if(this.state)this.update(this.state,this.analysis,this.overlay);
  }
@@ -319,7 +319,7 @@ export class CityView{
   w.h=Math.max(1,Math.min(65,w.h+((k.Space?1:0)-(k.KeyC||k.KeyQ?1:0))*speed));this.cameraUpdate();
  }
  walkInterior(dt){
-  if(this.room.kind==='dock'&&!Object.keys(this.keys).length&&!this.room.guide){this.explorer.state.moving=0;return;}
+  if(this.room.kind==='dock'&&!Object.keys(this.keys).length&&!this.room.guide&&!this.room.pending()){this.explorer.state.moving=0;return;}
   const p=this.room.position,k=this.keys,e=this.explorer.state,before={x:p.x,z:p.z};turnInput(p,k,dt);if(this.room.step){this.room.step(dt,k);const distance=Math.hypot(p.x-before.x,p.z-before.z);e.moving=distance/Math.max(dt,.001)*.3;e.phase+=distance*3.6;if(distance>.0001)e.heading=Math.atan2(p.x-before.x,-(p.z-before.z));this.cameraUpdate();return;}const f=(k.KeyW?1:0)-(k.KeyS?1:0),side=(k.KeyD?1:0)-(k.KeyA?1:0),speed=2.3*dt/Math.max(1,Math.hypot(f,side));this.room.move((Math.sin(p.yaw)*f+Math.cos(p.yaw)*side)*speed,(-Math.cos(p.yaw)*f+Math.sin(p.yaw)*side)*speed);
   const distance=Math.hypot(p.x-before.x,p.z-before.z);e.moving=distance/Math.max(dt,.001)*.3;e.phase+=distance*3.6;if(distance>.0001){const heading=Math.atan2(p.x-before.x,-(p.z-before.z));e.heading=wrapAngle(e.heading+wrapAngle(heading-e.heading)*Math.min(1,dt*14));}this.cameraUpdate();
  }
@@ -365,6 +365,7 @@ export class CityView{
   if(Object.keys(this.keys).length||this.pointers.size||this.walker.velocity||this.walker.jump>.01||this.explorer.state.cooldown>0)return 30;
   if(this.grandOrbit?.pending())return 15;
   if(this.growing.length)return 20;
+  if(this.room?.kind==='dock'&&this.room.pending())return 30;
   if(this.room?.kind==='dock'&&this.simulationSpeed===0)return this.room.guide?12:0;
   if(this.simulationSpeed>0)return ['walk','fly','interior'].includes(this.mode)?12:8;
   return ['walk','fly','interior'].includes(this.mode)?12:0;

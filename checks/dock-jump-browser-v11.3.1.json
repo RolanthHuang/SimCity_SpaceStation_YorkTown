@@ -1,0 +1,38 @@
+{
+  "version": "11.3.1",
+  "observed": {
+    "firstPersonKeyboardSpace": {
+      "takeoff": {
+        "disabled": true,
+        "frames": "7",
+        "status": "中央漂浮台 · 旗艦觀景泊位 · 跳躍中"
+      },
+      "landing": {
+        "disabled": false,
+        "frames": "23",
+        "status": "中央漂浮台 · 旗艦觀景泊位"
+      }
+    },
+    "thirdPersonJumpButton": {
+      "takeoffObserved": true,
+      "screenshot": "previews/dock-jump-v11.3.1.png"
+    },
+    "pausedAfterLanding": {
+      "seconds": 5,
+      "before": {
+        "disabled": false,
+        "frames": "23",
+        "status": "中央漂浮台 · 旗艦觀景泊位"
+      },
+      "after": {
+        "disabled": false,
+        "frames": "23",
+        "status": "中央漂浮台 · 旗艦觀景泊位"
+      }
+    },
+    "console": []
+  },
+  "limits": [
+    "Short functional check, not a long-duration heat/battery guarantee."
+  ]
+}

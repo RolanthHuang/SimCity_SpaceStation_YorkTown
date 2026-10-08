@@ -1,7 +1,7 @@
 import * as T from '../YorktownPreview/three.module.js';
 import {builder,v,label} from './orbital-assets/geometry.mjs';
 import {batchStaticArchitecture} from './static-batch.mjs';
-import {DOCK_FRAME,DOCK_FLOORS,DOCK_START,DOCK_ROUTE,dockEdges,dockWorld,dockCamera,moveDock} from './dock-walking.mjs';
+import {DOCK_FRAME,DOCK_FLOORS,DOCK_START,DOCK_ROUTE,dockEdges,dockWorld,dockCamera,moveDock,dockAirborne,beginDockJump,stepDockAir} from './dock-walking.mjs';
 import {GRAND_PORTS} from './grand-orbit.mjs';
 import {xy,deckOf} from './catalog.mjs';
 import {surface,nearestWalkable} from './habitat.mjs';
@@ -22,18 +22,20 @@ export function centralDock(m,{labels=true}={}){
  batchStaticArchitecture(root);root.position.set(...DOCK_FRAME.position);root.rotation.y=DOCK_FRAME.yaw;return root;
 }
 export class DockWalk{
- constructor(view){this.kind='dock';this.type='dock';this.view=view;this.scene=view.scene;this.avatarScale=.165;this.position={...DOCK_START};this.clock=0;this.guide=null;
-  $('structure-hud').hidden=false;$('room-guide').hidden=false;$('room-jump').hidden=true;$('room-guide').onclick=()=>{this.guide=this.guide?null:{index:0};this.ui();view.cameraUpdate();};$('room-recover').onclick=()=>{Object.assign(this.position,DOCK_START);this.guide=null;this.ui();view.cameraUpdate();};$('room-exit').onclick=()=>view.setMode('walk');this.ui();}
+ constructor(view){this.kind='dock';this.type='dock';this.view=view;this.scene=view.scene;this.avatarScale=.165;this.position={...DOCK_START};this.air={height:0,velocity:0};this.clock=0;this.guide=null;
+  $('structure-hud').hidden=false;$('room-guide').hidden=false;$('room-jump').hidden=false;$('room-jump').textContent='跳躍 · Space';$('room-jump').onclick=()=>this.jump();$('room-guide').onclick=()=>{this.guide=this.guide?null:{index:0};this.ui();view.cameraUpdate();};$('room-recover').onclick=()=>{Object.assign(this.position,DOCK_START);Object.assign(this.air,{height:0,velocity:0});this.guide=null;this.ui();view.cameraUpdate();};$('room-exit').onclick=()=>view.setMode('walk');this.ui();}
  update(){this.ui();}
- status(){return '中央漂浮台 · 旗艦觀景泊位';}
+ pending(){return dockAirborne(this.air);}
+ jump(){if(!beginDockJump(this.air))return false;this.guide=null;this.ui();this.view.cameraUpdate();return true;}
+ status(){return '中央漂浮台 · 旗艦觀景泊位'+(this.pending()?' · 跳躍中':'');}
  step(dt,k){const p=this.position;if((k.KeyW||k.KeyS||k.KeyA||k.KeyD)&&this.guide){this.guide=null;this.ui();}let dx=0,dz=0,speed=(k.ShiftLeft||k.ShiftRight)?.85:.48;
   if(this.guide){let t=DOCK_ROUTE[this.guide.index];if(Math.hypot(t.x-p.x,t.z-p.z)<.10)t=DOCK_ROUTE[++this.guide.index];if(!t){this.guide=null;p.yaw=Math.PI;p.pitch=.42;this.ui();}else{const d=Math.hypot(t.x-p.x,t.z-p.z);speed=Math.min(.95,d/Math.max(dt,.001));dx=(t.x-p.x)/d;dz=(t.z-p.z)/d;p.yaw=Math.atan2(dx,-dz);}}
   else{const f=(k.KeyW?1:0)-(k.KeyS?1:0),s=(k.KeyD?1:0)-(k.KeyA?1:0),n=Math.max(1,Math.hypot(f,s));dx=(Math.sin(p.yaw)*f+Math.cos(p.yaw)*s)/n;dz=(-Math.cos(p.yaw)*f+Math.sin(p.yaw)*s)/n;}
-  moveDock(p,dx*speed*dt,dz*speed*dt);this.clock+=dt;if(this.clock-(this.lastHUD||0)>.2){this.lastHUD=this.clock;this.ui();}}
- interact(){return Math.hypot(this.position.x-8,this.position.z+6.6)<1.1?{exit:true}:{text:'WASD 沿觀景甲板移動，方向鍵轉頭，V 切換人稱；入口升降接駁或「返回街道」可離開。'};}
+  moveDock(p,dx*speed*dt,dz*speed*dt);const landed=stepDockAir(this.air,dt);p.y=this.air.height;this.clock+=dt;if(landed||this.clock-(this.lastHUD||0)>.2){this.lastHUD=this.clock;this.ui();}}
+ interact(){return Math.hypot(this.position.x-8,this.position.z+6.6)<1.1?{exit:true}:{text:'WASD 沿觀景甲板移動，Space 跳躍，方向鍵轉頭，V 切換人稱；入口升降接駁或「返回街道」可離開。'};}
  placeAvatar(rig,heading){rig.root.position.set(...dockWorld(this.position));rig.root.quaternion.setFromAxisAngle(v(0,1,0),DOCK_FRAME.yaw-heading);}
- camera(camera,third){const p=dockCamera(this.position,third);camera.up.set(0,1,0);camera.position.set(...p.eye);camera.lookAt(v(...p.aim));return true;}
- ui(){$('structure-floor').textContent=this.status();$('structure-objective').textContent=this.view.state.orbital.grand.flagship.remaining?'旗艦停泊 · 有厚度的船殼、能源光圈與開放機庫':'旗艦已離港 · 泊位保留供下一次造訪';$('structure-progress').textContent='WASD 步行 · 方向鍵轉頭 · V 人稱 · 護欄防墜';$('room-guide').textContent=this.guide?'停止導覽':'沿甲板走向觀景端';const b=$('room-interact');b.hidden=Math.hypot(this.position.x-8,this.position.z+6.6)>=1.1;b.textContent='E · 搭升降接駁返回街道';b.onclick=()=>this.view.explorer.interact();}
+ camera(camera,third){const p=dockCamera(this.position,third);camera.up.set(0,1,0);camera.position.set(...p.eye);camera.lookAt(v(...p.aim));this.view.explorer?.rig.cameraClearance(camera.position.distanceTo(v(...dockWorld({...this.position,y:this.position.y+.245})))/this.avatarScale,true);return true;}
+ ui(){$('structure-floor').textContent=this.status();$('structure-objective').textContent=this.view.state.orbital.grand.flagship.remaining?'旗艦停泊 · 有厚度的船殼、能源光圈與開放機庫':'旗艦已離港 · 泊位保留供下一次造訪';$('structure-progress').textContent='WASD 步行 · Space 跳躍 · 方向鍵轉頭 · V 人稱 · 護欄防墜';$('room-guide').textContent=this.guide?'停止導覽':'沿甲板走向觀景端';$('room-jump').disabled=this.pending();const b=$('room-interact');b.hidden=this.pending()||Math.hypot(this.position.x-8,this.position.z+6.6)>=1.1;b.textContent='E · 搭升降接駁返回街道';b.onclick=()=>this.view.explorer.interact();}
  dispose(){$('structure-hud').hidden=true;$('structure-puzzle').hidden=true;/* The shared city scene and its buffers remain owned by CityView. */}
 }
 export function dockStreet(view){const [x,y]=xy(GRAND_PORTS[0]),p=nearestWalkable(view.state.cells,x-27.5,y-26.5);return p?{kind:'dock',...p,deck:deckOf(GRAND_PORTS[0]),radius:1.2,priority:3,label:'E · 升降接駁至中央旗艦泊位'}:null;}

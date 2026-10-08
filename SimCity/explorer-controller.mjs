@@ -50,7 +50,7 @@ export class ExplorerController{
    const mount=e.mounted,h=.065+w.jump+(mount?(mount.kind==='hound'?.19:.065):0);this.rig.root.scale.setScalar(.165);this.rig.place(w.u,w.v,h,e.heading);this.rig.animate(e,w);
   }else if(v.mode==='interior'&&v.room){
    if(this.rig.root.parent!==v.room.scene)v.room.scene.add(this.rig.root);
-   const p=v.room.position;this.rig.root.scale.setScalar(v.room.avatarScale||1);if(v.room.placeAvatar)v.room.placeAvatar(this.rig,e.heading);else{this.rig.root.position.set(p.x,p.y+.01,p.z);this.rig.root.quaternion.setFromAxisAngle(new THREE.Vector3(0,1,0),-e.heading);}this.rig.animate(e,{jump:0});
+   const p=v.room.position;this.rig.root.scale.setScalar(v.room.avatarScale||1);if(v.room.placeAvatar)v.room.placeAvatar(this.rig,e.heading);else{this.rig.root.position.set(p.x,p.y+.01,p.z);this.rig.root.quaternion.setFromAxisAngle(new THREE.Vector3(0,1,0),-e.heading);}this.rig.animate(e,{jump:v.room.kind==='dock'?p.y:0});
   }
   if(v.mode!=='interior'&&this.rig.root.parent!==v.scene)v.scene.add(this.rig.root);
   this.hud();

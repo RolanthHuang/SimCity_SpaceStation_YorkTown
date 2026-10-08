@@ -1,8 +1,10 @@
-# Yorktown · 晨光立體城 v11.3.0
+# Yorktown · 晨光立體城 v11.3.1
 
-核准的遠航旗艦與中繼巨構已整合到實際城市經營。旗艦停在中央漂浮台旁的一支下方懸臂，艦身不被外環包住；旁邊的護欄觀景甲板可第一／第三人稱步行。船塢與巨構面板可「步行登上泊位」，或在曙光船塢附近按 E 搭升降接駁；WASD 移動、方向鍵轉頭、V 切換人稱，返回街道會回到接駁入口。
+11.3.1 修正泊位不能跳躍：Space、跳躍按鈕與觸控按鈕均可起跳；第一／第三人稱鏡頭隨人物升降，放開按鍵仍會正常落地，靜止後停止重繪。第三人稱鏡頭限制在護欄內側。
 
-[開啟新版遊戲](https://rolanthhuang.github.io/SimCity_SpaceStation_YorkTown/?v=11.3.0) · [遠航臨時示範城](https://rolanthhuang.github.io/SimCity_SpaceStation_YorkTown/?demo=1&v=11.3.0) · [下載遊戲與原始碼](Yorktown-Grand-Orbit-v11.3.0.zip) · [離線單檔](Yorktown-Grand-Orbit-v11.3.0.html)
+核准的遠航旗艦與中繼巨構已整合到實際城市經營。旗艦停在中央漂浮台旁的一支下方懸臂，艦身不被外環包住；旁邊的護欄觀景甲板可第一／第三人稱步行。船塢與巨構面板可「步行登上泊位」，或在曙光船塢附近按 E 搭升降接駁；WASD 移動、Space 或「跳躍」按鈕起跳、方向鍵轉頭、V 切換人稱，返回街道會回到接駁入口。
+
+[開啟新版遊戲](https://rolanthhuang.github.io/SimCity_SpaceStation_YorkTown/?v=11.3.1) · [遠航臨時示範城](https://rolanthhuang.github.io/SimCity_SpaceStation_YorkTown/?demo=1&v=11.3.1) · [下載遊戲與原始碼](Yorktown-Grand-Orbit-v11.3.1.zip) · [離線單檔](Yorktown-Grand-Orbit-v11.3.1.html)
 
 | 大型投資 | 一次費用 | 維護／服務 | 解鎖 |
 | --- | ---: | --- | --- |
@@ -18,9 +20,9 @@
 ![主遊戲中央泊位與完整艦身](previews/flagship-in-city.png)
 ![實際第一人稱在泊位步行](previews/flagship-dock-first-person.png)
 
-本輪 159 項自動檢查通過，包括一次扣費、供應不足與資金拒絕、舊檔遷移、服務期滿、待機、訂單支付、Worker 一致性、封閉船殼、步行護欄與視角防墜。瀏覽器實際付款確認 1,000,000 → 820,000 → 520,000 → 485,000，重新載入保留；音樂播放時 4× 推進六個月，靜止泊位十秒未增加繪製幀。示範城自費啟動後模擬 80 個月未破產；這些是特定案例與短期檢查，尚不證明長時間熱度、電池續航或全站塞滿時的效能。
+本輪 164 項自動檢查通過，包括一次扣費、供應不足與資金拒絕、舊檔遷移、服務期滿、待機、訂單支付、Worker 一致性、封閉船殼、步行護欄與視角防墜。瀏覽器實際付款確認 1,000,000 → 820,000 → 520,000 → 485,000，重新載入保留；音樂播放時 4× 推進六個月，靜止泊位十秒未增加繪製幀。示範城自費啟動後模擬 80 個月未破產；這些是特定案例與短期檢查，尚不證明長時間熱度、電池續航或全站塞滿時的效能。
 
-[經濟與 CPU 紀錄](checks/grand-orbit-economy.json) · [完整自動檢查](checks/grand-orbit-release-tests.tap) · [瀏覽器驗證](checks/grand-orbit-browser-verification.json) · [獨立原始觀賞樣板](https://rolanthhuang.github.io/SimCity_SpaceStation_YorkTown/orbital-study/?v=0.1.1)
+[經濟與 CPU 紀錄](checks/grand-orbit-economy.json) · [完整自動檢查](checks/grand-orbit-v11.3.1-tests.tap) · [泊位跳躍驗證](checks/dock-jump-browser-v11.3.1.json) · [原整合版瀏覽器驗證](checks/grand-orbit-browser-verification.json) · [獨立原始觀賞樣板](https://rolanthhuang.github.io/SimCity_SpaceStation_YorkTown/orbital-study/?v=0.1.1)
 
 ## 沿用的 11.2.1 工業修正
 
