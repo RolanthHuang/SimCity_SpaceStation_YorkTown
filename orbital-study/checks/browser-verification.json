@@ -1,0 +1,97 @@
+{
+  "version": "0.1.0",
+  "scope": "Independent actual WebGL2 preview; no main city simulation or save mutation.",
+  "viewport": [
+    425,
+    471
+  ],
+  "observedControls": [
+    "street, fly, overview presets",
+    "ship and relay focus",
+    "12 horizontal drags spanning more than one turn",
+    "arrow-key look",
+    "WASD street movement from 16.00,1.75,44.00 to 15.64,1.75,43.11",
+    "hangar and coil closeups",
+    "1920x1200 PNG export",
+    "capture image released after closing",
+    "16 second arrival ended automatically",
+    "13 second charge with visible 6-second active state ended automatically"
+  ],
+  "steady": {
+    "before": {
+      "cameraPosition": "59.03,88.79,58.85",
+      "drawCalls": "52",
+      "geometries": "44",
+      "pixelRatio": "2",
+      "ready": "true",
+      "renderFrames": "277",
+      "settled": "true",
+      "textures": "14",
+      "triangles": "258778",
+      "view": "fly"
+    },
+    "after": {
+      "cameraPosition": "59.03,88.79,58.85",
+      "drawCalls": "52",
+      "geometries": "44",
+      "pixelRatio": "2",
+      "ready": "true",
+      "renderFrames": "277",
+      "settled": "true",
+      "textures": "14",
+      "triangles": "258778",
+      "view": "fly"
+    },
+    "seconds": 10,
+    "frameDelta": 0
+  },
+  "chargePeak": {
+    "data": {
+      "cameraPosition": "207.60,132.46,-33.32",
+      "drawCalls": "32",
+      "geometries": "44",
+      "pixelRatio": "2",
+      "ready": "true",
+      "renderFrames": "402",
+      "settled": "false",
+      "textures": "14",
+      "triangles": "210610",
+      "view": "fly"
+    },
+    "status": "中繼充能 · 6 / 13 秒"
+  },
+  "chargeEnd": {
+    "data": {
+      "cameraPosition": "207.60,132.46,-33.32",
+      "drawCalls": "28",
+      "geometries": "44",
+      "pixelRatio": "2",
+      "ready": "true",
+      "renderFrames": "526",
+      "settled": "true",
+      "textures": "14",
+      "triangles": "210478",
+      "view": "fly"
+    },
+    "status": "停泊靜止 · 畫面完成後停止重繪"
+  },
+  "arrivalEnd": {
+    "cameraPosition": "59.03,88.79,58.85",
+    "drawCalls": "52",
+    "geometries": "44",
+    "pixelRatio": "2",
+    "ready": "true",
+    "renderFrames": "364",
+    "settled": "true",
+    "textures": "14",
+    "triangles": "258778",
+    "view": "fly"
+  },
+  "logs": [],
+  "limits": [
+    "No sustained heat or battery measurement.",
+    "Not integrated with the main 11.2.1 city.",
+    "Flight view is a showcase camera, not a complete avatar or starship interior.",
+    "Far city and planet are scenic backgrounds."
+  ]
+}

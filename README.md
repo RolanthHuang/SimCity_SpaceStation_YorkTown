@@ -1,4 +1,7 @@
 # Yorktown · 晨光立體城 v11.2.1
+
+> **獨立觀賞樣板：** [遠航旗艦與中繼巨構近景](https://rolanthhuang.github.io/SimCity_SpaceStation_YorkTown/orbital-study/) · 實際可旋轉模型、街道與飛行近景、有限時長訪港／充能演出。這是外觀試作，主遊戲維持 11.2.1，沒有新增建設經費或修改城市存檔。
+
 工業招工與污染平衡修正。住宅、商業仍能在沒有工業的情況下起步；有實際貨運、供應與通勤路徑的工廠，在高需求時能取得有限度的工人，不再被較近的零售職位長期排擠。
 
 [開啟 11.2.1 遊戲](https://rolanthhuang.github.io/SimCity_SpaceStation_YorkTown/?v=11.2.1) · [下載遊戲與原始碼](Yorktown-Industry-Balance-v11.2.1.zip) · [離線單檔](Yorktown-Industry-Balance-v11.2.1.html)

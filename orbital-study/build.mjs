@@ -1,0 +1,12 @@
+import {build} from 'esbuild';
+import {readFile,writeFile} from 'node:fs/promises';
+const js=await build({entryPoints:['src/app.mjs'],bundle:true,minify:true,format:'iife',write:false,target:['safari16','chrome110']});
+let html=await readFile('template.html','utf8');
+const css=await readFile('style.css','utf8');
+html=html.replace('/*STYLE*/',()=>css).replace('/*SCRIPT*/',()=>js.outputFiles[0].text);
+const license=await readFile('THIRD-PARTY-LICENSES.txt','utf8');
+html=html.replace('</body>',()=>`<!-- Third-party license\n${license}\n-->\n</body>`);
+if(/\/\*(STYLE|SCRIPT)\*\//.test(html))throw new Error('Unresolved template.');
+await writeFile('index.html',html);
+await writeFile('Yorktown-Orbital-Closeup.html',html);
+console.log(`Built self-contained orbital closeup: ${(Buffer.byteLength(html)/1024/1024).toFixed(2)} MiB`);
