@@ -1,8 +1,11 @@
 {
-  "version": "0.1.0",
-  "html_bytes": 558135,
-  "html_sha256": "db382d48dabe522006a7264ddfeefa81195d7b091c3af65597c96cf2a8d258f6",
+  "version": "0.1.1",
+  "html_bytes": 584297,
+  "html_sha256": "a36ea0fd740916be420e404550fb4f674b467117d2012fbb57759375838ab0c7",
   "main_game_unchanged": true,
+  "main_game_sha256": "70e46e3c5a33923fb1a0cf1e9cdf4fca16318613c9ade8dd2ec2f7f13419a22e",
   "self_contained": true,
-  "syntax_files_passed": 11
+  "syntax_files_passed": 13,
+  "structure_checks": "checks/structure-verification.json",
+  "browser_checks": "checks/browser-verification.json"
 }

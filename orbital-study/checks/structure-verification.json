@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "nacelle",
+      "triangles": 768,
+      "closed": true
+    },
+    {
+      "name": "engineering",
+      "triangles": 576,
+      "closed": true
+    },
+    {
+      "name": "armor panel",
+      "triangles": 56,
+      "closed": true
+    },
+    {
+      "name": "mirrored wing -1",
+      "triangles": 16,
+      "closed": true
+    },
+    {
+      "name": "mirrored wing 1",
+      "triangles": 16,
+      "closed": true
+    },
+    {
+      "name": "both assembled collectors and hangar",
+      "opaqueBackingRays": 140,
+      "passed": true
+    },
+    {
+      "name": "assembled and batched flagship",
+      "partsBeforeBatch": 543,
+      "passed": true
+    }
+  ]
+}

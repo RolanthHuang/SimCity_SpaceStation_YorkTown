@@ -23,7 +23,7 @@ function start(){
  ship.door.userData.dynamic=true;gate.field.userData.dynamic=true;gate.shuttle.userData.dynamic=true;
  for(const root of [ship.root,ship.lod,gate.root,port.root])batchStaticArchitecture(root);
  scene.add(ship.root,ship.lod,gate.root,port.root,distantCity(m));scene.updateMatrixWorld(true);
- let mode='overview',object='ship',detail=false,drag=null,event=null,clock=0,shadowTime=0,frames=0,lastHud=0;
+ let mode='fly',object='ship',detail=false,drag=null,event=null,clock=0,shadowTime=0,frames=0,lastHud=0;
  const keys=new Set(),orbit={target:v(0,49,-77),distance:320,yaw:.42,pitch:.24},desired={target:orbit.target.clone(),distance:320,yaw:.42,pitch:.24};
  const walker={x:16,z:44,yaw:-.38,pitch:.41};
  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),smooth=x=>x*x*(3-2*x);
@@ -32,8 +32,8 @@ function start(){
  function caption(){
   $('eyebrow').textContent=object==='ship'?'HORIZON / NX–2263':'MASS TRANSIT / DEEP HORIZON';
   $('title').textContent=object==='ship'?'一座城市，迎接遠航。':'向更遠的世界，開一道門。';
-  $('description').textContent=object==='ship'?'分層碟盤、工程艙、雙引擎艙與開放機庫。近看船殼拼板、窗帶、補給支臂與艙內穿梭艇。':'厚重外環包覆線圈與交叉桁架；環側設有維修步道和控制艙。充能時，穿梭艇會實際穿越環心。';
-  $('detail').textContent=detail?'返回取景':object==='ship'?'近看機庫':'近看線圈';
+  $('description').textContent=object==='ship'?'階梯甲板與獨立厚裝甲、封閉引擎與凹入集能核心。近看承重翼板、設備槽及帶維修走道的穿梭艇機庫。':'厚重外環包覆線圈與交叉桁架；環側設有維修步道和控制艙。充能時，穿梭艇會實際穿越環心。';
+  $('detail').textContent=detail==='engine'||detail==='coil'?'返回取景':object==='ship'?'近看引擎':'近看線圈';$('hull-detail').hidden=$('bay-detail').hidden=object!=='ship';$('hull-detail').textContent=detail==='hull'?'返回取景':'船殼細節';$('bay-detail').textContent=detail==='bay'?'返回取景':'近看機庫';
   $('hint').textContent=mode==='street'?'WASD 步行 · 拖曳看四周 · 方向鍵轉頭':mode==='fly'?'拖曳旋轉 · 滾輪縮放 · WASD 平移 · Q / E 升降':'拖曳旋轉 · 滾輪縮放 · 方向鍵轉向 · 右拖平移';
   document.body.dataset.view=mode;
   document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===mode)));
@@ -44,7 +44,9 @@ function start(){
    walker.x=object==='ship'?16:64;walker.z=object==='ship'?44:19;walker.yaw=object==='ship'?-.38:.14;walker.pitch=object==='ship'?.41:.37;
   }else{
    let p;
-   if(detail&&object==='ship')p={target:shipPoint(v(0,-8.5,-61)),distance:24,yaw:Math.PI-.28+.26,pitch:.10};
+   if(detail==='engine')p={target:shipPoint(v(31,13,5.0)),distance:25,yaw:.48,pitch:.13};
+   else if(detail==='hull')p={target:shipPoint(v(10,-1,22)),distance:66,yaw:1.02,pitch:.35};
+   else if(detail==='bay')p={target:shipPoint(v(0,-8.0,-63.5)),distance:18,yaw:Math.PI-.28+.07,pitch:.05};
    else if(detail)p={target:relayPoint(v(61,-29,11)),distance:44,yaw:.48,pitch:.09};
    else if(mode==='overview')p=object==='ship'?{target:v(0,49,-77),distance:320,yaw:.42,pitch:.24}:{target:v(68,85,-207),distance:335,yaw:.40,pitch:.13};
    else p=object==='ship'?{target:shipPoint(v(0,0,4)),distance:155,yaw:.66,pitch:.20}:{target:RELAY_CENTER.clone(),distance:235,yaw:.48,pitch:.13};
@@ -55,7 +57,8 @@ function start(){
  }
  document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{mode=b.dataset.view;detail=false;keys.clear();drag=null;focus(true);canvas.focus();});
  document.querySelectorAll('[data-object]').forEach(b=>b.onclick=()=>{object=b.dataset.object;detail=false;keys.clear();focus();});
- $('detail').onclick=()=>{detail=!detail;if(mode==='street')mode='fly';focus();};
+ function focusDetail(kind){detail=detail===kind?false:kind;if(mode==='street')mode='fly';focus();}
+ $('detail').onclick=()=>focusDetail(object==='ship'?'engine':'coil');$('hull-detail').onclick=()=>focusDetail('hull');$('bay-detail').onclick=()=>focusDetail('bay');
  $('reset').onclick=()=>{detail=false;keys.clear();drag=null;focus(true);canvas.focus();};
  function endEvent(){event=null;ship.root.position.copy(SHIP_DOCK);ship.lod.position.copy(SHIP_DOCK);ship.door.position.y=5.8;ship.door.visible=false;gate.field.visible=false;gate.shuttle.visible=false;m.field.uniforms.intensity.value=0;$('arrival').classList.remove('active');$('charge').classList.remove('active');$('arrival').textContent='播放訪港';$('charge').textContent='中繼充能';renderer.shadowMap.needsUpdate=true;quality.motion();budget.invalidate();}
  function play(kind){if(event?.kind===kind){endEvent();return;}endEvent();event={kind,time:0,duration:kind==='arrival'?16:13};$(kind==='arrival'?'arrival':'charge').classList.add('active');$(kind==='arrival'?'arrival':'charge').textContent='停止演出';budget.invalidate();}

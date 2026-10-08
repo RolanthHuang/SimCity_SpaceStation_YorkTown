@@ -1,1 +1,1 @@
-{"name":"yorktown-orbital-closeup","version":"0.1.0","private":true,"type":"module","scripts":{"build":"node build.mjs"},"devDependencies":{"esbuild":"0.25.9"}}
+{"name":"yorktown-orbital-closeup","version":"0.1.1","private":true,"type":"module","scripts":{"build":"node build.mjs","test":"node checks/structure-test.mjs"},"devDependencies":{"esbuild":"0.25.9"}}

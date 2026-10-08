@@ -1,61 +1,79 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "url": "http://127.0.0.1:8783/index.html?v=0.1.1-final",
   "scope": "Independent actual WebGL2 preview; no main city simulation or save mutation.",
   "viewport": [
-    425,
-    471
+    1280,
+    720
   ],
   "observedControls": [
-    "street, fly, overview presets",
-    "ship and relay focus",
-    "12 horizontal drags spanning more than one turn",
+    "engine, hull and hangar closeups",
+    "six 300px horizontal drags exceeding a full 360 degree turn",
     "arrow-key look",
-    "WASD street movement from 16.00,1.75,44.00 to 15.64,1.75,43.11",
-    "hangar and coil closeups",
-    "1920x1200 PNG export",
-    "capture image released after closing",
-    "16 second arrival ended automatically",
-    "13 second charge with visible 6-second active state ended automatically"
+    "street WASD, fixed deck camera and right turn",
+    "ship and relay switching",
+    "1920x1200 actual-render PNG exports"
   ],
   "steady": {
     "before": {
       "cameraPosition": "59.03,88.79,58.85",
-      "drawCalls": "52",
-      "geometries": "44",
+      "drawCalls": "67",
+      "geometries": "45",
       "pixelRatio": "2",
       "ready": "true",
-      "renderFrames": "277",
+      "renderFrames": "4",
       "settled": "true",
-      "textures": "14",
-      "triangles": "258778",
+      "textures": "13",
+      "triangles": "397842",
       "view": "fly"
     },
     "after": {
       "cameraPosition": "59.03,88.79,58.85",
-      "drawCalls": "52",
-      "geometries": "44",
+      "drawCalls": "67",
+      "geometries": "45",
       "pixelRatio": "2",
       "ready": "true",
-      "renderFrames": "277",
+      "renderFrames": "4",
       "settled": "true",
-      "textures": "14",
-      "triangles": "258778",
+      "textures": "13",
+      "triangles": "397842",
       "view": "fly"
     },
     "seconds": 10,
     "frameDelta": 0
   },
+  "captureRelease": {
+    "downloadReleased": true,
+    "imageReleased": true,
+    "open": false
+  },
+  "arrivalEnd": {
+    "button": "播放訪港",
+    "data": {
+      "cameraPosition": "-11.70,50.90,-143.61",
+      "drawCalls": "53",
+      "geometries": "46",
+      "pixelRatio": "2",
+      "ready": "true",
+      "renderFrames": "370",
+      "settled": "true",
+      "textures": "13",
+      "triangles": "242888",
+      "view": "fly"
+    },
+    "status": "停泊靜止 · 畫面完成後停止重繪"
+  },
   "chargePeak": {
     "data": {
       "cameraPosition": "207.60,132.46,-33.32",
-      "drawCalls": "32",
-      "geometries": "44",
+      "drawCalls": "47",
+      "geometries": "48",
       "pixelRatio": "2",
       "ready": "true",
-      "renderFrames": "402",
+      "renderFrames": "540",
       "settled": "false",
       "textures": "14",
-      "triangles": "210610",
+      "triangles": "314018",
       "view": "fly"
     },
     "status": "中繼充能 · 6 / 13 秒"
@@ -63,35 +81,74 @@
   "chargeEnd": {
     "data": {
       "cameraPosition": "207.60,132.46,-33.32",
-      "drawCalls": "28",
-      "geometries": "44",
+      "drawCalls": "43",
+      "geometries": "48",
       "pixelRatio": "2",
       "ready": "true",
-      "renderFrames": "526",
+      "renderFrames": "667",
       "settled": "true",
       "textures": "14",
-      "triangles": "210478",
+      "triangles": "313886",
       "view": "fly"
     },
     "status": "停泊靜止 · 畫面完成後停止重繪"
   },
-  "arrivalEnd": {
-    "cameraPosition": "59.03,88.79,58.85",
-    "drawCalls": "52",
-    "geometries": "44",
-    "pixelRatio": "2",
-    "ready": "true",
-    "renderFrames": "364",
-    "settled": "true",
-    "textures": "14",
-    "triangles": "258778",
-    "view": "fly"
+  "walk": {
+    "before": {
+      "cameraPosition": "16.00,1.75,44.00",
+      "drawCalls": "67",
+      "geometries": "47",
+      "pixelRatio": "1.4",
+      "ready": "true",
+      "renderFrames": "418",
+      "settled": "true",
+      "textures": "14",
+      "triangles": "397842",
+      "view": "street"
+    },
+    "after": {
+      "cameraPosition": "15.64,1.75,43.11",
+      "drawCalls": "67",
+      "geometries": "47",
+      "pixelRatio": "1.4",
+      "ready": "true",
+      "renderFrames": "419",
+      "settled": "false",
+      "textures": "14",
+      "triangles": "397842",
+      "view": "street"
+    }
+  },
+  "warmResources": {
+    "before": {
+      "cameraPosition": "207.60,132.46,-33.32",
+      "drawCalls": "43",
+      "geometries": "48",
+      "pixelRatio": "2",
+      "ready": "true",
+      "renderFrames": "667",
+      "settled": "true",
+      "textures": "14",
+      "triangles": "313886",
+      "view": "fly"
+    },
+    "after": {
+      "cameraPosition": "59.03,88.79,58.85",
+      "drawCalls": "67",
+      "geometries": "48",
+      "pixelRatio": "1.4",
+      "ready": "true",
+      "renderFrames": "739",
+      "settled": "true",
+      "textures": "14",
+      "triangles": "397842",
+      "view": "fly"
+    }
   },
   "logs": [],
   "limits": [
     "No sustained heat or battery measurement.",
     "Not integrated with the main 11.2.1 city.",
-    "Flight view is a showcase camera, not a complete avatar or starship interior.",
-    "Far city and planet are scenic backgrounds."
+    "No full ship interiors, fusion or spacetime physics simulation."
   ]
 }
